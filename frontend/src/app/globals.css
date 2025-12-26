@@ -1,0 +1,505 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===============================================
+   Modern Sanctuary Design System
+   TF Wellfare Medical Clinic
+   =============================================== */
+
+@layer base {
+  :root {
+    /* Core Palette - NEVER use pure white */
+    --background: 60 7% 97%; /* Soft Sand #F9F9F7 */
+    --foreground: 158 89% 16%; /* Deep Emerald */
+
+    --card: 60 7% 99%;
+    --card-foreground: 158 89% 16%;
+
+    --popover: 60 7% 99%;
+    --popover-foreground: 158 89% 16%;
+
+    --primary: 158 89% 16%;
+    --primary-foreground: 60 7% 97%;
+
+    --secondary: 60 7% 93%;
+    --secondary-foreground: 158 89% 16%;
+
+    --muted: 60 7% 93%;
+    --muted-foreground: 150 10% 35%;
+
+    --accent: 11 65% 63%; /* Muted Terracotta */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 60 7% 88%;
+    --input: 60 7% 88%;
+    --ring: 158 89% 16%;
+
+    --radius: 0.75rem;
+    
+    /* Glass effects */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  }
+
+  .dark {
+    --background: 158 50% 6%;
+    --foreground: 60 7% 97%;
+
+    --card: 158 50% 8%;
+    --card-foreground: 60 7% 97%;
+
+    --popover: 158 50% 8%;
+    --popover-foreground: 60 7% 97%;
+
+    --primary: 158 70% 45%;
+    --primary-foreground: 158 50% 6%;
+
+    --secondary: 158 30% 15%;
+    --secondary-foreground: 60 7% 97%;
+
+    --muted: 158 30% 15%;
+    --muted-foreground: 60 7% 70%;
+
+    --accent: 11 65% 63%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 158 30% 20%;
+    --input: 158 30% 20%;
+    --ring: 158 70% 45%;
+    
+    --glass-bg: rgba(6, 78, 59, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    @apply scroll-smooth antialiased;
+  }
+  
+  body {
+    @apply bg-sand-100 text-foreground font-sans;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-emerald-900;
+    text-wrap: balance;
+  }
+  
+  p {
+    text-wrap: pretty;
+  }
+  
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-fluid {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .prose-wellness {
+    @apply prose prose-emerald max-w-none;
+    @apply prose-headings:font-serif prose-headings:text-emerald-900;
+    @apply prose-p:text-gray-700 prose-p:leading-relaxed;
+    @apply prose-a:text-terracotta-500 prose-a:no-underline hover:prose-a:underline;
+    @apply prose-strong:text-emerald-800;
+    @apply prose-ul:list-disc prose-ol:list-decimal;
+  }
+
+  /* ===============================================
+     Glassmorphism System
+     =============================================== */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  
+  .glass-subtle {
+    @apply bg-white/50 backdrop-blur-sm border border-white/10;
+  }
+  
+  .glass-strong {
+    @apply bg-white/80 backdrop-blur-xl border border-white/30;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 rounded-2xl;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+  }
+  
+  .glass-navbar {
+    @apply bg-white/70 backdrop-blur-md border-b border-white/20;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.04);
+  }
+
+  /* ===============================================
+     Premium Focus States
+     =============================================== */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-sand-100;
+    @apply transition-all duration-200;
+  }
+  
+  .focus-visible-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50;
+    @apply focus-visible:ring-offset-2 focus-visible:ring-offset-sand-100;
+  }
+
+  /* ===============================================
+     Skip Link for Accessibility
+     =============================================== */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4;
+    @apply focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-900 focus:text-white;
+    @apply focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:shadow-lg;
+  }
+
+  /* ===============================================
+     Button Interactions
+     =============================================== */
+  .btn-primary {
+    @apply relative overflow-hidden;
+    @apply bg-terracotta text-white font-medium;
+    @apply transition-all duration-300 ease-smooth;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-terracotta-600;
+    @apply transform scale-x-0 origin-right;
+    @apply transition-transform duration-300 ease-smooth;
+  }
+  
+  .btn-primary:hover::before {
+    @apply scale-x-100 origin-left;
+  }
+  
+  .btn-primary:active {
+    @apply scale-95;
+  }
+  
+  .btn-ripple {
+    @apply relative overflow-hidden;
+  }
+  
+  .btn-ripple .ripple {
+    @apply absolute rounded-full bg-white/30 animate-ripple;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ===============================================
+     Card Interactions
+     =============================================== */
+  .card-lift {
+    @apply transition-all duration-300 ease-smooth;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.04);
+  }
+  
+  .card-lift:hover {
+    @apply -translate-y-1;
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.08);
+  }
+
+  /* ===============================================
+     Floating Labels
+     =============================================== */
+  .floating-label-group {
+    @apply relative;
+  }
+  
+  .floating-label-group input,
+  .floating-label-group textarea {
+    @apply peer pt-6 pb-2;
+  }
+  
+  .floating-label-group label {
+    @apply absolute left-3 top-4 text-muted-foreground;
+    @apply transition-all duration-200 ease-smooth;
+    @apply peer-focus:top-1 peer-focus:text-xs peer-focus:text-emerald-600;
+    @apply peer-placeholder-shown:top-4 peer-placeholder-shown:text-base;
+    @apply peer-[:not(:placeholder-shown)]:top-1 peer-[:not(:placeholder-shown)]:text-xs;
+  }
+
+  /* ===============================================
+     Skeleton Shimmer
+     =============================================== */
+  .skeleton-shimmer {
+    @apply relative overflow-hidden bg-sand-200 rounded;
+  }
+  
+  .skeleton-shimmer::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
+    @apply animate-shimmer;
+    background-size: 200% 100%;
+  }
+  
+  /* Skeleton variants */
+  .skeleton-text {
+    @apply skeleton-shimmer h-4 rounded-full;
+  }
+  
+  .skeleton-heading {
+    @apply skeleton-shimmer h-8 w-3/4 rounded-full;
+  }
+  
+  .skeleton-avatar {
+    @apply skeleton-shimmer rounded-full;
+  }
+  
+  .skeleton-card {
+    @apply skeleton-shimmer rounded-2xl;
+  }
+
+  /* ===============================================
+     Marquee (Trust Bar)
+     =============================================== */
+  .marquee-container {
+    @apply overflow-hidden whitespace-nowrap;
+  }
+  
+  .marquee-content {
+    @apply inline-flex animate-marquee;
+  }
+  
+  .marquee-container:hover .marquee-content {
+    animation-play-state: paused;
+  }
+
+  /* ===============================================
+     Blob Shape (Hero Image)
+     =============================================== */
+  .blob-shape {
+    @apply animate-blob;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
+
+@layer utilities {
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-emerald-700 to-emerald-500;
+    @apply bg-clip-text text-transparent;
+  }
+  
+  .gradient-text-accent {
+    @apply bg-gradient-to-r from-terracotta to-terracotta-600;
+    @apply bg-clip-text text-transparent;
+  }
+
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Editorial emphasis (italic serif) */
+  .text-emphasis {
+    @apply font-serif italic text-emerald-800;
+  }
+}
+
+/* ===============================================
+   Custom Scrollbar
+   =============================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-sand-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-emerald-200 rounded-full;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-emerald-300;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(167 243 208) rgb(249 249 247);
+}
+
+/* ===============================================
+   Calendar Styles Override
+   =============================================== */
+.rbc-calendar {
+  font-family: var(--font-jakarta), sans-serif;
+}
+
+.rbc-header {
+  @apply bg-sand-100 text-emerald-900 font-medium py-3 border-b border-sand-200;
+}
+
+.rbc-today {
+  @apply bg-emerald-50/50;
+}
+
+.rbc-event {
+  @apply bg-emerald-600 border-none rounded-lg px-2 py-1;
+  box-shadow: 0 2px 8px rgba(6, 78, 59, 0.2);
+}
+
+.rbc-event.rbc-selected {
+  @apply bg-emerald-700;
+}
+
+.rbc-event-pending {
+  @apply bg-amber-500;
+}
+
+.rbc-event-approved {
+  @apply bg-emerald-600;
+}
+
+.rbc-event-rejected {
+  @apply bg-red-500;
+}
+
+/* ===============================================
+   Custom Date Picker Styles
+   =============================================== */
+.calendar-grid {
+  @apply grid grid-cols-7 gap-1;
+}
+
+.calendar-day {
+  @apply relative flex items-center justify-center w-10 h-10 rounded-full;
+  @apply text-sm font-medium text-emerald-900;
+  @apply transition-all duration-200 ease-smooth;
+  @apply hover:bg-emerald-50;
+}
+
+.calendar-day.selected {
+  @apply bg-emerald-900 text-white;
+  box-shadow: 0 4px 12px rgba(6, 78, 59, 0.3);
+}
+
+.calendar-day.today {
+  @apply ring-2 ring-emerald-500 ring-offset-2;
+}
+
+.calendar-day.disabled {
+  @apply text-sand-400 cursor-not-allowed hover:bg-transparent;
+}
+
+.calendar-day.available {
+  @apply cursor-pointer;
+}
+
+.calendar-day.available::after {
+  content: '';
+  @apply absolute bottom-1 left-1/2 -translate-x-1/2;
+  @apply w-1 h-1 bg-emerald-500 rounded-full;
+}
+
+/* ===============================================
+   Confetti Animation
+   =============================================== */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: confetti 3s ease-out forwards;
+}
+
+/* ===============================================
+   Toast Styles
+   =============================================== */
+.toast-success {
+  @apply bg-emerald-50 border-l-4 border-emerald-500;
+}
+
+.toast-error {
+  @apply bg-red-50 border-l-4 border-red-500;
+}
+
+.toast-warning {
+  @apply bg-amber-50 border-l-4 border-amber-500;
+}
+
+.toast-info {
+  @apply bg-blue-50 border-l-4 border-blue-500;
+}
+
+/* ===============================================
+   Page Transition Container
+   =============================================== */
+.page-transition-enter {
+  @apply opacity-0 translate-y-4;
+}
+
+.page-transition-enter-active {
+  @apply opacity-100 translate-y-0 transition-all duration-300 ease-smooth;
+}
+
+.page-transition-exit {
+  @apply opacity-100 translate-y-0;
+}
+
+.page-transition-exit-active {
+  @apply opacity-0 -translate-y-4 transition-all duration-200 ease-smooth;
+}
+
+/* ===============================================
+   Print Styles
+   =============================================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .glass,
+  .glass-card,
+  .glass-navbar {
+    background: white !important;
+    backdrop-filter: none !important;
+  }
+}
