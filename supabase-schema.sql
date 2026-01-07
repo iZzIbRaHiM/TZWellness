@@ -559,9 +559,6 @@ CREATE POLICY "Authenticated can manage events" ON events FOR ALL USING (auth.ro
 -- SEED DATA (Optional - for testing)
 -- ============================================
 
--- Uncomment to insert sample data
-
-/*
 -- Sample Service Categories
 INSERT INTO service_categories (name, slug, description, icon, "order") VALUES
 ('Mental Health', 'mental-health', 'Therapy and counseling services', 'brain', 1),
@@ -592,7 +589,50 @@ INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active) V
 (3, '09:00', '17:00', true), -- Thursday
 (4, '09:00', '17:00', true)  -- Friday
 ON CONFLICT DO NOTHING;
-*/
+
+-- Sample Blog Categories
+INSERT INTO blog_categories (name, slug, description, color, "order") VALUES
+('Health Tips', 'health-tips', 'Practical health and wellness advice', '#10B981', 1),
+('Mental Wellness', 'mental-wellness', 'Mental health insights', '#8B5CF6', 2),
+('Nutrition', 'nutrition', 'Diet and nutrition guidance', '#F59E0B', 3)
+ON CONFLICT (slug) DO NOTHING;
+
+-- Sample Blog Post
+INSERT INTO blog_posts (title, slug, excerpt, content, category_id, author_name, is_published, is_featured, read_time_minutes)
+SELECT 
+  'Understanding Blood Sugar: A Complete Guide',
+  'understanding-blood-sugar-complete-guide',
+  'Learn everything you need to know about maintaining healthy blood sugar levels.',
+  'Blood sugar management is crucial for overall health. This comprehensive guide covers the basics of glucose metabolism, common concerns, and practical tips for maintaining balanced levels throughout the day.',
+  c.id,
+  'Dr. Wellness',
+  true,
+  true,
+  8
+FROM blog_categories c WHERE c.slug = 'health-tips'
+ON CONFLICT (slug) DO NOTHING;
+
+-- Sample Event Categories
+INSERT INTO event_categories (name, slug, event_type, description, color, icon) VALUES
+('Workshops', 'workshops', 'workshop', 'Interactive learning sessions', '#F59E0B', 'users'),
+('Webinars', 'webinars', 'webinar', 'Online educational events', '#3B82F6', 'video')
+ON CONFLICT (slug) DO NOTHING;
+
+-- Sample Event
+INSERT INTO events (title, slug, description, modality, start_date, end_date, max_participants, category_id, is_published, is_featured)
+SELECT
+  'Diabetes Workshop for New Patients',
+  'diabetes-workshop-new-patients',
+  'Join us for an informative workshop designed for newly diagnosed diabetes patients. Learn about blood sugar management, nutrition, and lifestyle changes.',
+  'virtual',
+  CURRENT_TIMESTAMP + INTERVAL '7 days',
+  CURRENT_TIMESTAMP + INTERVAL '7 days' + INTERVAL '2 hours',
+  30,
+  c.id,
+  true,
+  true
+FROM event_categories c WHERE c.slug = 'workshops'
+ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================
 -- COMPLETE!
