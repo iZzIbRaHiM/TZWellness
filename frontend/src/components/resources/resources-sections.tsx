@@ -97,7 +97,7 @@ const paymentFAQs = [
   {
     question: "Do you offer payment plans?",
     answer:
-      "Yes, we offer interest-free payment plans for larger treatment costs. Our billing team will work with you to create a plan that fits your budget.",
+      "Yes, we offer interest-free payment plans for larger treatment costs. Our billing department will work with you to create a plan that fits your budget.",
   },
   {
     question: "What payment methods do you accept?",
@@ -249,7 +249,7 @@ export function ResourcesSections() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-700">
-                  Our billing team is here to help you understand your costs and
+                  Our billing department is here to help you understand your costs and
                   options.
                 </p>
                 <div className="flex flex-col gap-3">

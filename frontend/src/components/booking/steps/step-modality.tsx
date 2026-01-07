@@ -35,8 +35,8 @@ const modalities: {
     features: [
       "Physical examination",
       "Lab work on-site",
-      "Meet our full care team",
-      "Tour our facilities",
+      "Comprehensive consultation",
+      "Tour our facility",
     ],
     priceNote: "Starting at $200",
   },

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate, formatTime } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/env";
 
 interface AdminDashboardProps {
   onNavigate: (tab: "appointments" | "blog" | "events") => void;
@@ -66,7 +67,17 @@ interface Activity {
   created_at: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = API_BASE_URL;
+
+// SSR-safe localStorage access
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem("accessToken");
+  } catch {
+    return null;
+  }
+}
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const { toast } = useToast();
@@ -79,7 +90,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     setLoading(true);
-    const token = localStorage.getItem("accessToken");
+    const token = getToken();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -133,7 +144,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   // Approve appointment
   const handleApprove = async (appointmentId: number) => {
     setActionLoading(appointmentId);
-    const token = localStorage.getItem("accessToken");
+    const token = getToken();
     
     try {
       const response = await fetch(
@@ -184,7 +195,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     if (reason === null) return; // User cancelled
 
     setActionLoading(appointmentId);
-    const token = localStorage.getItem("accessToken");
+    const token = getToken();
 
     try {
       const response = await fetch(
@@ -343,9 +354,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         {statsCards.map((stat, index) => (
           <motion.div
             key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ duration: 0.2 }}
           >
             <Card>
               <CardContent className="p-6">
@@ -370,9 +381,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending Appointments */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ duration: 0.2 }}
           className="lg:col-span-2"
         >
           <Card>
@@ -467,9 +478,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
         {/* Recent Activity */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ duration: 0.2 }}
         >
           <Card>
             <CardHeader>
@@ -509,9 +520,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       {/* Quick Actions */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ duration: 0.2 }}
       >
         <Card>
           <CardHeader>

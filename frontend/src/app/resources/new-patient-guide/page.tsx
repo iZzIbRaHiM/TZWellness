@@ -95,7 +95,7 @@ export default function NewPatientGuidePage() {
               
               <div>
                 <h3 className="font-semibold text-emerald-950 mb-2">Vital Signs & Medical History</h3>
-                <p className="text-gray-700">Our staff will take your vitals and review your medical history.</p>
+                <p className="text-gray-700">A medical assistant will take your vitals and review your medical history.</p>
               </div>
               
               <div>

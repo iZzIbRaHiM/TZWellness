@@ -38,9 +38,8 @@ export function CertificationsBar() {
           {certifications.map((cert, index) => (
             <motion.div
               key={cert.abbreviation}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ y: 10 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"

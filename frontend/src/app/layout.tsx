@@ -22,8 +22,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "TF Wellfare Medical Clinic | Holistic Healthcare",
-    template: "%s | TF Wellfare Medical Clinic",
+    default: "TZ Wellness Health | Holistic Healthcare",
+    template: "%s | TZ Wellness Health",
   },
   description:
     "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today. Expert care for Diabetes, Thyroid, PCOS, and Metabolic Health.",
@@ -37,17 +37,19 @@ export const metadata: Metadata = {
     "holistic healthcare",
     "wellness",
   ],
-  authors: [{ name: "TF Wellfare Medical Clinic" }],
-  creator: "TF Wellfare",
+  authors: [{ name: "TZ Wellness Health" }],
+  creator: "TZ Wellness Health",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_SITE_URL || 
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+    "https://tzwellnesshealth.com"
   ),
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "TF Wellfare Medical Clinic",
-    title: "TF Wellfare Medical Clinic | Holistic Healthcare",
+    siteName: "TZ Wellness Health",
+    title: "TZ Wellness Health | Holistic Healthcare",
     description:
       "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today.",
     images: [

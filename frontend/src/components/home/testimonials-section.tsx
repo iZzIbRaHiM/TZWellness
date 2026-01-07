@@ -18,7 +18,7 @@ export function TestimonialsSection() {
     queryFn: async () => {
       const response = await testimonialsApi.getAll();
       if (response.success && response.data) {
-        return response.data;
+        return response.data.results || [];
       }
       return [];
     },
@@ -55,10 +55,9 @@ export function TestimonialsSection() {
     <section className="py-24 bg-sand-100" aria-labelledby="testimonials-heading">
       <div className="container-fluid">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <h2
@@ -78,9 +77,8 @@ export function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <TestimonialCard testimonial={testimonial} />

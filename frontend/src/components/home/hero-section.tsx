@@ -57,15 +57,15 @@ export function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Content */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 30 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
             className="text-center lg:text-left"
           >
             {/* Trust badge */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-flex items-center gap-2 px-4 py-2 glass-card text-emerald-800 text-sm font-medium mb-8"
             >
@@ -97,8 +97,8 @@ export function HeroSection() {
               ].map((prop, index) => (
                 <motion.li
                   key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ x: -20 }}
+                  animate={{ x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                   className="flex items-center gap-3 text-emerald-900"
                 >
@@ -134,8 +134,8 @@ export function HeroSection() {
               {stats.map((stat, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ y: 20 }}
+                  animate={{ y: 0 }}
                   transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
                   className="text-center lg:text-left"
                 >
@@ -150,8 +150,8 @@ export function HeroSection() {
 
           {/* Hero Image with Blob Shape */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="relative lg:pl-8"
           >
@@ -184,8 +184,8 @@ export function HeroSection() {
 
               {/* Floating appointment card */}
               <motion.div
-                initial={{ opacity: 0, y: 30, x: 20 }}
-                animate={{ opacity: 1, y: 0, x: 0 }}
+                initial={{ y: 30, x: 20 }}
+                animate={{ y: 0, x: 0 }}
                 transition={{ duration: 0.6, delay: 1 }}
                 className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs"
               >
@@ -209,8 +209,8 @@ export function HeroSection() {
 
               {/* Floating rating badge */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 1.2 }}
                 className="absolute -top-4 -right-4 glass-card p-3 shadow-elevated-sm"
               >

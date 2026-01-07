@@ -34,15 +34,15 @@ export function Footer() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-emerald-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                   <span className="text-white font-serif font-bold text-2xl">
-                    TF
+                    TZ
                   </span>
                 </div>
                 <div>
                   <span className="font-serif text-xl font-semibold text-white">
-                    TF Wellfare
+                    TZ Wellness Health
                   </span>
                   <span className="block text-xs text-emerald-300 -mt-0.5">
-                    Medical Clinic
+                    Holistic Healthcare
                   </span>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export function Footer() {
       <div className="container-fluid py-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-emerald-300">
-            © {new Date().getFullYear()} TF Wellfare Medical Clinic. All rights
+            © {new Date().getFullYear()} TZ Wellness Health. All rights
             reserved.
           </p>
 

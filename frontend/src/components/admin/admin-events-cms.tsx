@@ -52,7 +52,9 @@ export function AdminEventsCMS() {
     queryFn: () => eventsApi.admin.getAll(),
   });
 
-  const events = eventsData?.data || [];
+  const events: any[] = Array.isArray(eventsData?.data) 
+    ? eventsData.data 
+    : (Array.isArray((eventsData?.data as any)?.results) ? (eventsData?.data as any).results : []);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -72,26 +74,29 @@ export function AdminEventsCMS() {
   });
 
   const filteredEvents = events.filter(
-    (event) =>
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (event) => {
+      const categoryName = typeof event.category === "object" ? event.category?.name : String(event.category);
+      return event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        categoryName?.toLowerCase().includes(searchQuery.toLowerCase());
+    }
   );
 
   // Mutations for CRUD operations
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Event> & { image?: File | null }) => {
+    mutationFn: (data: Record<string, unknown> & { image?: File | null }) => {
       if (data.image) {
         const formDataToSend = new FormData();
         Object.keys(data).forEach((key) => {
-          if (key === 'image' && data[key]) {
-            formDataToSend.append('image', data[key]);
-          } else if (data[key] !== null && data[key] !== undefined) {
-            formDataToSend.append(key, String(data[key]));
+          const value = data[key];
+          if (key === 'image' && value instanceof File) {
+            formDataToSend.append('image', value);
+          } else if (value !== null && value !== undefined) {
+            formDataToSend.append(key, String(value));
           }
         });
         return eventsApi.admin.create(formDataToSend);
       }
-      return eventsApi.admin.create(data);
+      return eventsApi.admin.create(data as Partial<Event>);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
@@ -418,7 +423,7 @@ export function AdminEventsCMS() {
             <div>
               <p className="text-sm text-gray-500">Total Registrations</p>
               <p className="text-2xl font-bold text-gray-900">
-                {events.reduce((sum, e) => sum + e.registered_count, 0)}
+                {events.reduce((sum, e) => sum + (e.registered_count || e.current_attendees || 0), 0)}
               </p>
             </div>
           </CardContent>
@@ -431,7 +436,7 @@ export function AdminEventsCMS() {
             <div>
               <p className="text-sm text-gray-500">Virtual Events</p>
               <p className="text-2xl font-bold text-gray-900">
-                {events.filter((e) => e.is_virtual).length}
+                {events.filter((e) => e.is_virtual || e.modality === "virtual").length}
               </p>
             </div>
           </CardContent>
@@ -445,18 +450,17 @@ export function AdminEventsCMS() {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <Badge
-                  variant={
-                    event.category === "Workshop"
-                      ? "default"
-                      : event.category === "Live Q&A"
-                        ? "secondary"
-                        : "outline"
-                  }
+                  variant={(() => {
+                    const categoryName = typeof event.category === "object" ? event.category?.name : String(event.category);
+                    if (categoryName === "Workshop") return "default";
+                    if (categoryName === "Live Q&A") return "secondary";
+                    return "outline";
+                  })()}
                 >
-                  {event.category}
+                  {typeof event.category === "object" ? event.category?.name : event.category}
                 </Badge>
                 <Badge
-                  variant={event.status === "published" ? "success" : "secondary"}
+                  variant={(event.status === "published" || event.status === "upcoming") ? "success" : "secondary"}
                 >
                   {event.status}
                 </Badge>
@@ -470,16 +474,16 @@ export function AdminEventsCMS() {
               <div className="space-y-2 text-sm text-gray-500">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span>{formatDate(event.date)}</span>
+                  <span>{formatDate(event.date || event.start_datetime || "")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span>
-                    {event.start_time} - {event.end_time}
+                    {event.start_time || ""} - {event.end_time || ""}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {event.is_virtual ? (
+                  {(event.is_virtual || event.modality === "virtual") ? (
                     <Video className="h-4 w-4" />
                   ) : (
                     <MapPin className="h-4 w-4" />
@@ -489,7 +493,7 @@ export function AdminEventsCMS() {
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>
-                    {event.registered_count} / {event.max_attendees} registered
+                    {event.registered_count || event.current_attendees || 0} / {event.max_attendees} registered
                   </span>
                 </div>
               </div>

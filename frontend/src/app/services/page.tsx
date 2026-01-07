@@ -11,12 +11,13 @@ export const metadata: Metadata = {
 
 async function getServices() {
   const response = await servicesApi.getAll();
-  return response.data?.services || [];
+  return response.data?.results || [];
 }
 
 async function getCategories() {
   const response = await servicesApi.getCategories();
-  return response.data || [];
+  const data = response.data;
+  return Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
 }
 
 export default async function ServicesPage() {

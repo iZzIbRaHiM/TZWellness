@@ -55,10 +55,9 @@ export function ValuePropsSection() {
     <section className="py-24 bg-white" aria-labelledby="values-heading">
       <div className="container-fluid">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <h2
@@ -66,7 +65,7 @@ export function ValuePropsSection() {
             className="font-serif text-display-sm sm:text-display-md text-emerald-950 mb-4"
           >
             Why Patients Choose{" "}
-            <span className="italic text-terracotta">TF Wellfare</span>
+            <span className="italic text-terracotta">TZ Wellness Health</span>
           </h2>
           <p className="text-lg text-emerald-700/80">
             We combine medical expertise with a compassionate, patient-centered
@@ -78,9 +77,8 @@ export function ValuePropsSection() {
           {values.map((value, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="group p-8 rounded-2xl bg-sand-100/50 hover:bg-white hover:shadow-elevated-sm transition-all duration-300 ease-smooth border border-transparent hover:border-sand-200"
             >

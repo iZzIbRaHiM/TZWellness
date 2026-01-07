@@ -73,4 +73,4 @@ class ServiceAdminViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all().select_related('category').prefetch_related('faqs')
     serializer_class = ServiceAdminSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
-    lookup_field = 'slug'
+    # Use 'id' for admin operations to support newly created services

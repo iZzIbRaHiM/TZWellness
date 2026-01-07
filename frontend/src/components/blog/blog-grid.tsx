@@ -37,7 +37,9 @@ export function BlogGrid() {
   });
 
   const blogPosts = postsData?.data?.results || [];
-  const apiCategories = categoriesData?.data || [];
+  const apiCategories: BlogCategory[] = Array.isArray(categoriesData?.data) 
+    ? categoriesData.data 
+    : (Array.isArray((categoriesData?.data as any)?.results) ? (categoriesData?.data as any).results : []);
   const categories = ["All", ...apiCategories.map((cat: BlogCategory) => cat.name)];
 
   // Debounce search

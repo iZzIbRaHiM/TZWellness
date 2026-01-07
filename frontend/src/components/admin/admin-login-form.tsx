@@ -26,32 +26,31 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
-      // Simulated login - in production, call authApi.login()
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call actual login API
+      const response = await authApi.login(email, password);
 
-      // Mock successful login
-      const mockUser = {
-        id: 1,
-        email,
-        full_name: "Admin User",
-        role: "admin" as const,
-      };
-      const mockAccessToken = "mock-jwt-access-token";
-      const mockRefreshToken = "mock-jwt-refresh-token";
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || "Login failed");
+      }
 
-      setUser(mockUser);
-      setAuth(mockAccessToken, mockRefreshToken);
+      const { access, refresh, user } = response.data as any;
+
+      // Store tokens in localStorage via Zustand
+      setAuth(access, refresh);
+      setUser(user);
 
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
 
+      // Navigate to admin dashboard
       router.push("/admin");
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "Invalid email or password",
+        description: error instanceof Error ? error.message : "Invalid email or password",
         variant: "destructive",
       });
     } finally {
@@ -73,7 +72,7 @@ export function AdminLoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@tfwellfare.com"
+              placeholder="admin@tfwelfare.com"
               required
               autoComplete="email"
             />

@@ -10,7 +10,7 @@ import { CTASection } from "@/components/home/cta-section";
 import { MedicalBusinessSchema } from "@/components/seo/schemas";
 
 export const metadata: Metadata = {
-  title: "TF Wellfare Medical Clinic | End Metabolic Frustration",
+  title: "TZ Wellness Health | Expert Metabolic & Holistic Healthcare",
   description:
     "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today. Expert care for Diabetes, Thyroid, PCOS, and Metabolic Health.",
 };

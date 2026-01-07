@@ -1,4 +1,4 @@
-# 🏥 TF Wellfare Medical Clinic Platform
+# 🏥 TZ Wellness Health Platform
 
 A production-grade, full-stack medical appointment booking system with real-time admin dashboard, automated email notifications, and PostgreSQL database.
 
@@ -46,8 +46,8 @@ A production-grade, full-stack medical appointment booking system with real-time
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/yourusername/tf-wellfare.git
-cd tf-wellfare
+git clone https://github.com/yourusername/tz-wellness-health.git
+cd tz-wellness-health
 ```
 
 ### 2. Backend Setup
@@ -370,8 +370,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-**Developed by:** TF Wellfare Medical Clinic Team  
-**Contact:** contact@tfwellfare.com  
+**Developed by:** TZ Wellness Health  
+**Contact:** info@tzwellnesshealth.com  
 **Phone:** +1 (555) 123-4567
 
 ---
@@ -394,7 +394,7 @@ For issues and questions:
 1. Check [QUICK_START.md](QUICK_START.md) for common setup issues
 2. Review [GOLDEN_PATH_TEST.md](GOLDEN_PATH_TEST.md) for debugging
 3. Open an issue on GitHub
-4. Email: support@tfwellfare.com
+4. Email: info@tzwellnesshealth.com
 
 ---
 

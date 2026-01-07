@@ -33,8 +33,11 @@ export function ServicesGrid() {
     queryFn: () => categoriesApi.getAll(),
   });
 
-  const services = servicesData?.data?.services || [];
-  const apiCategories = categoriesData?.data || [];
+  const services = servicesData?.data?.results || [];
+  // categoriesApi returns array directly, not paginated
+  const apiCategories: ServiceCategory[] = Array.isArray(categoriesData?.data) 
+    ? categoriesData.data 
+    : [];
 
   // Build categories array with "all" option
   const categories = [
@@ -46,7 +49,10 @@ export function ServicesGrid() {
   const filteredServices =
     activeCategory === "all"
       ? services
-      : services.filter((s: Service) => s.category?.slug === activeCategory || s.category === activeCategory);
+      : services.filter((s: Service) => {
+          const categorySlug = typeof s.category === "object" ? s.category?.slug : String(s.category);
+          return categorySlug === activeCategory;
+        });
 
   // Loading state
   if (servicesLoading || categoriesLoading) {
@@ -143,7 +149,7 @@ export function ServicesGrid() {
                       <span>Virtual Only</span>
                     </div>
                   )}
-                  {service.modality === "in-person" && (
+                  {service.modality === "in_person" && (
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
                       <span>In-Person Only</span>

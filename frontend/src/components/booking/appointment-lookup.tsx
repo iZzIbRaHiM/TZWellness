@@ -46,12 +46,12 @@ interface AppointmentResult {
     email: string;
     phone: string;
   };
-  service: string;
+  service: string | null;
   date: string;
   time: string;
   duration: number;
   modality: "virtual" | "in-person" | "phone";
-  status: "pending" | "confirmed" | "cancelled";
+  status: "pending" | "confirmed" | "cancelled" | "approved" | "rejected" | "completed";
   provider: string;
   notes: string;
 }
@@ -85,6 +85,10 @@ export function AppointmentLookup() {
         }
 
         // Map API response to UI format
+        const serviceTitle = response.data.service?.title || response.data.service_title || null;
+        const normalizedModality = response.data.modality === "in_person" ? "in-person" : response.data.modality as "virtual" | "in-person" | "phone";
+        const normalizedStatus = response.data.status === "approved" ? "confirmed" : response.data.status as "pending" | "confirmed" | "cancelled" | "approved" | "rejected" | "completed";
+        
         setAppointment({
           id: response.data.id,
           reference: response.data.reference_id,
@@ -93,13 +97,13 @@ export function AppointmentLookup() {
             email: response.data.patient_email,
             phone: response.data.patient_phone,
           },
-          service: response.data.service,
+          service: serviceTitle,
           date: response.data.scheduled_date,
           time: response.data.scheduled_time,
           duration: response.data.duration_minutes || 60,
-          modality: response.data.modality,
-          status: response.data.status,
-          provider: "TF Wellfare Team",
+          modality: normalizedModality,
+          status: normalizedStatus,
+          provider: "Dr. Wellness",
           notes: response.data.reason || "",
         });
       } else {
@@ -330,7 +334,7 @@ export function AppointmentLookup() {
                             ? "A video link will be sent before your appointment"
                             : appointment.modality === "phone"
                               ? "We will call you at the scheduled time"
-                              : "TF Wellfare Clinic, 123 Wellness Way"}
+                              : "TZ Wellness Health, 123 Wellness Way"}
                         </p>
                       </div>
                     </div>

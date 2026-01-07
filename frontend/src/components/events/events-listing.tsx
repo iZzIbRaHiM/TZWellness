@@ -67,7 +67,9 @@ export function EventsListing() {
   });
 
   const events = eventsData?.data?.results || [];
-  const apiCategories = categoriesData?.data || [];
+  const apiCategories: EventCategory[] = Array.isArray(categoriesData?.data) 
+    ? categoriesData.data 
+    : (Array.isArray((categoriesData?.data as any)?.results) ? (categoriesData?.data as any).results : []);
   const categories = ["All", ...apiCategories.map((cat: EventCategory) => cat.name)];
 
   // Filter events

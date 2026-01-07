@@ -1,5 +1,5 @@
 """
-Django settings for TF Wellfare Medical Clinic Platform.
+Django settings for TZ Wellness Health Platform.
 Django 5.0+ with best practices.
 """
 

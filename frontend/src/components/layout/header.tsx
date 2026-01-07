@@ -24,10 +24,17 @@ export function Header() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // SSR guard - ensure window is available
+    if (typeof window === "undefined") return;
+    
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener("scroll", handleScroll);
+    
+    // Check initial scroll position
+    handleScroll();
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -83,17 +90,17 @@ export function Header() {
           <Link
             href="/"
             className="flex items-center gap-2"
-            aria-label="TF Wellfare - Home"
+            aria-label="TZ Wellness Health - Home"
           >
             <div className="w-10 h-10 bg-emerald-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-serif font-bold text-xl">TF</span>
+              <span className="text-white font-serif font-bold text-xl">TZ</span>
             </div>
             <div className="hidden sm:block">
               <span className="font-serif text-xl font-semibold text-emerald-900">
-                TF Wellfare
+                TZ Wellness Health
               </span>
               <span className="block text-xs text-emerald-700 -mt-1">
-                Medical Clinic
+                Holistic Healthcare
               </span>
             </div>
           </Link>

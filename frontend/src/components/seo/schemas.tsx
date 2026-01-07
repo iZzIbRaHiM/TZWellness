@@ -19,12 +19,12 @@ export function MedicalBusinessSchema() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
-    name: "TF Wellfare Medical Clinic",
+    name: "TZ Wellness Health",
     description:
       "Holistic medical clinic specializing in metabolic health, diabetes management, thyroid care, PCOS treatment, and obesity management.",
     url: process.env.NEXT_PUBLIC_SITE_URL,
     telephone: "+1-123-456-7890",
-    email: "info@tfwellfare.com",
+    email: "info@tzwellnesshealth.com",
     address: {
       "@type": "PostalAddress",
       streetAddress: "123 Medical Center Drive, Suite 100",

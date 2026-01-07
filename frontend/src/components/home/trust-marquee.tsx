@@ -54,9 +54,8 @@ export function TrustBar() {
           {certifications.slice(0, 4).map((cert, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              initial={{ y: 10 }}
+              animate={{ y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
               className="flex items-center gap-2 text-emerald-800"
             >

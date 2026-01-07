@@ -35,16 +35,14 @@ export function CTASection() {
       <div className="container-fluid relative">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ y: 30 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5 }}
           >
             {/* Badge */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-emerald-100 text-sm font-medium mb-8 border border-white/10"
             >
@@ -84,9 +82,8 @@ export function CTASection() {
             </div>
 
             <motion.p 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0.7 }}
+              animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
               className="mt-10 text-emerald-200/70 text-sm"
             >

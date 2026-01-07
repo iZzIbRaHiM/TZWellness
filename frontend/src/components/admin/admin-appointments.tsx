@@ -13,6 +13,8 @@ import {
   addWeeks,
   subWeeks,
 } from "date-fns";
+import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/env";
 import {
   Card,
   CardContent,
@@ -55,7 +57,17 @@ import { useToast } from "@/hooks/use-toast";
 type ViewMode = "list" | "calendar";
 type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = API_BASE_URL;
+
+// SSR-safe localStorage access
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem("accessToken");
+  } catch {
+    return null;
+  }
+}
 
 interface Appointment {
   id: number;
@@ -90,7 +102,7 @@ export function AdminAppointments() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["admin-appointments"],
     queryFn: async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = getToken();
       const res = await fetch(`${API_URL}/api/v1/dashboard/pending/`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -107,7 +119,7 @@ export function AdminAppointments() {
   // Approve mutation
   const approveMutation = useMutation({
     mutationFn: async (id: number) => {
-      const token = localStorage.getItem("accessToken");
+      const token = getToken();
       const res = await fetch(`${API_URL}/api/v1/dashboard/approve/${id}/`, {
         method: "POST",
         headers: {
@@ -141,7 +153,7 @@ export function AdminAppointments() {
   // Reject mutation
   const rejectMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-      const token = localStorage.getItem("accessToken");
+      const token = getToken();
       const res = await fetch(`${API_URL}/api/v1/dashboard/reject/${id}/`, {
         method: "POST",
         headers: {

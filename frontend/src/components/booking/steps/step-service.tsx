@@ -33,7 +33,7 @@ export function StepService() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.services || [];
+  const services = data?.data?.results || [];
 
   // Pre-select service from URL query param
   useEffect(() => {
@@ -54,7 +54,8 @@ export function StepService() {
 
   // Get features for a service based on its category
   const getServiceFeatures = (service: Service): string[] => {
-    const categoryKey = service.category?.slug || service.category || "general";
+    const categorySlug = typeof service.category === "object" ? service.category?.slug : String(service.category);
+    const categoryKey = categorySlug || "general";
     return serviceFeaturesByCategory[categoryKey] || defaultFeatures;
   };
 
@@ -175,8 +176,8 @@ export function StepService() {
                 <div className="text-4xl mb-2">{service.icon || "🩺"}</div>
                 <h3 className="text-lg font-semibold flex items-center justify-between mb-2">
                   {service.title}
-                  {service.duration && (
-                    <span className="text-sm font-normal text-gray-500">{service.duration} min</span>
+                  {(service.duration_minutes || service.duration) && (
+                    <span className="text-sm font-normal text-gray-500">{service.duration_minutes || service.duration} min</span>
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">{service.description}</p>

@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide - TF Wellfare Medical Platform
+# 🚀 Deployment Guide - TZ Wellness Health Platform
 
 ## Quick Start with Docker
 

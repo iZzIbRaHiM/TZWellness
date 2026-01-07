@@ -23,15 +23,14 @@ export function ServicesSection() {
     queryFn: () => servicesApi.getAll({ featured: true }),
   });
 
-  const services = (data?.data?.services || []).slice(0, 4);
+  const services = (data?.data?.results || []).slice(0, 4);
   return (
     <section className="py-24 bg-sand-100" aria-labelledby="services-heading">
       <div className="container-fluid">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
           <h2
@@ -60,9 +59,8 @@ export function ServicesSection() {
             {services.map((service: Service, index: number) => (
               <motion.div
                 key={service.slug}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                initial={{ y: 30 }}
+                animate={{ y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card
@@ -112,9 +110,8 @@ export function ServicesSection() {
         )}
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
           className="text-center mt-14"
         >

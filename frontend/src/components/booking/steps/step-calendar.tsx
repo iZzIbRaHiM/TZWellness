@@ -19,7 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 
 // Single-clinic mode - clinic name for display
-const CLINIC_NAME = "TF Wellfare Clinic";
+const CLINIC_NAME = "TZ Wellness Health";
 
 export function StepCalendar() {
   const {

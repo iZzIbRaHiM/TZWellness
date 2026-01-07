@@ -39,7 +39,7 @@ interface BlogPostContentProps {
 }
 
 export function BlogPostContent({ post }: BlogPostContentProps) {
-  const shareUrl = `https://tfwellfare.com/blog/${post.slug}`;
+  const shareUrl = `https://tzwellnesshealth.com/blog/${post.slug}`;
 
   const handleShare = (platform: string) => {
     const urls: Record<string, string> = {

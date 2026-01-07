@@ -1,52 +1,35 @@
-import { Metadata } from "next";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/admin/admin-layout";
+import { useAuthStore } from "@/lib/store";
 
-export const metadata: Metadata = {
-  title: "Admin Dashboard | TF Wellfare",
-  description: "Admin dashboard for managing appointments, content, and clinic operations.",
-  robots: "noindex, nofollow",
-};
+export default function AdminDashboardPage() {
+  const router = useRouter();
+  const { isAuthenticated, accessToken } = useAuthStore();
+  const [isChecking, setIsChecking] = useState(true);
 
-// Verify JWT token from cookies
-async function checkAuth() {
-  const cookieStore = cookies();
-  const token = cookieStore.get('accessToken')?.value;
-  
-  if (!token) {
-    return false;
-  }
+  useEffect(() => {
+    // Give Zustand time to hydrate from localStorage
+    const timer = setTimeout(() => {
+      if (!isAuthenticated || !accessToken) {
+        router.replace("/admin/login");
+      } else {
+        setIsChecking(false);
+      }
+    }, 100);
 
-  // Verify token with backend API
-  try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const res = await fetch(`${API_URL}/api/v1/auth/me/`, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      cache: 'no-store'
-    });
-    
-    if (!res.ok) {
-      return false;
-    }
-    
-    const user = await res.json();
-    // Check if user has admin role
-    return user.data?.role === 'admin' || user.data?.role === 'staff';
-  } catch (error) {
-    console.error('Auth check failed:', error);
-    return false;
-  }
-}
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, accessToken, router]);
 
-export default async function AdminDashboardPage() {
-  const isAuthenticated = await checkAuth();
-  
-  if (!isAuthenticated) {
-    redirect("/admin/login");
+  // Show nothing while checking auth
+  if (isChecking || !isAuthenticated || !accessToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    );
   }
 
   return <AdminLayout />;

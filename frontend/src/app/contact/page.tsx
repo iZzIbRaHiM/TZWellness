@@ -28,9 +28,9 @@ const contactInfo = [
   },
   {
     icon: Mail,
-    title: "Email",
-    details: ["info@tfwellfare.com", "appointments@tfwellfare.com"],
-    action: "mailto:info@tfwellfare.com"
+    title: "Email Us",
+    details: ["info@tzwellnesshealth.com", "appointments@tzwellnesshealth.com"],
+    action: "mailto:info@tzwellnesshealth.com"
   },
   {
     icon: MapPin,

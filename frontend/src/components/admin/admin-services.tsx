@@ -20,7 +20,7 @@ interface ServiceFormData {
   description: string;
   icon: string;
   category: number | string;
-  modality: "in-person" | "telehealth" | "both";
+  modality: "in_person" | "virtual" | "both";
   duration: number;
   price: string;
   is_featured: boolean;
@@ -55,7 +55,7 @@ export function AdminServices() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.services || [];
+  const services = data?.data?.results || [];
 
   // Fetch categories
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
@@ -63,7 +63,10 @@ export function AdminServices() {
     queryFn: categoriesApi.getAll,
   });
 
-  const categories = categoriesData?.data || [];
+  // categoriesApi returns array directly, not paginated
+  const categories: ServiceCategory[] = Array.isArray(categoriesData?.data) 
+    ? categoriesData.data 
+    : [];
 
   // Create service mutation
   const createMutation = useMutation({
@@ -76,10 +79,11 @@ export function AdminServices() {
         description: "Service created successfully",
       });
     },
-    onError: (error: Error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Failed to create service";
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to create service",
+        description: message,
         variant: "destructive",
       });
     },
@@ -101,10 +105,11 @@ export function AdminServices() {
         description: "Service updated successfully",
       });
     },
-    onError: (error: Error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Failed to update service";
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to update service",
+        description: message,
         variant: "destructive",
       });
     },
@@ -126,10 +131,11 @@ export function AdminServices() {
         description: "Service deleted successfully",
       });
     },
-    onError: (error: Error) => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Failed to delete service";
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to delete service",
+        description: message,
         variant: "destructive",
       });
     },
@@ -202,14 +208,15 @@ export function AdminServices() {
   // Open edit dialog
   const openEditDialog = (service: Service) => {
     setSelectedService(service);
+    const categoryId = typeof service.category === "object" ? service.category?.id : service.category;
     setFormData({
       title: service.title,
       description: service.description || "",
       icon: service.icon || "🩺",
-      category: service.category?.id || service.category,
+      category: categoryId,
       modality: service.modality || "both",
-      duration: service.duration || 30,
-      price: service.price || "",
+      duration: service.duration_minutes || service.duration || 30,
+      price: service.price?.toString() || "",
       is_featured: service.is_featured || false,
       is_published: service.is_published !== false,
     });
@@ -308,14 +315,14 @@ export function AdminServices() {
                     <Label htmlFor="create-modality">Modality</Label>
                     <Select
                       value={formData.modality}
-                      onValueChange={(value: string) => setFormData({ ...formData, modality: value })}
+                      onValueChange={(value: "in_person" | "virtual" | "both") => setFormData({ ...formData, modality: value })}
                     >
                       <SelectTrigger id="create-modality">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="in-person">In-Person</SelectItem>
-                        <SelectItem value="telehealth">Telehealth</SelectItem>
+                        <SelectItem value="in_person">In-Person</SelectItem>
+                        <SelectItem value="virtual">Telehealth</SelectItem>
                         <SelectItem value="both">Both</SelectItem>
                       </SelectContent>
                     </Select>
@@ -448,10 +455,10 @@ export function AdminServices() {
                   {service.description || "No description"}
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  {service.duration && (
+                  {(service.duration_minutes || service.duration) && (
                     <span className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      {service.duration} min
+                      {service.duration_minutes || service.duration} min
                     </span>
                   )}
                   {service.price && (
@@ -559,14 +566,14 @@ export function AdminServices() {
                   <Label htmlFor="edit-modality">Modality</Label>
                   <Select
                     value={formData.modality}
-                    onValueChange={(value: string) => setFormData({ ...formData, modality: value })}
+                    onValueChange={(value: "in_person" | "virtual" | "both") => setFormData({ ...formData, modality: value })}
                   >
                     <SelectTrigger id="edit-modality">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="in-person">In-Person</SelectItem>
-                      <SelectItem value="telehealth">Telehealth</SelectItem>
+                      <SelectItem value="in_person">In-Person</SelectItem>
+                      <SelectItem value="virtual">Telehealth</SelectItem>
                       <SelectItem value="both">Both</SelectItem>
                     </SelectContent>
                   </Select>

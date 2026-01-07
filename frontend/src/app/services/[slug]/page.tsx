@@ -69,7 +69,7 @@ We believe in treating the whole person, not just the disease. Our approach incl
           "Type 2 diabetes can often be put into remission with significant lifestyle changes and weight loss. We'll discuss realistic goals based on your specific situation.",
       },
     ],
-    meta_title: "Diabetes Management - Expert Care | TF Wellfare",
+    meta_title: "Diabetes Management - Expert Care | TZ Wellness Health",
     meta_description:
       "Comprehensive diabetes care with personalized treatment plans, blood sugar optimization, and lifestyle coaching. Book your consultation today.",
   },

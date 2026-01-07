@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, Target, Award, Calendar, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "About Us | TF Wellfare Medical Clinic",
-  description: "Learn about TF Wellfare Medical Clinic's mission to provide holistic healthcare focused on metabolic health, diabetes management, and sustainable wellness solutions.",
+  title: "About Us | TZ Wellness Health",
+  description: "Learn about TZ Wellness Health's mission to provide holistic healthcare focused on metabolic health, diabetes management, and sustainable wellness solutions.",
   openGraph: {
-    title: "About Us | TF Wellfare Medical Clinic",
-    description: "Expert holistic healthcare team dedicated to your metabolic health and wellness journey.",
+    title: "About Us | TZ Wellness Health",
+    description: "Expert holistic healthcare dedicated to your metabolic health and wellness journey.",
   },
 };
 
@@ -51,7 +51,7 @@ export default function AboutPage() {
         <div className="container-fluid">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="font-serif text-4xl lg:text-6xl font-bold text-emerald-950 mb-6">
-              About TF Wellfare Medical Clinic
+              About TZ Wellness Health
             </h1>
             <p className="text-xl text-gray-700 mb-8 leading-relaxed">
               Dedicated to transforming lives through holistic healthcare, specialized metabolic treatments, 
@@ -65,9 +65,9 @@ export default function AboutPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/about/team">
-                  <Users className="mr-2 h-5 w-5" />
-                  Meet Our Team
+                <Link href="/services">
+                  <ArrowRight className="mr-2 h-5 w-5" />
+                  View Services
                 </Link>
               </Button>
             </div>

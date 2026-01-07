@@ -52,7 +52,9 @@ export function AdminBlogCMS() {
     queryFn: () => blogApi.admin.getAll(),
   });
 
-  const posts = postsData?.data || [];
+  const posts: any[] = Array.isArray(postsData?.data) 
+    ? postsData.data 
+    : (Array.isArray((postsData?.data as any)?.results) ? (postsData?.data as any).results : []);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<(typeof posts)[0] | null>(null);
@@ -67,9 +69,11 @@ export function AdminBlogCMS() {
   });
 
   const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (post) => {
+      const categoryName = typeof post.category === "object" ? post.category?.name : String(post.category);
+      return post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        categoryName?.toLowerCase().includes(searchQuery.toLowerCase());
+    }
   );
 
   // Mutations for CRUD operations
@@ -384,15 +388,15 @@ export function AdminBlogCMS() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant="outline">{post.category}</Badge>
+                      <Badge variant="outline">{typeof post.category === "object" ? post.category?.name : post.category}</Badge>
                     </td>
                     <td className="px-6 py-4">
                       <Badge
                         variant={
-                          post.status === "published" ? "success" : "secondary"
+                          (post.status === "published" || post.is_published) ? "success" : "secondary"
                         }
                       >
-                        {post.status}
+                        {post.status || (post.is_published ? "published" : "draft")}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-gray-500">

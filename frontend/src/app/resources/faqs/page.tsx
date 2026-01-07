@@ -100,8 +100,8 @@ export default function FAQsPage() {
 
         <div className="mt-12 bg-emerald-50 rounded-lg p-8">
           <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">Still Have Questions?</h2>
-          <p className="text-gray-700 mb-6">
-            Our team is here to help. Contact us directly or explore our other resources.
+          <p className="text-gray-700">
+            I'm here to help. Contact me directly or explore our other resources.
           </p>
           <div className="flex flex-wrap gap-4">
             <Button asChild>
