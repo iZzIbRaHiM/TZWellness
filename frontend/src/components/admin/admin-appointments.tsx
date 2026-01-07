@@ -51,7 +51,6 @@ import {
   LayoutList,
   CalendarDays,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 type ViewMode = "list" | "calendar";
