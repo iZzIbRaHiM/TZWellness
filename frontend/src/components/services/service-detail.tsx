@@ -88,7 +88,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
       >
         <Button asChild variant="cta" size="xl">
-          <Link href={`/book?service=${service.slug}`}>
+          <Link href={`/appointments?service=${service.slug}`}>
             <Calendar className="mr-2 h-5 w-5" />
             Book This Service
           </Link>
@@ -99,7 +99,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
           size="xl"
           className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
         >
-          <a href="tel:+1234567890">
+          <a href="tel:+15551234567">
             <Phone className="mr-2 h-5 w-5" />
             Call to Discuss
           </a>
@@ -229,7 +229,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
             and let us help you achieve your wellness goals.
           </p>
           <Button asChild variant="cta" size="xl">
-            <Link href="/book">
+            <Link href="/appointments">
               <Calendar className="mr-2 h-5 w-5" />
               Book Your Consultation
             </Link>

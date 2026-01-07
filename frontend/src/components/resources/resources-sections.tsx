@@ -371,7 +371,7 @@ export function ResourcesSections() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild variant="cta" size="lg">
-            <Link href="/book">Book Appointment</Link>
+            <Link href="/appointments">Book Appointment</Link>
           </Button>
           <Button
             asChild
@@ -379,7 +379,7 @@ export function ResourcesSections() {
             size="lg"
             className="border-white text-white hover:bg-white/10"
           >
-            <a href="tel:+1234567890">Call Us</a>
+            <a href="tel:+15551234567">Call Us</a>
           </Button>
         </div>
       </motion.section>

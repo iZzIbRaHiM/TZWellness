@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { ServicesGrid } from "@/components/services/services-grid";
-import { servicesApi } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Our Services",
@@ -9,20 +8,7 @@ export const metadata: Metadata = {
     "Comprehensive medical services including Diabetes Management, Thyroid Care, PCOS Treatment, and Obesity Management. Holistic, personalized healthcare.",
 };
 
-async function getServices() {
-  const response = await servicesApi.getAll();
-  return response.data?.results || [];
-}
-
-async function getCategories() {
-  const response = await servicesApi.getCategories();
-  const data = response.data;
-  return Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
-}
-
 export default async function ServicesPage() {
-  // In production, these would fetch from the API
-  // For now, we'll use static data in the component
   
   return (
     <div className="min-h-screen bg-sand-50">

@@ -39,7 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
 
 interface AppointmentResult {
-  id: number;
+  id: string;
   reference: string;
   patient: {
     name: string;
@@ -85,7 +85,7 @@ export function AppointmentLookup() {
         }
 
         // Map API response to UI format
-        const serviceTitle = response.data.service?.title || response.data.service_title || null;
+        const serviceTitle = response.data.service?.title || null;
         const normalizedModality = response.data.modality === "in_person" ? "in-person" : response.data.modality as "virtual" | "in-person" | "phone";
         const normalizedStatus = response.data.status === "approved" ? "confirmed" : response.data.status as "pending" | "confirmed" | "cancelled" | "approved" | "rejected" | "completed";
         
@@ -137,7 +137,7 @@ export function AppointmentLookup() {
         
         toast({
           title: "Appointment Cancelled",
-          description: response.data?.message || "Your appointment has been cancelled. You will receive a confirmation email.",
+          description: "Your appointment has been cancelled. You will receive a confirmation email.",
         });
       } else {
         toast({

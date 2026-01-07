@@ -33,13 +33,13 @@ export function StepService() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.results || [];
+  const services = data?.data || [];
 
   // Pre-select service from URL query param
   useEffect(() => {
     const serviceParam = searchParams.get("service");
     if (serviceParam && !serviceId && services.length > 0) {
-      const service = services.find((s: Service) => s.slug === serviceParam || s.id === parseInt(serviceParam));
+      const service = services.find((s: Service) => s.slug === serviceParam || s.id === serviceParam);
       if (service) {
         setService(service.slug || String(service.id), service.title);
       }
@@ -176,8 +176,8 @@ export function StepService() {
                 <div className="text-4xl mb-2">{service.icon || "🩺"}</div>
                 <h3 className="text-lg font-semibold flex items-center justify-between mb-2">
                   {service.title}
-                  {(service.duration_minutes || service.duration) && (
-                    <span className="text-sm font-normal text-gray-500">{service.duration_minutes || service.duration} min</span>
+                  {service.duration_minutes && (
+                    <span className="text-sm font-normal text-gray-500">{service.duration_minutes} min</span>
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">{service.description}</p>

@@ -56,7 +56,7 @@ export function EventsListing() {
     queryKey: ["events", activeCategory],
     queryFn: () => eventsApi.getAll({
       category: activeCategory !== "All" ? activeCategory : undefined,
-      status: "upcoming",
+      upcoming: true,
     }),
   });
 
@@ -66,7 +66,7 @@ export function EventsListing() {
     queryFn: () => eventsApi.getCategories(),
   });
 
-  const events = eventsData?.data?.results || [];
+  const events = eventsData?.data || [];
   const apiCategories: EventCategory[] = Array.isArray(categoriesData?.data) 
     ? categoriesData.data 
     : (Array.isArray((categoriesData?.data as any)?.results) ? (categoriesData?.data as any).results : []);
@@ -84,7 +84,7 @@ export function EventsListing() {
   // Get events for the current month (calendar view)
   const monthEvents = useMemo(() => {
     return filteredEvents.filter((event: Event) => {
-      const eventDate = parseISO(event.start_datetime);
+      const eventDate = parseISO(event.start_date);
       return isSameMonth(eventDate, currentMonth);
     });
   }, [filteredEvents, currentMonth]);

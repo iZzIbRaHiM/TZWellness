@@ -55,7 +55,7 @@ export function AdminServices() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.results || [];
+  const services = data?.data || [];
 
   // Fetch categories
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
@@ -95,7 +95,7 @@ export function AdminServices() {
 
   // Update service mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<ServiceFormData> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<ServiceFormData> }) =>
       servicesApi.update(id, data as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services-admin"] });
@@ -199,7 +199,7 @@ export function AdminServices() {
   };
 
   // Handle delete
-  const handleDelete = (serviceId: number) => {
+  const handleDelete = (serviceId: string) => {
     if (confirm("Are you sure you want to delete this service? This action cannot be undone.")) {
       deleteMutation.mutate(serviceId);
     }
@@ -213,9 +213,9 @@ export function AdminServices() {
       title: service.title,
       description: service.description || "",
       icon: service.icon || "🩺",
-      category: categoryId,
+      category: categoryId || "",
       modality: service.modality || "both",
-      duration: service.duration_minutes || service.duration || 30,
+      duration: service.duration_minutes || 30,
       price: service.price?.toString() || "",
       is_featured: service.is_featured || false,
       is_published: service.is_published !== false,
@@ -455,10 +455,10 @@ export function AdminServices() {
                   {service.description || "No description"}
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  {(service.duration_minutes || service.duration) && (
+                  {service.duration_minutes && (
                     <span className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      {service.duration_minutes || service.duration} min
+                      {service.duration_minutes} min
                     </span>
                   )}
                   {service.price && (

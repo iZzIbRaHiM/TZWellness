@@ -36,10 +36,8 @@ export function BlogGrid() {
     queryFn: () => blogApi.getCategories(),
   });
 
-  const blogPosts = postsData?.data?.results || [];
-  const apiCategories: BlogCategory[] = Array.isArray(categoriesData?.data) 
-    ? categoriesData.data 
-    : (Array.isArray((categoriesData?.data as any)?.results) ? (categoriesData?.data as any).results : []);
+  const blogPosts = postsData?.data || [];
+  const apiCategories: BlogCategory[] = categoriesData?.data || [];
   const categories = ["All", ...apiCategories.map((cat: BlogCategory) => cat.name)];
 
   // Debounce search
@@ -58,7 +56,7 @@ export function BlogGrid() {
       const matchesSearch =
         debouncedSearch === "" ||
         post.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (post.excerpt && post.excerpt.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
         (post.tags && post.tags.some((tag: BlogTag) =>
           tag.name.toLowerCase().includes(debouncedSearch.toLowerCase())
         ));

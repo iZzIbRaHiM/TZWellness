@@ -7,24 +7,28 @@ import { useAuthStore } from "@/lib/store";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { isAuthenticated, accessToken } = useAuthStore();
-  const [isChecking, setIsChecking] = useState(true);
+  const { isAuthenticated, accessToken, syncFromStorage } = useAuthStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    // Give Zustand time to hydrate from localStorage
-    const timer = setTimeout(() => {
-      if (!isAuthenticated || !accessToken) {
-        router.replace("/admin/login");
-      } else {
-        setIsChecking(false);
-      }
-    }, 100);
+    // Wait for Zustand to hydrate from storage
+    setIsHydrated(true);
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, accessToken, router]);
+  useEffect(() => {
+    if (!isHydrated) return;
 
-  // Show nothing while checking auth
-  if (isChecking || !isAuthenticated || !accessToken) {
+    // Sync from storage to ensure we have latest tokens
+    syncFromStorage();
+
+    // Check authentication after hydration
+    if (!isAuthenticated || !accessToken) {
+      router.replace("/admin/login");
+    }
+  }, [isHydrated, isAuthenticated, accessToken, router, syncFromStorage]);
+
+  // Show loading while hydrating
+  if (!isHydrated || !isAuthenticated || !accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-gray-600">Loading...</div>

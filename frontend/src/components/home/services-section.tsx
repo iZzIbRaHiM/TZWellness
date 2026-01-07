@@ -23,7 +23,7 @@ export function ServicesSection() {
     queryFn: () => servicesApi.getAll({ featured: true }),
   });
 
-  const services = (data?.data?.results || []).slice(0, 4);
+  const services = (data?.data || []).slice(0, 4);
   return (
     <section className="py-24 bg-sand-100" aria-labelledby="services-heading">
       <div className="container-fluid">

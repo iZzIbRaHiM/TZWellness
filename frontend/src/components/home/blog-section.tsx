@@ -64,7 +64,7 @@ export function BlogSection() {
   });
 
   // Extract posts with defensive handling - limit to 3 for home page
-  const apiPosts = data?.data?.results || [];
+  const apiPosts = data?.data || [];
   const posts = apiPosts.length > 0 ? apiPosts.slice(0, 3) : fallbackPosts;
 
   // Helper to get category name safely

@@ -131,7 +131,7 @@ export function AdminEventsCMS() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       eventsApi.admin.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
@@ -153,7 +153,7 @@ export function AdminEventsCMS() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => eventsApi.admin.delete(id),
+    mutationFn: (id: string) => eventsApi.admin.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       toast({
@@ -177,11 +177,11 @@ export function AdminEventsCMS() {
     createMutation.mutate(formData);
   };
 
-  const handlePublish = (id: number) => {
+  const handlePublish = (id: string) => {
     updateMutation.mutate({ id, data: { is_published: true } });
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this event?")) {
       deleteMutation.mutate(id);
     }

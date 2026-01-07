@@ -181,12 +181,11 @@ function TestimonialCard({ testimonial }: TestimonialCardProps) {
                 <BadgeCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
               )}
             </div>
-            <div className="text-sm text-emerald-600/70">{testimonial.location}</div>
           </div>
           <div className="text-right">
-            {testimonial.service_name && (
+            {testimonial.service && (
               <Badge variant="secondary" className="mb-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-                {testimonial.service_name}
+                {testimonial.service}
               </Badge>
             )}
             <div className="text-xs text-emerald-500/70">

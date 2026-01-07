@@ -10,9 +10,9 @@ import { CTASection } from "@/components/home/cta-section";
 import { MedicalBusinessSchema } from "@/components/seo/schemas";
 
 export const metadata: Metadata = {
-  title: "TZ Wellness Health | Expert Metabolic & Holistic Healthcare",
+  title: "TZ Wellness | Mental Health & Holistic Wellbeing",
   description:
-    "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today. Expert care for Diabetes, Thyroid, PCOS, and Metabolic Health.",
+    "Expert mental health and wellness services. Book your personalized consultation today for therapy, counseling, and holistic wellness programs.",
 };
 
 export default function HomePage() {
