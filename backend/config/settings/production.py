@@ -3,8 +3,15 @@ Production settings for TF Wellfare.
 """
 
 from .base import *
+import dj_database_url
 
 DEBUG = False
+
+# Parse DATABASE_URL for Render
+DATABASES['default'] = dj_database_url.config(
+    conn_max_age=600,
+    conn_health_checks=True,
+)
 
 # Security settings
 SECURE_BROWSER_XSS_FILTER = True
@@ -20,11 +27,13 @@ X_FRAME_OPTIONS = 'DENY'
 # HTTPS only
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Production logging
-LOGGING['handlers']['file'] = {
-    'class': 'logging.handlers.RotatingFileHandler',
-    'filename': BASE_DIR / 'logs' / 'django.log',
-    'maxBytes': 10 * 1024 * 1024,  # 10 MB
-    'backupCount': 5,
+# Production logging - Console only for Render
+LOGGING['handlers']['console'] = {
+    'class': 'logging.StreamHandler',
     'formatter': 'verbose',
 }
+LOGGING['root'] = {
+    'handlers': ['console'],
+    'level': 'INFO',
+}
+
