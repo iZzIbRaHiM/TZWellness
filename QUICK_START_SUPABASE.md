@@ -102,29 +102,15 @@ Your app is live! 🚀
 
 ## 👤 Create Admin User
 
-Run in **Supabase SQL Editor**:
+**Use Supabase Dashboard (NOT SQL):**
 
-```sql
-INSERT INTO auth.users (
-  id,
-  email,
-  encrypted_password,
-  email_confirmed_at,
-  raw_app_meta_data,
-  raw_user_meta_data,
-  created_at,
-  updated_at
-) VALUES (
-  gen_random_uuid(),
-  'admin@tzwellness.com',
-  crypt('YourSecurePassword123!', gen_salt('bf')),
-  NOW(),
-  '{"provider":"email","providers":["email"]}',
-  '{"name":"Admin User","role":"admin"}',
-  NOW(),
-  NOW()
-);
-```
+1. **Supabase Dashboard** → **Authentication** → **Users**
+2. Click **"Add user"** → **"Create new user"**
+3. Fill in:
+   - **Email:** `admin@tzwellness.com`
+   - **Password:** `YourSecurePassword123!`
+   - ✅ **Check:** "Auto Confirm User"
+4. Click **"Create user"**
 
 Login at: `/admin` with your credentials
 

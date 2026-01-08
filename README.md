@@ -251,15 +251,12 @@ npm run build
 
 Access admin panel at `/admin` after creating admin user:
 
-```sql
--- Run in Supabase SQL Editor
-INSERT INTO auth.users (email, encrypted_password, email_confirmed_at)
-VALUES (
-  'admin@tzwellness.com',
-  crypt('YourPassword123!', gen_salt('bf')),
-  NOW()
-);
-```
+**Create Admin User (Use Supabase Dashboard):**
+1. Dashboard → Authentication → Users
+2. Click "Add user" → "Create new user"
+3. Email: `admin@tzwellness.com`, Password: `YourPassword123!`
+4. ✅ Check "Auto Confirm User"
+5. Click "Create user"
 
 Dashboard features:
 - 📈 Real-time booking statistics

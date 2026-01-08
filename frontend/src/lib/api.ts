@@ -280,33 +280,170 @@ export const servicesApi = {
   },
 
   // Admin methods for managing services (requires authentication)
-  create: async (serviceData: any): Promise<ApiResponse<Service>> => {
-    return {
-      success: false,
-      error: {
-        code: 'NOT_IMPLEMENTED',
-        message: 'Service creation not yet implemented - use Supabase dashboard',
-      },
+  create: async (serviceData: Partial<Service>): Promise<ApiResponse<Service>> => {
+    try {
+      const supabase = createClient()
+      
+      // Insert new service
+      const { data, error } = await supabase
+        .from('services')
+        .insert({
+          title: serviceData.title,
+          slug: serviceData.slug,
+          category_id: serviceData.category_id,
+          short_description: serviceData.short_description,
+          description: serviceData.description,
+          symptoms: serviceData.symptoms,
+          approach: serviceData.approach,
+          what_to_expect: serviceData.what_to_expect,
+          image: serviceData.image,
+          icon: serviceData.icon,
+          modality: serviceData.modality || 'both',
+          duration_minutes: serviceData.duration_minutes || 60,
+          price: serviceData.price,
+          price_note: serviceData.price_note,
+          is_featured: serviceData.is_featured || false,
+          is_published: serviceData.is_published !== false,
+          order: serviceData.order || 0,
+          meta_title: serviceData.meta_title,
+          meta_description: serviceData.meta_description,
+          meta_keywords: serviceData.meta_keywords,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Log activity
+      try {
+        await supabase.from('activity_logs').insert({
+          action: 'service_created',
+          description: `Created service: ${data.title}`,
+          metadata: { service_id: data.id, service_title: data.title },
+        })
+      } catch (logError) {
+        console.error('Failed to log activity:', logError)
+      }
+
+      return {
+        success: true,
+        data: data as Service,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'CREATE_ERROR',
+          message: error.message || 'Failed to create service',
+        },
+      }
     }
   },
 
-  update: async (id: string, serviceData: any): Promise<ApiResponse<Service>> => {
-    return {
-      success: false,
-      error: {
-        code: 'NOT_IMPLEMENTED',
-        message: 'Service update not yet implemented - use Supabase dashboard',
-      },
+  update: async (id: string, serviceData: Partial<Service>): Promise<ApiResponse<Service>> => {
+    try {
+      const supabase = createClient()
+      
+      // Update service
+      const { data, error } = await supabase
+        .from('services')
+        .update({
+          title: serviceData.title,
+          slug: serviceData.slug,
+          category_id: serviceData.category_id,
+          short_description: serviceData.short_description,
+          description: serviceData.description,
+          symptoms: serviceData.symptoms,
+          approach: serviceData.approach,
+          what_to_expect: serviceData.what_to_expect,
+          image: serviceData.image,
+          icon: serviceData.icon,
+          modality: serviceData.modality,
+          duration_minutes: serviceData.duration_minutes,
+          price: serviceData.price,
+          price_note: serviceData.price_note,
+          is_featured: serviceData.is_featured,
+          is_published: serviceData.is_published,
+          order: serviceData.order,
+          meta_title: serviceData.meta_title,
+          meta_description: serviceData.meta_description,
+          meta_keywords: serviceData.meta_keywords,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Log activity
+      try {
+        await supabase.from('activity_logs').insert({
+          action: 'service_updated',
+          description: `Updated service: ${data.title}`,
+          metadata: { service_id: data.id, service_title: data.title },
+        })
+      } catch (logError) {
+        console.error('Failed to log activity:', logError)
+      }
+
+      return {
+        success: true,
+        data: data as Service,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'UPDATE_ERROR',
+          message: error.message || 'Failed to update service',
+        },
+      }
     }
   },
 
   delete: async (id: string): Promise<ApiResponse<null>> => {
-    return {
-      success: false,
-      error: {
-        code: 'NOT_IMPLEMENTED',
-        message: 'Service deletion not yet implemented - use Supabase dashboard',
-      },
+    try {
+      const supabase = createClient()
+      
+      // Get service title before deletion for logging
+      const { data: service } = await supabase
+        .from('services')
+        .select('title')
+        .eq('id', id)
+        .single()
+
+      // Delete service
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      // Log activity
+      try {
+        await supabase.from('activity_logs').insert({
+          action: 'service_deleted',
+          description: `Deleted service: ${service?.title || id}`,
+          metadata: { service_id: id, service_title: service?.title },
+        })
+      } catch (logError) {
+        console.error('Failed to log activity:', logError)
+      }
+
+      return {
+        success: true,
+        data: null,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'DELETE_ERROR',
+          message: error.message || 'Failed to delete service',
+        },
+      }
     }
   },
 }
@@ -824,17 +961,53 @@ export const blogApi = {
       }
     },
 
-    create: async (postData: any): Promise<ApiResponse<BlogPost>> => {
+    create: async (postData: Partial<BlogPost>): Promise<ApiResponse<BlogPost>> => {
       try {
         const supabase = createClient()
         
-        // For now, just return a stub - full implementation would handle file upload
+        // Insert new blog post
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .insert({
+            title: postData.title,
+            slug: postData.slug,
+            category_id: postData.category_id,
+            excerpt: postData.excerpt,
+            content: postData.content,
+            featured_image: postData.featured_image,
+            image_caption: postData.image_caption,
+            author_name: postData.author_name,
+            author_bio: postData.author_bio,
+            author_avatar: postData.author_avatar,
+            is_published: postData.is_published !== false,
+            is_featured: postData.is_featured || false,
+            published_at: postData.published_at || new Date().toISOString(),
+            read_time_minutes: postData.read_time_minutes,
+            meta_title: postData.meta_title,
+            meta_description: postData.meta_description,
+          })
+          .select(`
+            *,
+            category:blog_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'blog_post_created',
+            description: `Created blog post: ${data.title}`,
+            metadata: { post_id: data.id, post_title: data.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
         return {
-          success: false,
-          error: {
-            code: 'NOT_IMPLEMENTED',
-            message: 'Blog creation not yet implemented - use Supabase dashboard',
-          },
+          success: true,
+          data: data as BlogPost,
         }
       } catch (error: any) {
         return {
@@ -847,16 +1020,55 @@ export const blogApi = {
       }
     },
 
-    update: async (id: string, postData: any): Promise<ApiResponse<BlogPost>> => {
+    update: async (id: string, postData: Partial<BlogPost>): Promise<ApiResponse<BlogPost>> => {
       try {
         const supabase = createClient()
         
+        // Update blog post
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .update({
+            title: postData.title,
+            slug: postData.slug,
+            category_id: postData.category_id,
+            excerpt: postData.excerpt,
+            content: postData.content,
+            featured_image: postData.featured_image,
+            image_caption: postData.image_caption,
+            author_name: postData.author_name,
+            author_bio: postData.author_bio,
+            author_avatar: postData.author_avatar,
+            is_published: postData.is_published,
+            is_featured: postData.is_featured,
+            published_at: postData.published_at,
+            read_time_minutes: postData.read_time_minutes,
+            meta_title: postData.meta_title,
+            meta_description: postData.meta_description,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .select(`
+            *,
+            category:blog_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'blog_post_updated',
+            description: `Updated blog post: ${data.title}`,
+            metadata: { post_id: data.id, post_title: data.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
         return {
-          success: false,
-          error: {
-            code: 'NOT_IMPLEMENTED',
-            message: 'Blog update not yet implemented - use Supabase dashboard',
-          },
+          success: true,
+          data: data as BlogPost,
         }
       } catch (error: any) {
         return {
@@ -873,12 +1085,35 @@ export const blogApi = {
       try {
         const supabase = createClient()
         
+        // Get post title before deletion for logging
+        const { data: post } = await supabase
+          .from('blog_posts')
+          .select('title')
+          .eq('id', id)
+          .single()
+
+        // Delete blog post
+        const { error } = await supabase
+          .from('blog_posts')
+          .delete()
+          .eq('id', id)
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'blog_post_deleted',
+            description: `Deleted blog post: ${post?.title || id}`,
+            metadata: { post_id: id, post_title: post?.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
         return {
-          success: false,
-          error: {
-            code: 'NOT_IMPLEMENTED',
-            message: 'Blog deletion not yet implemented - use Supabase dashboard',
-          },
+          success: true,
+          data: null,
         }
       } catch (error: any) {
         return {
@@ -1075,33 +1310,172 @@ export const eventsApi = {
       }
     },
 
-    create: async (eventData: any): Promise<ApiResponse<Event>> => {
-      return {
-        success: false,
-        error: {
-          code: 'NOT_IMPLEMENTED',
-          message: 'Event creation not yet implemented - use Supabase dashboard',
-        },
+    create: async (eventData: Partial<Event>): Promise<ApiResponse<Event>> => {
+      try {
+        const supabase = createClient()
+        
+        // Insert new event
+        const { data, error } = await supabase
+          .from('events')
+          .insert({
+            title: eventData.title,
+            slug: eventData.slug,
+            category_id: eventData.category_id,
+            description: eventData.description,
+            what_to_bring: eventData.what_to_bring,
+            modality: eventData.modality || 'in_person',
+            start_date: eventData.start_date,
+            end_date: eventData.end_date,
+            timezone: eventData.timezone || 'UTC',
+            max_participants: eventData.max_participants,
+            location_name: eventData.location_name,
+            location_address: eventData.location_address,
+            virtual_link: eventData.virtual_link,
+            image: eventData.image,
+            is_published: eventData.is_published !== false,
+            is_featured: eventData.is_featured || false,
+            meta_title: eventData.meta_title,
+            meta_description: eventData.meta_description,
+          })
+          .select(`
+            *,
+            category:event_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'event_created',
+            description: `Created event: ${data.title}`,
+            metadata: { event_id: data.id, event_title: data.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
+        return {
+          success: true,
+          data: data as Event,
+        }
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            code: 'CREATE_ERROR',
+            message: error.message || 'Failed to create event',
+          },
+        }
       }
     },
 
-    update: async (id: string, eventData: any): Promise<ApiResponse<Event>> => {
-      return {
-        success: false,
-        error: {
-          code: 'NOT_IMPLEMENTED',
-          message: 'Event update not yet implemented - use Supabase dashboard',
-        },
+    update: async (id: string, eventData: Partial<Event>): Promise<ApiResponse<Event>> => {
+      try {
+        const supabase = createClient()
+        
+        // Update event
+        const { data, error } = await supabase
+          .from('events')
+          .update({
+            title: eventData.title,
+            slug: eventData.slug,
+            category_id: eventData.category_id,
+            description: eventData.description,
+            what_to_bring: eventData.what_to_bring,
+            modality: eventData.modality,
+            start_date: eventData.start_date,
+            end_date: eventData.end_date,
+            timezone: eventData.timezone,
+            max_participants: eventData.max_participants,
+            location_name: eventData.location_name,
+            location_address: eventData.location_address,
+            virtual_link: eventData.virtual_link,
+            image: eventData.image,
+            is_published: eventData.is_published,
+            is_featured: eventData.is_featured,
+            meta_title: eventData.meta_title,
+            meta_description: eventData.meta_description,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .select(`
+            *,
+            category:event_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'event_updated',
+            description: `Updated event: ${data.title}`,
+            metadata: { event_id: data.id, event_title: data.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
+        return {
+          success: true,
+          data: data as Event,
+        }
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            code: 'UPDATE_ERROR',
+            message: error.message || 'Failed to update event',
+          },
+        }
       }
     },
 
     delete: async (id: string): Promise<ApiResponse<null>> => {
-      return {
-        success: false,
-        error: {
-          code: 'NOT_IMPLEMENTED',
-          message: 'Event deletion not yet implemented - use Supabase dashboard',
-        },
+      try {
+        const supabase = createClient()
+        
+        // Get event title before deletion for logging
+        const { data: event } = await supabase
+          .from('events')
+          .select('title')
+          .eq('id', id)
+          .single()
+
+        // Delete event
+        const { error } = await supabase
+          .from('events')
+          .delete()
+          .eq('id', id)
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: 'event_deleted',
+            description: `Deleted event: ${event?.title || id}`,
+            metadata: { event_id: id, event_title: event?.title },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
+        return {
+          success: true,
+          data: null,
+        }
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            code: 'DELETE_ERROR',
+            message: error.message || 'Failed to delete event',
+          },
+        }
       }
     },
   },

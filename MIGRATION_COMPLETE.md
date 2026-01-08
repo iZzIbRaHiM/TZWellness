@@ -451,10 +451,15 @@ Add to Vercel:
 
 ### 5. Create Admin User
 
-```sql
-INSERT INTO auth.users (email, encrypted_password, email_confirmed_at)
-VALUES ('admin@tzwellness.com', crypt('YourPassword', gen_salt('bf')), NOW());
-```
+⚠️ **Use Supabase Dashboard (NOT SQL):**
+
+1. Dashboard → Authentication → Users
+2. Click "Add user" → "Create new user"
+3. Email: `admin@tzwellness.com`, Password: your choice
+4. ✅ Check "Auto Confirm User"
+5. Click "Create user"
+
+**Why?** Supabase Auth requires special handling that SQL inserts cannot provide.
 
 ### 6. Test Everything
 
