@@ -26,18 +26,25 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
-      // Call actual login API
+      // Call Supabase login API
       const response = await authApi.login(email, password);
 
       if (!response.success || !response.data) {
         throw new Error(response.error?.message || "Login failed");
       }
 
-      const { access, refresh, user } = response.data as any;
+      const user = response.data;
 
-      // Store tokens in localStorage via Zustand
-      setAuth(access, refresh);
-      setUser(user);
+      // Store user in Zustand (Supabase handles session cookies automatically)
+      setUser({
+        id: user.id,
+        email: user.email || "",
+        full_name: user.user_metadata?.full_name || user.email || "Admin",
+        role: user.user_metadata?.role || "admin",
+      });
+
+      // Set authenticated state (Supabase session is in cookies)
+      setAuth("supabase_session", "supabase_session");
 
       toast({
         title: "Login successful",
@@ -46,6 +53,7 @@ export function AdminLoginForm() {
 
       // Navigate to admin dashboard
       router.push("/admin");
+      router.refresh(); // Force refresh to update middleware
     } catch (error) {
       console.error("Login error:", error);
       toast({

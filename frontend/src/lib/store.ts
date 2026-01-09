@@ -340,7 +340,7 @@ export const useBookingStore = create<BookingState>()(
 // Auth store
 interface AuthState {
   user: {
-    id: number;
+    id: string; // Supabase user IDs are UUID strings, not numbers
     email: string;
     full_name: string;
     role: string;
