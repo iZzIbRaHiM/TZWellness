@@ -75,7 +75,7 @@ export function ServicesSection() {
                   <CardHeader className="pb-4">
                     <CardTitle className="text-xl">{service.title}</CardTitle>
                     <CardDescription className="text-emerald-700/70">
-                      {service.short_description}
+                      {service.short_description || service.title}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1">

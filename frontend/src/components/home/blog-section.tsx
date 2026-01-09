@@ -148,7 +148,7 @@ export function BlogSection() {
                         {post.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
-                        {post.excerpt}
+                        {post.excerpt || post.title}
                       </CardDescription>
                     </CardHeader>
 

@@ -67,7 +67,17 @@ export default async function ServicePage({ params }: ServicePageProps) {
             { label: service.title, href: `/services/${params.slug}` },
           ]}
         />
-        <ServiceDetail service={{...service, faqs: mockFaqs}} />
+        <ServiceDetail service={{
+          ...service,
+          short_description: service.short_description || service.title,
+          description: service.description || service.short_description || service.title,
+          symptoms: service.symptoms || "",
+          approach: service.approach || "",
+          what_to_expect: service.what_to_expect || "",
+          icon: service.icon || "🏥",
+          price: service.price || 0,
+          faqs: mockFaqs
+        }} />
       </div>
     </div>
   );

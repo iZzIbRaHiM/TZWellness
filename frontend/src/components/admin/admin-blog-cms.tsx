@@ -383,7 +383,7 @@ export function AdminBlogCMS() {
                           {post.title}
                         </p>
                         <p className="text-sm text-gray-500 line-clamp-1">
-                          {post.excerpt}
+                          {post.excerpt || "No excerpt"}
                         </p>
                       </div>
                     </td>

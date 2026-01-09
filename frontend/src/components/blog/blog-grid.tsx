@@ -225,7 +225,7 @@ function BlogCard({ post, featured = false }: BlogCardProps) {
               {post.title}
             </CardTitle>
             <CardDescription className="line-clamp-2 text-emerald-700/70">
-              {post.excerpt}
+              {post.excerpt || post.title}
             </CardDescription>
           </CardHeader>
           <CardContent className="mt-auto">

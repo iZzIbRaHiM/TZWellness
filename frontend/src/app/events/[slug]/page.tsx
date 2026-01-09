@@ -45,6 +45,7 @@ export default async function EventPage({ params }: EventPageProps) {
   // Format event data to match component expectations
   const formattedEvent = {
     ...event,
+    description: event.description || event.title,
     date: event.start_date.split('T')[0],
     start_time: event.start_date.split('T')[1]?.substring(0, 5) || "00:00",
     end_time: event.end_date.split('T')[1]?.substring(0, 5) || "00:00",
@@ -52,10 +53,15 @@ export default async function EventPage({ params }: EventPageProps) {
     address: event.location_address || "",
     is_virtual: event.modality === 'virtual',
     registered_count: event.current_participants,
-    max_attendees: event.max_participants,
+    max_attendees: event.max_participants || 50,
     price: 0,
     category: event.category?.name || "Event",
-    long_description: event.description,
+    long_description: event.description || event.title,
+    speaker: {
+      name: "TZ Wellness Team",
+      title: "Healthcare Professionals",
+      bio: "Our experienced team of healthcare professionals is dedicated to providing quality care and education to our community."
+    }
   };
 
   const isVirtual = event.modality === 'virtual';

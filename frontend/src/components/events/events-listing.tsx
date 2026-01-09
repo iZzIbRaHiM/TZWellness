@@ -377,7 +377,7 @@ function EventCard({ event, compact = false }: EventCardProps) {
           </CardTitle>
           {!compact && (
             <CardDescription className="line-clamp-2">
-              {event.short_description}
+              {event.description || event.title}
             </CardDescription>
           )}
         </CardHeader>

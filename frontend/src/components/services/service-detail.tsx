@@ -28,9 +28,9 @@ interface ServiceDetailProps {
     slug: string;
     short_description: string;
     description: string;
-    symptoms: string;
-    approach: string;
-    what_to_expect: string;
+    symptoms?: string;
+    approach?: string;
+    what_to_expect?: string;
     icon: string;
     duration_minutes: number;
     price: number;
@@ -128,67 +128,73 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
         </motion.section>
 
         {/* Symptoms */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-xl p-8 shadow-sm border"
-        >
-          <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
-            Common Symptoms We Address
-          </h2>
-          <ul className="grid md:grid-cols-2 gap-3">
-            {service.symptoms
-              .split("\n")
-              .filter((s) => s.trim().startsWith("-"))
-              .map((symptom, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-terracotta shrink-0 mt-0.5" />
-                  <span className="text-gray-700">
-                    {symptom.replace("-", "").trim()}
-                  </span>
-                </li>
-              ))}
-          </ul>
-        </motion.section>
+        {service.symptoms && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white rounded-xl p-8 shadow-sm border"
+          >
+            <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
+              Common Symptoms We Address
+            </h2>
+            <ul className="grid md:grid-cols-2 gap-3">
+              {service.symptoms
+                .split("\n")
+                .filter((s) => s.trim().startsWith("-"))
+                .map((symptom, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-terracotta shrink-0 mt-0.5" />
+                    <span className="text-gray-700">
+                      {symptom.replace("-", "").trim()}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+          </motion.section>
+        )}
 
         {/* Approach */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-emerald-50 rounded-xl p-8 border border-emerald-100"
-        >
-          <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
-            Our Approach
-          </h2>
-          <div className="prose prose-emerald max-w-none">
-            {service.approach.split("\n").map((para, i) => (
-              <p key={i} className="text-gray-700">
-                {para.replace(/\*\*/g, "")}
-              </p>
-            ))}
-          </div>
-        </motion.section>
+        {service.approach && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-emerald-50 rounded-xl p-8 border border-emerald-100"
+          >
+            <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
+              Our Approach
+            </h2>
+            <div className="prose prose-emerald max-w-none">
+              {service.approach.split("\n").map((para, i) => (
+                <p key={i} className="text-gray-700">
+                  {para.replace(/\*\*/g, "")}
+                </p>
+              ))}
+            </div>
+          </motion.section>
+        )}
 
         {/* What to expect */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-white rounded-xl p-8 shadow-sm border"
-        >
-          <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
-            What to Expect
-          </h2>
-          <div className="prose prose-emerald max-w-none">
-            {service.what_to_expect.split("\n").map((para, i) => (
-              <p key={i} className="text-gray-700">
-                {para.replace(/\*\*/g, "")}
-              </p>
-            ))}
-          </div>
-        </motion.section>
+        {service.what_to_expect && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-xl p-8 shadow-sm border"
+          >
+            <h2 className="font-serif text-2xl font-bold text-emerald-950 mb-4">
+              What to Expect
+            </h2>
+            <div className="prose prose-emerald max-w-none">
+              {service.what_to_expect.split("\n").map((para, i) => (
+                <p key={i} className="text-gray-700">
+                  {para.replace(/\*\*/g, "")}
+                </p>
+              ))}
+            </div>
+          </motion.section>
+        )}
 
         {/* FAQs */}
         <motion.section

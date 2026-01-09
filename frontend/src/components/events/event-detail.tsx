@@ -41,7 +41,7 @@ interface EventDetailProps {
     title: string;
     slug: string;
     description: string;
-    long_description: string;
+    long_description?: string;
     category: string;
     date: string;
     start_time: string;
@@ -52,7 +52,7 @@ interface EventDetailProps {
     max_attendees: number;
     registered_count: number;
     price: number;
-    speaker: {
+    speaker?: {
       name: string;
       title: string;
       bio: string;
@@ -175,27 +175,29 @@ export function EventDetail({ event }: EventDetailProps) {
             </div>
 
             {/* Speaker */}
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="text-lg">About the Speaker</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-full bg-emerald-200 flex items-center justify-center shrink-0">
-                    <User className="h-8 w-8 text-emerald-700" />
+            {event.speaker && (
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">About the Speaker</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-200 flex items-center justify-center shrink-0">
+                      <User className="h-8 w-8 text-emerald-700" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-emerald-950">
+                        {event.speaker.name}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {event.speaker.title}
+                      </p>
+                      <p className="text-gray-700">{event.speaker.bio}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-emerald-950">
-                      {event.speaker.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {event.speaker.title}
-                    </p>
-                    <p className="text-gray-700">{event.speaker.bio}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         </div>
 
