@@ -219,7 +219,7 @@ export function EventDetail({ event }: EventDetailProps) {
                   <Calendar className="h-5 w-5 text-emerald-600" />
                   <div>
                     <p className="font-medium text-gray-900">
-                      {format(parseISO(event.date), "EEEE, MMMM d, yyyy")}
+                      {event.date ? format(parseISO(event.date), "EEEE, MMMM d, yyyy") : "Date TBD"}
                     </p>
                   </div>
                 </div>

@@ -84,6 +84,7 @@ export function EventsListing() {
   // Get events for the current month (calendar view)
   const monthEvents = useMemo(() => {
     return filteredEvents.filter((event: Event) => {
+      if (!event.start_date) return false;
       const eventDate = parseISO(event.start_date);
       return isSameMonth(eventDate, currentMonth);
     });
@@ -218,6 +219,7 @@ function CalendarView({
   const eventsByDate = useMemo(() => {
     const grouped: Record<string, any[]> = {};
     events.forEach((event) => {
+      if (!event.start_datetime) return;
       const dateKey = format(parseISO(event.start_datetime), "yyyy-MM-dd");
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -340,7 +342,7 @@ interface EventCardProps {
 }
 
 function EventCard({ event, compact = false }: EventCardProps) {
-  const eventDate = parseISO(event.start_datetime);
+  const eventDate = event.start_datetime ? parseISO(event.start_datetime) : new Date();
   const spotsLeft = event.spots_left;
   const isFull = event.is_full;
 
