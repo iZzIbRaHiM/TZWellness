@@ -522,9 +522,12 @@ export const appointmentsApi = {
 
       if (error) throw error
 
+      // Supabase RPC returns JSONB directly - data IS the slots object
+      const slotsData = data || {}
+
       return {
         success: true,
-        data: { slots: data || {} },
+        data: { slots: slotsData },
       }
     } catch (error: any) {
       return {
