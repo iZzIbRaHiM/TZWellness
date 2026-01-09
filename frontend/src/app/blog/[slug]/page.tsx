@@ -49,6 +49,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const formattedPost = {
     ...post,
     excerpt: post.excerpt || post.title, // Ensure excerpt is always a string
+    featured_image: post.featured_image || "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800", // Default health image
     author: {
       name: post.author_name || "TZ Wellness Team",
       bio: post.author_bio || "Healthcare professionals dedicated to your wellbeing",
