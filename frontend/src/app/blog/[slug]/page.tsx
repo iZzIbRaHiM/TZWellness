@@ -48,6 +48,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Format post data to match component expectations
   const formattedPost = {
     ...post,
+    excerpt: post.excerpt || post.title, // Ensure excerpt is always a string
     author: {
       name: post.author_name || "TZ Wellness Team",
       bio: post.author_bio || "Healthcare professionals dedicated to your wellbeing",
