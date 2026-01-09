@@ -2,11 +2,10 @@
 
 import React, { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, parseISO } from "date-fns";
+import { format, addDays, parseISO, startOfDay, isSameDay } from "date-fns";
 import { useBookingStore } from "@/lib/store";
 import { appointmentsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -15,6 +14,8 @@ import {
   RefreshCw,
   Calendar as CalendarIcon,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -72,19 +73,15 @@ export function StepCalendar() {
 
   // Check if a date has available slots
   const isDateAvailable = useCallback(
-    (date: Date) => {
-      const dateStr = format(date, "yyyy-MM-dd");
+    (dateStr: string) => {
       return availableDates.includes(dateStr);
     },
     [availableDates]
   );
 
   // Handle date selection - updates store directly
-  const handleDateSelect = useCallback((date: Date | undefined) => {
-    if (!date) return;
-    
-    // Format date and update store - this is the single source of truth
-    const dateStr = format(date, "yyyy-MM-dd");
+  const handleDateSelect = useCallback((dateStr: string) => {
+    console.log("Date selected:", dateStr);
     setDateTime(dateStr, ""); // Clear time when date changes
   }, [setDateTime]);
 
@@ -107,6 +104,44 @@ export function StepCalendar() {
     }
   }, [refetchSlots]);
 
+  // Navigate months
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  // Generate calendar days
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days: Array<{ date: Date | null; dateStr: string | null; isCurrentMonth: boolean }> = [];
+
+    // Empty cells before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ date: null, dateStr: null, isCurrentMonth: false });
+    }
+
+    // Days in current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = format(date, "yyyy-MM-dd");
+      days.push({ date, dateStr, isCurrentMonth: true });
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays();
+  const today = startOfDay(new Date());
+
   // Determine if we have a valid selected date
   const hasSelectedDate = !!selectedDate && !!internalSelectedDate;
 
@@ -128,13 +163,31 @@ export function StepCalendar() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Calendar */}
+        {/* Custom Calendar */}
         <div className="border rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-gray-900">Select Date</h3>
-            <span className="text-sm text-gray-500">
-              {format(currentMonth, "MMMM yyyy")}
-            </span>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePrevMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-gray-700 font-medium min-w-[140px] text-center">
+                {format(currentMonth, "MMMM yyyy")}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNextMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {datesLoading ? (
@@ -142,27 +195,55 @@ export function StepCalendar() {
               <Skeleton className="h-64 w-full" />
             </div>
           ) : (
-            <Calendar
-              mode="single"
-              selected={internalSelectedDate}
-              onSelect={handleDateSelect}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              disabled={(date) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return date < today || !isDateAvailable(date);
-              }}
-              modifiers={{
-                available: (date) => isDateAvailable(date),
-              }}
-              modifiersClassNames={{
-                available: "bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100 cursor-pointer",
-              }}
-              className="rounded-md"
-              fromDate={new Date()}
-              toDate={addDays(new Date(), 90)}
-            />
+            <div className="space-y-2">
+              {/* Weekday headers */}
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  <div
+                    key={day}
+                    className="text-center text-xs font-medium text-gray-500 py-2"
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((day, index) => {
+                  if (!day.date || !day.dateStr) {
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
+                  const isPast = day.date < today;
+                  const isAvailable = isDateAvailable(day.dateStr);
+                  const isSelected = selectedDate === day.dateStr;
+                  const isToday = isSameDay(day.date, new Date());
+                  const isDisabled = isPast || !isAvailable;
+
+                  return (
+                    <button
+                      key={day.dateStr}
+                      onClick={() => !isDisabled && handleDateSelect(day.dateStr!)}
+                      disabled={isDisabled}
+                      className={cn(
+                        "aspect-square rounded-lg text-sm font-medium transition-all relative",
+                        "flex items-center justify-center",
+                        isDisabled && "cursor-not-allowed opacity-40",
+                        !isDisabled && "cursor-pointer hover:bg-emerald-100",
+                        isSelected && "bg-emerald-600 text-white hover:bg-emerald-700",
+                        !isSelected && isAvailable && !isPast && "bg-emerald-50 text-emerald-700 border border-emerald-200",
+                        !isAvailable && !isPast && "bg-gray-50 text-gray-400",
+                        isPast && "bg-gray-100 text-gray-300",
+                        isToday && !isSelected && "ring-2 ring-emerald-400"
+                      )}
+                    >
+                      {day.date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
