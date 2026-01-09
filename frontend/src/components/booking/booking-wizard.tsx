@@ -44,11 +44,6 @@ export function BookingWizard() {
   const [direction, setDirection] = React.useState(1);
   const prevStepRef = React.useRef(step);
 
-  // Reset booking state when component mounts
-  useEffect(() => {
-    reset();
-  }, []);
-
   // Track direction for animations
   useEffect(() => {
     setDirection(step > prevStepRef.current ? 1 : -1);

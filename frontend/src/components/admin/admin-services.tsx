@@ -31,7 +31,7 @@ const defaultFormData: ServiceFormData = {
   title: "",
   description: "",
   icon: "🩺",
-  category: "",
+  category: "" as any,
   modality: "both",
   duration: 30,
   price: "",
@@ -293,7 +293,7 @@ export function AdminServices() {
                   <div className="space-y-2">
                     <Label htmlFor="create-category">Category *</Label>
                     <Select
-                      value={String(formData.category)}
+                      value={formData.category ? String(formData.category) : undefined}
                       onValueChange={(value: string) => setFormData({ ...formData, category: parseInt(value) })}
                     >
                       <SelectTrigger id="create-category">

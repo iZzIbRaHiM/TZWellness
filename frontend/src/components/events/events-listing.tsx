@@ -99,17 +99,6 @@ export function EventsListing() {
     );
   }
 
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-red-600">
-        <AlertCircle className="h-12 w-12 mb-3" />
-        <p className="font-semibold mb-1">Unable to load events</p>
-        <p className="text-sm text-gray-600">Please try again later</p>
-      </div>
-    );
-  }
-
   // Empty state
   if (events.length === 0) {
     return (
