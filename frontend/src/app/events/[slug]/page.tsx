@@ -46,9 +46,9 @@ export default async function EventPage({ params }: EventPageProps) {
   const formattedEvent = {
     ...event,
     description: event.description || event.title,
-    date: event.start_date.split('T')[0],
-    start_time: event.start_date.split('T')[1]?.substring(0, 5) || "00:00",
-    end_time: event.end_date.split('T')[1]?.substring(0, 5) || "00:00",
+    date: event.start_date?.split('T')[0] || new Date().toISOString().split('T')[0],
+    start_time: event.start_date?.split('T')[1]?.substring(0, 5) || "00:00",
+    end_time: event.end_date?.split('T')[1]?.substring(0, 5) || "00:00",
     location: event.location_name || "TZ Wellness Center",
     address: event.location_address || "",
     is_virtual: event.modality === 'virtual',

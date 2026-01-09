@@ -119,7 +119,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
             About This Service
           </h2>
           <div className="prose prose-emerald max-w-none">
-            {service.description.split("\n").map((para, i) => (
+            {(service.description || "").split("\n").map((para, i) => (
               <p key={i} className="text-gray-700">
                 {para}
               </p>
@@ -139,7 +139,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
               Common Symptoms We Address
             </h2>
             <ul className="grid md:grid-cols-2 gap-3">
-              {service.symptoms
+              {(service.symptoms || "")
                 .split("\n")
                 .filter((s) => s.trim().startsWith("-"))
                 .map((symptom, i) => (
@@ -166,7 +166,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
               Our Approach
             </h2>
             <div className="prose prose-emerald max-w-none">
-              {service.approach.split("\n").map((para, i) => (
+              {(service.approach || "").split("\n").map((para, i) => (
                 <p key={i} className="text-gray-700">
                   {para.replace(/\*\*/g, "")}
                 </p>
@@ -187,7 +187,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
               What to Expect
             </h2>
             <div className="prose prose-emerald max-w-none">
-              {service.what_to_expect.split("\n").map((para, i) => (
+              {(service.what_to_expect || "").split("\n").map((para, i) => (
                 <p key={i} className="text-gray-700">
                   {para.replace(/\*\*/g, "")}
                 </p>

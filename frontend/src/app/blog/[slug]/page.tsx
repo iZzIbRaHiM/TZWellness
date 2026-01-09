@@ -55,7 +55,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       bio: post.author_bio || "Healthcare professionals dedicated to your wellbeing",
       image: post.author_avatar || "/images/default-avatar.jpg",
     },
-    read_time: post.read_time_minutes || Math.ceil(post.content.split(' ').length / 200),
+    read_time: post.read_time_minutes || Math.ceil((post.content || '').split(' ').length / 200),
     tags: post.tags?.map(t => t.name) || [],
     category: post.category?.name || "Health",
   };

@@ -52,6 +52,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
   // Parse markdown-like content into sections
   const parseContent = (content: string) => {
+    if (!content) return [];
     const sections = content.split("\n\n").filter(Boolean);
     return sections.map((section, i) => {
       if (section.startsWith("## ")) {
