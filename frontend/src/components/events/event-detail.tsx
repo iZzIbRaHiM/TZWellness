@@ -87,6 +87,7 @@ export function EventDetail({ event }: EventDetailProps) {
 
   // Parse markdown-like content
   const parseContent = (content: string) => {
+    if (!content) return null;
     const sections = content.split("\n\n").filter(Boolean);
     return sections.map((section, i) => {
       if (section.startsWith("## ")) {
