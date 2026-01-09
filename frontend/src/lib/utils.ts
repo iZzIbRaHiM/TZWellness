@@ -15,6 +15,7 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatTime(time: string): string {
+  if (!time) return "12:00 AM";
   const [hours, minutes] = time.split(":");
   const h = parseInt(hours, 10);
   const ampm = h >= 12 ? "PM" : "AM";
