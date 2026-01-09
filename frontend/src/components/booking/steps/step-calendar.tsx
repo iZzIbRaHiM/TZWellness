@@ -42,8 +42,25 @@ export function StepCalendar() {
     queryKey: ["availableDates"],
     queryFn: async () => {
       const response = await appointmentsApi.getAvailableDates(60);
-      console.log("📅 Available dates from API:", response.data?.dates);
-      return response.data?.dates || [];
+      console.log("📅 Raw API response:", response.data?.dates);
+      
+      // Transform response - handle both string[] and object[] formats
+      const rawDates = response.data?.dates || [];
+      const dateStrings = rawDates.map((item: any) => {
+        // If it's already a string, use it
+        if (typeof item === 'string') return item;
+        // If it's an object with date/available_date property
+        if (item.date) return item.date;
+        if (item.available_date) return item.available_date;
+        // Try to extract any date-like property
+        const dateValue = Object.values(item).find((val: any) => 
+          typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)
+        );
+        return dateValue as string;
+      }).filter(Boolean);
+      
+      console.log("✅ Processed date strings:", dateStrings.slice(0, 5));
+      return dateStrings;
     },
     staleTime: 60 * 1000,
   });
@@ -75,7 +92,11 @@ export function StepCalendar() {
   // Check if a date has available slots
   const isDateAvailable = useCallback(
     (dateStr: string) => {
-      return availableDates.includes(dateStr);
+      const available = availableDates.includes(dateStr);
+      if (dateStr === format(new Date(), "yyyy-MM-dd")) {
+        console.log("🔍 Checking today:", dateStr, "Available:", available, "In array:", availableDates.slice(0, 3));
+      }
+      return available;
     },
     [availableDates]
   );
