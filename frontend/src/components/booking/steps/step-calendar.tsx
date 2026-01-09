@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, addDays, parseISO, startOfDay, isSameDay } from "date-fns";
 import { useBookingStore } from "@/lib/store";
@@ -71,23 +71,71 @@ export function StepCalendar() {
     isLoading: slotsLoading,
     refetch: refetchSlots,
     isRefetching,
+    error: slotsError,
   } = useQuery({
     queryKey: ["availableSlots", selectedDate, modality],
     queryFn: async () => {
       if (!selectedDate) return null;
+      
+      console.log("🕐 Fetching slots for:", {
+        date: selectedDate,
+        modality: modality === "phone" ? "virtual" : modality,
+      });
+      
       const response = await appointmentsApi.getAvailableSlots({
         start_date: selectedDate,
         end_date: selectedDate,
         modality: modality === "phone" ? "virtual" : modality || undefined,
       });
-      return response.data?.slots?.[selectedDate] || [];
+      
+      console.log("🕐 Slots API response:", response);
+      
+      if (!response.success) {
+        console.error("❌ Slots API error:", response.error);
+        throw new Error(response.error?.message || "Failed to fetch slots");
+      }
+      
+      const slotsForDate = response.data?.slots?.[selectedDate] || [];
+      console.log("✅ Slots for date:", selectedDate, slotsForDate);
+      
+      return slotsForDate;
     },
     enabled: !!selectedDate,
     staleTime: 30 * 1000,
+    retry: 2,
   });
 
   const availableDates = availableDatesData || [];
   const slots = slotsData || [];
+
+  // Generate fallback time slots if API fails (temporary development aid)
+  const generateFallbackSlots = useCallback((date: string) => {
+    console.warn("⚠️ Using fallback slots - API unavailable");
+    const times = [];
+    for (let hour = 9; hour <= 17; hour++) {
+      times.push({
+        start_time: `${hour.toString().padStart(2, '0')}:00`,
+        end_time: `${hour.toString().padStart(2, '0')}:30`,
+        available: true,
+      });
+      if (hour < 17) {
+        times.push({
+          start_time: `${hour.toString().padStart(2, '0')}:30`,
+          end_time: `${(hour + 1).toString().padStart(2, '0')}:00`,
+          available: true,
+        });
+      }
+    }
+    return times;
+  }, []);
+
+  // Use fallback slots if API error and date is selected
+  const displaySlots = useMemo(() => {
+    if (slotsError && selectedDate) {
+      return generateFallbackSlots(selectedDate);
+    }
+    return slots;
+  }, [slots, slotsError, selectedDate, generateFallbackSlots]);
 
   // Check if a date has available slots
   const isDateAvailable = useCallback(
@@ -340,15 +388,39 @@ export function StepCalendar() {
                 <Skeleton key={i} className="h-12" />
               ))}
             </div>
-          ) : slots.length === 0 ? (
+          ) : slotsError ? (
+            <div className="h-64 flex flex-col items-center justify-center text-gray-500 space-y-3">
+              <AlertCircle className="h-12 w-12 text-amber-400 mb-2" />
+              <p className="text-amber-600 font-medium">Time Slots API Unavailable</p>
+              <p className="text-sm text-center max-w-xs">
+                Using demo time slots. API error: {(slotsError as Error).message}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetchSlots()}>
+                  Retry API
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => {
+                    // Show fallback slots
+                    const fallback = generateFallbackSlots(selectedDate!);
+                    console.log("Using fallback slots:", fallback);
+                  }}
+                >
+                  Use Demo Times
+                </Button>
+              </div>
+            </div>
+          ) : displaySlots.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-gray-500">
               <AlertCircle className="h-12 w-12 text-gray-300 mb-4" />
               <p>No available times for this date</p>
-              <p className="text-sm">Please select another date</p>
+              <p className="text-sm mb-2">Please select another date</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
-              {slots.map((slot) => {
+              {displaySlots.map((slot) => {
                 const isSelected = selectedTime === slot.start_time;
                 return (
                   <button
@@ -374,6 +446,12 @@ export function StepCalendar() {
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {slotsError && displaySlots.length > 0 && (
+            <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+              <strong>⚠️ Demo Mode:</strong> Using sample time slots. Production API unavailable.
             </div>
           )}
 
