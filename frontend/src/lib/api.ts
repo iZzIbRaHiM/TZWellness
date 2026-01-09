@@ -961,14 +961,26 @@ export const blogApi = {
       }
     },
 
-    create: async (postData: Partial<BlogPost>): Promise<ApiResponse<BlogPost>> => {
+    create: async (postData: Partial<BlogPost> | FormData): Promise<ApiResponse<BlogPost>> => {
       try {
         const supabase = createClient()
         
-        // Insert new blog post
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .insert({
+        // Extract data from FormData if needed
+        let blogPostData: any
+        if (postData instanceof FormData) {
+          blogPostData = {
+            title: postData.get('title') as string,
+            slug: postData.get('slug') as string || (postData.get('title') as string)?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            category_id: postData.get('category') as string,
+            excerpt: postData.get('excerpt') as string,
+            content: postData.get('content') as string,
+            featured_image: postData.get('featured_image') as string || null,
+            is_published: true,
+            is_featured: false,
+            published_at: new Date().toISOString(),
+          }
+        } else {
+          blogPostData = {
             title: postData.title,
             slug: postData.slug,
             category_id: postData.category_id,
@@ -985,7 +997,13 @@ export const blogApi = {
             read_time_minutes: postData.read_time_minutes,
             meta_title: postData.meta_title,
             meta_description: postData.meta_description,
-          })
+          }
+        }
+        
+        // Insert new blog post
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .insert(blogPostData)
           .select(`
             *,
             category:blog_categories(*)
@@ -1310,14 +1328,35 @@ export const eventsApi = {
       }
     },
 
-    create: async (eventData: Partial<Event>): Promise<ApiResponse<Event>> => {
+    create: async (eventData: Partial<Event> | FormData): Promise<ApiResponse<Event>> => {
       try {
         const supabase = createClient()
         
-        // Insert new event
-        const { data, error } = await supabase
-          .from('events')
-          .insert({
+        // Extract data from FormData if needed
+        let eventPostData: any
+        if (eventData instanceof FormData) {
+          eventPostData = {
+            title: eventData.get('title') as string,
+            slug: eventData.get('slug') as string || (eventData.get('title') as string)?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+            category_id: eventData.get('category_id') as string,
+            description: eventData.get('description') as string,
+            what_to_bring: eventData.get('what_to_bring') as string || null,
+            modality: eventData.get('modality') as string || 'in_person',
+            start_date: eventData.get('start_date') as string,
+            end_date: eventData.get('end_date') as string,
+            timezone: eventData.get('timezone') as string || 'UTC',
+            max_participants: eventData.get('max_participants') ? parseInt(eventData.get('max_participants') as string) : null,
+            location_name: eventData.get('location_name') as string || null,
+            location_address: eventData.get('location_address') as string || null,
+            virtual_link: eventData.get('virtual_link') as string || null,
+            image: eventData.get('image') as string || null,
+            is_published: eventData.get('is_published') === 'true',
+            is_featured: eventData.get('is_featured') === 'true',
+            meta_title: eventData.get('meta_title') as string || null,
+            meta_description: eventData.get('meta_description') as string || null,
+          }
+        } else {
+          eventPostData = {
             title: eventData.title,
             slug: eventData.slug,
             category_id: eventData.category_id,
@@ -1336,7 +1375,13 @@ export const eventsApi = {
             is_featured: eventData.is_featured || false,
             meta_title: eventData.meta_title,
             meta_description: eventData.meta_description,
-          })
+          }
+        }
+        
+        // Insert new event
+        const { data, error } = await supabase
+          .from('events')
+          .insert(eventPostData)
           .select(`
             *,
             category:event_categories(*)

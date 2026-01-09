@@ -171,7 +171,7 @@ export function EventDetail({ event }: EventDetailProps) {
 
             {/* Details */}
             <div className="prose prose-emerald max-w-none">
-              {parseContent(event.long_description)}
+              {parseContent(event.long_description || event.description || "")}
             </div>
 
             {/* Speaker */}
