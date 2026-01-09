@@ -30,6 +30,15 @@
 -- ============================================
 
 -- ============================================
+-- DROP EXISTING FUNCTIONS
+-- ============================================
+DROP FUNCTION IF EXISTS get_available_dates(INTEGER);
+DROP FUNCTION IF EXISTS get_available_slots(TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS check_slot_available(DATE, TIME, TEXT);
+DROP FUNCTION IF EXISTS get_day_name(INTEGER);
+DROP FUNCTION IF EXISTS debug_day_mapping();
+
+-- ============================================
 -- FUNCTION 1: GET AVAILABLE DATES
 -- Returns list of dates with available appointment slots
 -- ============================================
@@ -84,20 +93,13 @@ CREATE OR REPLACE FUNCTION get_available_slots(
 RETURNS JSONB AS $$
 DECLARE
   result JSONB := '{}'::JSONB;
-  current_date DATE;
+  date_to_check DATE;
   time_slot RECORD;
   iso_day INTEGER;
   slots_array JSONB;
 BEGIN
-  -- Convert text dates to DATE type with validation
-  BEGIN
-    current_date := start_date::DATE;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE EXCEPTION 'Invalid start_date format. Expected YYYY-MM-DD, got: %', start_date;
-  END;
-
   -- Loop through each date in range
-  FOR current_date IN 
+  FOR date_to_check IN 
     SELECT generate_series(
       start_date::DATE, 
       end_date::DATE, 
@@ -105,7 +107,7 @@ BEGIN
     )::DATE
   LOOP
     -- Convert PostgreSQL DOW to ISO day (0=Monday to 6=Sunday)
-    iso_day := ((EXTRACT(DOW FROM current_date)::INTEGER + 6) % 7);
+    iso_day := ((EXTRACT(DOW FROM date_to_check)::INTEGER + 6) % 7);
     
     -- Initialize slots array for this date
     slots_array := '[]'::JSONB;
@@ -131,14 +133,14 @@ BEGIN
         AND NOT EXISTS (
           SELECT 1 
           FROM exception_dates ed
-          WHERE ed.date = current_date
+          WHERE ed.date = date_to_check
             AND ed.exception_type = 'blocked'
         )
         -- Exclude if slot is already booked
         AND NOT EXISTS (
           SELECT 1 
           FROM appointments a
-          WHERE a.scheduled_date = current_date
+          WHERE a.scheduled_date = date_to_check
             AND a.scheduled_time = wa.start_time
             AND a.status IN ('pending', 'approved', 'completed')
         )
@@ -161,7 +163,7 @@ BEGIN
     IF jsonb_array_length(slots_array) > 0 THEN
       result := jsonb_set(
         result,
-        ARRAY[current_date::TEXT],
+        ARRAY[date_to_check::TEXT],
         slots_array,
         true
       );
