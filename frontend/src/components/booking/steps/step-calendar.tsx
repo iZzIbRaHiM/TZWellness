@@ -42,6 +42,7 @@ export function StepCalendar() {
     queryKey: ["availableDates"],
     queryFn: async () => {
       const response = await appointmentsApi.getAvailableDates(60);
+      console.log("📅 Available dates from API:", response.data?.dates);
       return response.data?.dates || [];
     },
     staleTime: 60 * 1000,
@@ -81,9 +82,17 @@ export function StepCalendar() {
 
   // Handle date selection - updates store directly
   const handleDateSelect = useCallback((dateStr: string) => {
-    console.log("Date selected:", dateStr);
+    console.log("🎯 Date clicked:", dateStr);
+    console.log("📋 Available dates:", availableDates);
+    console.log("✅ Is available?", availableDates.includes(dateStr));
+    
     setDateTime(dateStr, ""); // Clear time when date changes
-  }, [setDateTime]);
+    
+    toast({
+      title: "Date selected",
+      description: `You selected ${dateStr}`,
+    });
+  }, [setDateTime, availableDates, toast]);
 
   // Handle time selection
   const handleTimeSelect = useCallback((time: string) => {
@@ -224,19 +233,28 @@ export function StepCalendar() {
                   return (
                     <button
                       key={day.dateStr}
-                      onClick={() => !isDisabled && handleDateSelect(day.dateStr!)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("🖱️ Button clicked for:", day.dateStr, "Disabled:", isDisabled);
+                        if (!isDisabled) {
+                          handleDateSelect(day.dateStr!);
+                        }
+                      }}
                       disabled={isDisabled}
                       className={cn(
                         "aspect-square rounded-lg text-sm font-medium transition-all relative",
-                        "flex items-center justify-center",
+                        "flex items-center justify-center min-h-[40px]",
                         isDisabled && "cursor-not-allowed opacity-40",
-                        !isDisabled && "cursor-pointer hover:bg-emerald-100",
-                        isSelected && "bg-emerald-600 text-white hover:bg-emerald-700",
-                        !isSelected && isAvailable && !isPast && "bg-emerald-50 text-emerald-700 border border-emerald-200",
-                        !isAvailable && !isPast && "bg-gray-50 text-gray-400",
+                        !isDisabled && "cursor-pointer hover:bg-emerald-200 hover:scale-105 active:scale-95",
+                        isSelected && "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
+                        !isSelected && isAvailable && !isPast && "bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-semibold hover:border-emerald-500",
+                        !isAvailable && !isPast && "bg-gray-50 text-gray-400 border border-gray-200",
                         isPast && "bg-gray-100 text-gray-300",
-                        isToday && !isSelected && "ring-2 ring-emerald-400"
+                        isToday && !isSelected && "ring-2 ring-offset-1 ring-emerald-500"
                       )}
+                      title={isAvailable ? `Select ${day.dateStr}` : "Not available"}
                     >
                       {day.date.getDate()}
                     </button>
@@ -248,7 +266,7 @@ export function StepCalendar() {
 
           <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-emerald-50 border border-emerald-200" />
+              <div className="w-4 h-4 rounded bg-emerald-100 border-2 border-emerald-300" />
               <span>Available</span>
             </div>
             <div className="flex items-center gap-2">
@@ -256,6 +274,16 @@ export function StepCalendar() {
               <span>Unavailable</span>
             </div>
           </div>
+          
+          {/* Debug info */}
+          {!datesLoading && (
+            <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-800">
+              <strong>Debug:</strong> {availableDates.length} available dates loaded
+              {availableDates.length > 0 && (
+                <div className="mt-1">Next 3: {availableDates.slice(0, 3).join(", ")}</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Time slots */}
