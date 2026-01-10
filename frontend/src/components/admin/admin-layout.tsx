@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminAppointments } from "./admin-appointments";
 import { AdminBlogCMS } from "./admin-blog-cms";
@@ -53,25 +54,45 @@ export function AdminLayout() {
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <AdminDashboard onNavigate={setActiveTab} />;
+        return (
+          <ErrorBoundary>
+            <AdminDashboard onNavigate={setActiveTab} />
+          </ErrorBoundary>
+        );
       case "appointments":
-        return <AdminAppointments />;
+        return (
+          <ErrorBoundary>
+            <AdminAppointments />
+          </ErrorBoundary>
+        );
       case "services":
         return (
-          <div className="p-8">
-            <AdminServices />
-          </div>
+          <ErrorBoundary>
+            <div className="p-8">
+              <AdminServices />
+            </div>
+          </ErrorBoundary>
         );
       case "blog":
-        return <AdminBlogCMS />;
+        return (
+          <ErrorBoundary>
+            <AdminBlogCMS />
+          </ErrorBoundary>
+        );
       case "events":
-        return <AdminEventsCMS />;
+        return (
+          <ErrorBoundary>
+            <AdminEventsCMS />
+          </ErrorBoundary>
+        );
       case "settings":
         return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-            <p className="text-gray-600">Settings panel coming soon...</p>
-          </div>
+          <ErrorBoundary>
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
+              <p className="text-gray-600">Settings panel coming soon...</p>
+            </div>
+          </ErrorBoundary>
         );
       default:
         return null;
