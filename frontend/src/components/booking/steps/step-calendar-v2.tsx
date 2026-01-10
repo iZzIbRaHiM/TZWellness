@@ -15,19 +15,24 @@ export function StepCalendarV2() {
 
   // Fetch available dates directly from Supabase
   const { data: dates, isLoading: loadingDates, error: datesError, refetch: refetchDates } = useQuery({
-    queryKey: ["dates"],
+    queryKey: ["dates-v2"],
     queryFn: async () => {
       const supabase = createClient();
       const { data, error } = await supabase.rpc("get_available_dates", { days_ahead: 30 });
-      if (error) throw error;
+      if (error) {
+        console.error("Dates error:", error);
+        throw error;
+      }
+      console.log("✅ Dates loaded:", data);
       return (data || []) as string[];
     },
     retry: 1,
+    staleTime: 0,
   });
 
   // Fetch slots for selected date
   const { data: slotsData, isLoading: loadingSlots } = useQuery({
-    queryKey: ["slots", localDate, modality],
+    queryKey: ["slots-v2", localDate, modality],
     queryFn: async () => {
       if (!localDate) return {};
       const supabase = createClient();
@@ -36,11 +41,16 @@ export function StepCalendarV2() {
         end_date: localDate,
         modality_filter: modality === "phone" ? "virtual" : modality || null,
       });
-      if (error) throw error;
+      if (error) {
+        console.error("Slots error:", error);
+        throw error;
+      }
+      console.log("✅ Slots loaded for", localDate, ":", data);
       return (data || {}) as Record<string, Array<{ start_time: string; end_time: string }>>;
     },
     enabled: !!localDate,
     retry: 1,
+    staleTime: 0,
   });
 
   const slots = localDate && slotsData ? slotsData[localDate] || [] : [];
