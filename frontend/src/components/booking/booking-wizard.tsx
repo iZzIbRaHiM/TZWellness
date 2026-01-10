@@ -9,7 +9,7 @@ import { ChevronLeft, X, Check } from "lucide-react";
 import { StepService } from "./steps/step-service";
 import { StepIdentity } from "./steps/step-identity";
 import { StepModality } from "./steps/step-modality";
-import { StepCalendar } from "./steps/step-calendar";
+import { StepCalendarV2 } from "./steps/step-calendar-v2";
 import { StepDetails } from "./steps/step-details";
 import { StepSuccess } from "./steps/step-success";
 import Link from "next/link";
@@ -159,7 +159,7 @@ export function BookingWizard() {
               {step === 1 && <StepService />}
               {step === 2 && <StepIdentity />}
               {step === 3 && <StepModality />}
-              {step === 4 && <StepCalendar />}
+              {step === 4 && <StepCalendarV2 />}
               {step === 5 && <StepDetails />}
               {step === 6 && <StepSuccess />}
             </motion.div>
