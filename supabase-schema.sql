@@ -401,20 +401,25 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER set_appointment_reference BEFORE INSERT ON appointments FOR EACH ROW EXECUTE FUNCTION generate_appointment_reference();
 
 -- Function to get available dates
+-- FIXED: Correct day-of-week mapping (PostgreSQL DOW -> ISO format)
+-- PostgreSQL: 0=Sunday, 1=Monday, ..., 6=Saturday
+-- ISO Format: 0=Monday, 1=Tuesday, ..., 6=Sunday
+-- Conversion: (EXTRACT(DOW) + 6) % 7
 CREATE OR REPLACE FUNCTION get_available_dates(days_ahead INTEGER)
 RETURNS TABLE(available_date DATE) AS $$
 BEGIN
   RETURN QUERY
   WITH date_range AS (
     SELECT generate_series(
-      CURRENT_DATE + INTERVAL '1 day',
+      CURRENT_DATE,  -- Include today
       CURRENT_DATE + (days_ahead || ' days')::INTERVAL,
       '1 day'::INTERVAL
     )::DATE AS date
   )
   SELECT DISTINCT dr.date
   FROM date_range dr
-  INNER JOIN weekly_availability wa ON EXTRACT(DOW FROM dr.date)::INTEGER = wa.day_of_week
+  -- Convert PostgreSQL DOW (0=Sunday) to ISO (0=Monday)
+  INNER JOIN weekly_availability wa ON ((EXTRACT(DOW FROM dr.date)::INTEGER + 6) % 7) = wa.day_of_week
   LEFT JOIN exception_dates ed ON ed.date = dr.date
   WHERE wa.is_active = true
     AND (ed.id IS NULL OR ed.exception_type != 'blocked')
@@ -423,6 +428,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to get available slots
+-- FIXED: Correct day-of-week mapping and proper variable naming
+-- PostgreSQL: 0=Sunday, 1=Monday, ..., 6=Saturday
+-- ISO Format: 0=Monday, 1=Tuesday, ..., 6=Sunday
+-- Conversion: (EXTRACT(DOW) + 6) % 7
 CREATE OR REPLACE FUNCTION get_available_slots(
   start_date DATE,
   end_date DATE,
@@ -431,22 +440,23 @@ CREATE OR REPLACE FUNCTION get_available_slots(
 RETURNS JSONB AS $$
 DECLARE
   result JSONB := '{}'::JSONB;
-  current_date DATE;
+  date_to_check DATE;
   time_slot TIME;
   slot_info JSONB;
-  day_of_week INTEGER;
+  iso_day INTEGER;
 BEGIN
-  FOR current_date IN 
+  FOR date_to_check IN 
     SELECT generate_series(start_date::TIMESTAMP, end_date::TIMESTAMP, '1 day'::INTERVAL)::DATE
   LOOP
-    day_of_week := EXTRACT(DOW FROM current_date)::INTEGER;
+    -- Convert PostgreSQL DOW (0=Sunday) to ISO (0=Monday)
+    iso_day := ((EXTRACT(DOW FROM date_to_check)::INTEGER + 6) % 7);
     
     -- Get available slots for this date
     FOR time_slot IN
       SELECT DISTINCT wa.start_time
       FROM weekly_availability wa
-      LEFT JOIN exception_dates ed ON ed.date = current_date
-      WHERE wa.day_of_week = day_of_week
+      LEFT JOIN exception_dates ed ON ed.date = date_to_check
+      WHERE wa.day_of_week = iso_day
         AND wa.is_active = true
         AND (ed.id IS NULL OR ed.exception_type != 'blocked')
         AND (modality_filter IS NULL OR 
@@ -455,22 +465,24 @@ BEGIN
         -- Check slot not already booked
         AND NOT EXISTS (
           SELECT 1 FROM appointments a
-          WHERE a.scheduled_date = current_date
+          WHERE a.scheduled_date = date_to_check
             AND a.scheduled_time = wa.start_time
-            AND a.status IN ('pending', 'approved')
+            AND a.status IN ('pending', 'approved', 'completed')
         )
       ORDER BY wa.start_time
     LOOP
       slot_info := jsonb_build_object(
         'start_time', time_slot::TEXT,
         'end_time', (time_slot + INTERVAL '30 minutes')::TIME::TEXT,
-        'available', true
+        'available', true,
+        'allows_virtual', (SELECT allows_virtual FROM weekly_availability WHERE day_of_week = iso_day AND start_time = time_slot LIMIT 1),
+        'allows_in_person', (SELECT allows_in_person FROM weekly_availability WHERE day_of_week = iso_day AND start_time = time_slot LIMIT 1)
       );
       
       result := jsonb_set(
         result,
-        ARRAY[current_date::TEXT],
-        COALESCE(result->current_date::TEXT, '[]'::JSONB) || slot_info
+        ARRAY[date_to_check::TEXT],
+        COALESCE(result->date_to_check::TEXT, '[]'::JSONB) || slot_info
       );
     END LOOP;
   END LOOP;

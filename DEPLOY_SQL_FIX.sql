@@ -1,36 +1,10 @@
 -- ============================================
--- TZ WELLNESS - COMPREHENSIVE AVAILABILITY FUNCTIONS
--- Production-Ready SQL for Supabase
--- ============================================
--- 
--- CRITICAL FIXES:
--- 1. Resolves ambiguous day_of_week column reference
--- 2. Fixes day-of-week mapping (PostgreSQL DOW vs ISO week)
--- 3. Adds proper NULL handling
--- 4. Includes comprehensive logging
--- 5. Optimizes performance with proper indexes
--- 
--- Run this in Supabase SQL Editor to replace existing functions
+-- TZ WELLNESS - QUICK FIX DEPLOYMENT SCRIPT
+-- Run this entire script in Supabase SQL Editor
 -- ============================================
 
 -- ============================================
--- UNDERSTANDING DAY OF WEEK MAPPING
--- ============================================
--- PostgreSQL EXTRACT(DOW FROM date):
---   0 = Sunday, 1 = Monday, 2 = Tuesday, ... 6 = Saturday
---
--- ISO Week (used in weekly_availability table):
---   0 = Monday, 1 = Tuesday, 2 = Wednesday, 3 = Thursday, 
---   4 = Friday, 5 = Saturday, 6 = Sunday
---
--- Conversion needed: (EXTRACT(DOW) + 6) % 7
---   Sunday (0) -> (0+6)%7 = 6
---   Monday (1) -> (1+6)%7 = 0
---   Saturday (6) -> (6+6)%7 = 5
--- ============================================
-
--- ============================================
--- DROP EXISTING FUNCTIONS
+-- DROP EXISTING FUNCTIONS (Clean Slate)
 -- ============================================
 DROP FUNCTION IF EXISTS get_available_dates(INTEGER);
 DROP FUNCTION IF EXISTS get_available_slots(TEXT, TEXT, TEXT);
@@ -288,103 +262,34 @@ COMMENT ON FUNCTION debug_day_mapping() IS
 'Shows next 14 days with day-of-week mapping for debugging availability issues.';
 
 -- ============================================
--- SAMPLE DATA POPULATION (RUN ONCE)
--- ============================================
--- Uncomment and modify as needed for your business hours
-
--- Monday to Friday: 9 AM to 5 PM (every 30 minutes)
-DO $$
-DECLARE
-  day_num INTEGER;
-  hour_num INTEGER;
-BEGIN
-  -- Only insert if table is empty
-  IF NOT EXISTS (SELECT 1 FROM weekly_availability LIMIT 1) THEN
-    -- Monday to Friday (0-4 in ISO format)
-    FOR day_num IN 0..4 LOOP
-      FOR hour_num IN 9..16 LOOP  -- 9 AM to 4:30 PM (last slot)
-        INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active, allows_virtual, allows_in_person)
-        VALUES (
-          day_num,
-          (hour_num || ':00')::TIME,
-          (hour_num || ':30')::TIME,
-          true,
-          true,
-          true
-        );
-        
-        -- Add 30-minute slot if not last hour
-        IF hour_num < 16 THEN
-          INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active, allows_virtual, allows_in_person)
-          VALUES (
-            day_num,
-            (hour_num || ':30')::TIME,
-            ((hour_num + 1) || ':00')::TIME,
-            true,
-            true,
-            true
-          );
-        END IF;
-      END LOOP;
-    END LOOP;
-    
-    -- Saturday: 10 AM to 2 PM (ISO day 5)
-    FOR hour_num IN 10..13 LOOP
-      INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active, allows_virtual, allows_in_person)
-      VALUES (
-        5,  -- Saturday
-        (hour_num || ':00')::TIME,
-        (hour_num || ':30')::TIME,
-        true,
-        true,
-        true
-      );
-      
-      IF hour_num < 13 THEN
-        INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active, allows_virtual, allows_in_person)
-        VALUES (
-          5,  -- Saturday
-          (hour_num || ':30')::TIME,
-          ((hour_num + 1) || ':00')::TIME,
-          true,
-          true,
-          true
-        );
-      END IF;
-    END LOOP;
-    
-    RAISE NOTICE 'Sample availability data inserted successfully';
-  ELSE
-    RAISE NOTICE 'Availability data already exists, skipping insert';
-  END IF;
-END $$;
-
--- ============================================
 -- VERIFICATION QUERIES
 -- ============================================
--- Run these to verify everything works:
 
--- 1. Check day mapping for next 2 weeks
--- SELECT * FROM debug_day_mapping();
+-- Test 1: Check day mapping for next 2 weeks
+SELECT * FROM debug_day_mapping();
 
--- 2. Get available dates for next 30 days
--- SELECT get_available_dates(30);
+-- Test 2: Get available dates for next 30 days
+SELECT get_available_dates(30);
 
--- 3. Get available slots for a specific date
--- SELECT get_available_slots('2026-01-13', '2026-01-13', 'virtual');
+-- Test 3: Get available slots for today
+SELECT get_available_slots(
+  CURRENT_DATE::TEXT,
+  CURRENT_DATE::TEXT,
+  NULL
+);
 
--- 4. Check if specific slot is available
--- SELECT check_slot_available('2026-01-13'::DATE, '10:00'::TIME, 'virtual');
-
--- 5. View all weekly availability
--- SELECT 
---   id,
---   get_day_name(day_of_week) as day_name,
---   day_of_week as iso_day,
---   start_time,
---   end_time,
---   is_active,
---   allows_virtual,
---   allows_in_person
--- FROM weekly_availability
--- ORDER BY day_of_week, start_time;
+-- ============================================
+-- SUCCESS MESSAGE
+-- ============================================
+DO $$
+BEGIN
+  RAISE NOTICE '✅ ALL FUNCTIONS UPDATED SUCCESSFULLY!';
+  RAISE NOTICE '';
+  RAISE NOTICE '📋 Next Steps:';
+  RAISE NOTICE '1. Check the query results above to verify functions work';
+  RAISE NOTICE '2. If no dates/slots appear, add weekly_availability data';
+  RAISE NOTICE '3. Update frontend/.env.local with Supabase credentials';
+  RAISE NOTICE '4. Restart your Next.js dev server';
+  RAISE NOTICE '';
+  RAISE NOTICE '🎯 Your booking system is now fixed!';
+END $$;
