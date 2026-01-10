@@ -167,7 +167,25 @@ export function AdminServices() {
       return;
     }
 
-    createMutation.mutate(formData);
+    // Generate slug from title
+    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const createData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Use category as category_id
+      description: formData.description,
+      icon: formData.icon,
+      modality: formData.modality,
+      duration_minutes: formData.duration,
+      price: formData.price ? parseFloat(formData.price) : null,
+      is_featured: formData.is_featured,
+      is_published: formData.is_published,
+      order: 0,
+    };
+
+    createMutation.mutate(createData as any);
   };
 
   // Handle form submission for update
@@ -195,7 +213,24 @@ export function AdminServices() {
       return;
     }
 
-    updateMutation.mutate({ id: selectedService.id, data: formData });
+    // Generate slug from title
+    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const updateData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Use category as category_id
+      description: formData.description,
+      icon: formData.icon,
+      modality: formData.modality,
+      duration_minutes: formData.duration,
+      price: formData.price ? parseFloat(formData.price) : null,
+      is_featured: formData.is_featured,
+      is_published: formData.is_published,
+    };
+
+    updateMutation.mutate({ id: selectedService.id, data: updateData as any });
   };
 
   // Handle delete
@@ -291,17 +326,17 @@ export function AdminServices() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="create-category">Category *</Label>
+                    <Label htmlFor="edit-category">Category *</Label>
                     <Select
-                      value={formData.category ? String(formData.category) : undefined}
-                      onValueChange={(value: string) => setFormData({ ...formData, category: parseInt(value) })}
+                      value={formData.category ? String(formData.category) : ""}
+                      onValueChange={(value: string) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger id="create-category">
+                      <SelectTrigger id="edit-category">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat: ServiceCategory) => (
-                          <SelectItem key={cat.id} value={String(cat.id)}>
+                          <SelectItem key={cat.id} value={cat.id}>
                             {cat.name}
                           </SelectItem>
                         ))}

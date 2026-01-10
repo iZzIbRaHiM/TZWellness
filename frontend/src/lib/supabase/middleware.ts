@@ -60,7 +60,34 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session if expired
-  await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  // Protect admin routes
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+  const isLoginPage = request.nextUrl.pathname === '/admin/login'
+
+  if (isAdminRoute && !isLoginPage) {
+    // Require authentication for all admin routes except login
+    if (error || !user) {
+      // No valid session - redirect to login
+      const redirectUrl = new URL('/admin/login', request.url)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Check if user has admin role (if role is stored in user_metadata)
+    const userRole = user.user_metadata?.role
+    if (userRole && userRole !== 'admin') {
+      // User is authenticated but not an admin
+      const redirectUrl = new URL('/unauthorized', request.url)
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
+
+  // If user is logged in and trying to access login page, redirect to dashboard
+  if (isLoginPage && user) {
+    const redirectUrl = new URL('/admin', request.url)
+    return NextResponse.redirect(redirectUrl)
+  }
 
   return response
 }

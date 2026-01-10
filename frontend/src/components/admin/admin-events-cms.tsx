@@ -174,7 +174,61 @@ export function AdminEventsCMS() {
   });
 
   const handleCreate = () => {
-    createMutation.mutate(formData);
+    // Validation
+    if (!formData.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.category) {
+      toast({
+        title: "Validation Error",
+        description: "Category is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.date) {
+      toast({
+        title: "Validation Error",
+        description: "Date is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate slug from title
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const createData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Map to category_id
+      description: formData.description,
+      modality: formData.is_virtual ? 'virtual' : 'in_person',
+      start_date: `${formData.date}T${formData.start_time || '09:00'}:00`,
+      end_date: `${formData.date}T${formData.end_time || '10:00'}:00`,
+      timezone: 'Africa/Dar_es_Salaam',
+      location_name: formData.is_virtual ? 'Online' : formData.location,
+      location_address: formData.is_virtual ? null : formData.location,
+      virtual_link: formData.is_virtual ? formData.location : null,
+      max_participants: formData.max_attendees, // Map to max_participants
+      what_to_bring: formData.speaker || null,
+      is_published: true,
+      is_featured: false,
+      image: null,
+    };
+
+    createMutation.mutate(createData as any);
   };
 
   const handlePublish = (id: string) => {

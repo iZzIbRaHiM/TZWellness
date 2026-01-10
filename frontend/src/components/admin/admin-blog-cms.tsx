@@ -78,15 +78,7 @@ export function AdminBlogCMS() {
 
   // Mutations for CRUD operations
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; excerpt: string; content: string; category: string; featured_image?: File | null }) => {
-      const formDataToSend = new FormData();
-      formDataToSend.append("title", data.title);
-      formDataToSend.append("excerpt", data.excerpt);
-      formDataToSend.append("content", data.content);
-      formDataToSend.append("category", data.category);
-      if (data.featured_image) {
-        formDataToSend.append("featured_image", data.featured_image);
-      }
+    mutationFn: (formDataToSend: FormData) => {
       return blogApi.admin.create(formDataToSend);
     },
     onSuccess: () => {
@@ -153,13 +145,53 @@ export function AdminBlogCMS() {
   });
 
   const handleCreate = () => {
-    createMutation.mutate({
-      title: formData.title,
-      excerpt: formData.excerpt,
-      content: formData.content,
-      category: formData.category,
-      featured_image: formData.featured_image,
-    });
+    // Validation
+    if (!formData.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.category) {
+      toast({
+        title: "Validation Error",
+        description: "Category is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Content is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate slug from title
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Create FormData with proper field mapping
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("slug", slug);
+    formDataToSend.append("category", formData.category); // API extracts this as category_id
+    formDataToSend.append("excerpt", formData.excerpt);
+    formDataToSend.append("content", formData.content);
+    
+    if (formData.featured_image) {
+      formDataToSend.append("featured_image", formData.featured_image);
+    }
+
+    createMutation.mutate(formDataToSend as any);
   };
 
   const handlePublish = (id: string) => {
