@@ -39,8 +39,13 @@ import {
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-const categories = ["Health Tips", "Nutrition", "Stress", "Motivation"];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AdminBlogCMS() {
   const { toast } = useToast();
@@ -51,6 +56,14 @@ export function AdminBlogCMS() {
     queryKey: ["admin-blog-posts"],
     queryFn: () => blogApi.admin.getAll(),
   });
+
+  // Fetch blog categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: () => blogApi.getCategories(),
+  });
+
+  const categories = categoriesData?.data || [];
 
   const posts: any[] = Array.isArray(postsData?.data) 
     ? postsData.data 
@@ -63,7 +76,7 @@ export function AdminBlogCMS() {
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
-    category: "Health Tips",
+    category: "",
     content: "",
     featured_image: null as File | null,
   });
@@ -88,16 +101,17 @@ export function AdminBlogCMS() {
         description: "Blog post created successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog creation error:', error);
       toast({
         title: "Error",
-        description: "Failed to create blog post",
+        description: error?.message || "Failed to create blog post",
         variant: "destructive",
       });
     },
     onSettled: () => {
       setIsCreateOpen(false);
-      setFormData({ title: "", excerpt: "", category: "Health Tips", content: "", featured_image: null });
+      setFormData({ title: "", excerpt: "", category: "", content: "", featured_image: null });
     },
   });
 
@@ -111,10 +125,11 @@ export function AdminBlogCMS() {
         description: "Blog post updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update blog post",
+        description: error?.message || "Failed to update blog post",
         variant: "destructive",
       });
     },
@@ -132,10 +147,11 @@ export function AdminBlogCMS() {
         description: "Blog post deleted successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog deletion error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete blog post",
+        description: error?.message || "Failed to delete blog post",
         variant: "destructive",
       });
     },
@@ -232,7 +248,7 @@ export function AdminBlogCMS() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -240,24 +256,28 @@ export function AdminBlogCMS() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Enter post title"
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
+                <Label htmlFor="category">Category *</Label>
+                <Select
                   value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                  onValueChange={(value: string) =>
+                    setFormData({ ...formData, category: value })
                   }
-                  className="w-full p-2 border rounded-md"
                 >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat: any) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="excerpt">Excerpt</Label>
@@ -295,7 +315,7 @@ export function AdminBlogCMS() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
+                <Label htmlFor="content">Content *</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
@@ -304,6 +324,7 @@ export function AdminBlogCMS() {
                   }
                   placeholder="Write your blog post content here..."
                   rows={10}
+                  required
                 />
               </div>
               <div className="flex gap-3 pt-4">

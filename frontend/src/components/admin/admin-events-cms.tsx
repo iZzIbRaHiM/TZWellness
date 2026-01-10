@@ -39,8 +39,13 @@ import {
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-const eventCategories = ["Workshop", "Live Q&A", "Support Group"];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AdminEventsCMS() {
   const { toast } = useToast();
@@ -52,6 +57,14 @@ export function AdminEventsCMS() {
     queryFn: () => eventsApi.admin.getAll(),
   });
 
+  // Fetch event categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ["event-categories"],
+    queryFn: () => eventsApi.getCategories(),
+  });
+
+  const categories = categoriesData?.data || [];
+
   const events: any[] = Array.isArray(eventsData?.data) 
     ? eventsData.data 
     : (Array.isArray((eventsData?.data as any)?.results) ? (eventsData?.data as any).results : []);
@@ -62,7 +75,7 @@ export function AdminEventsCMS() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "Workshop",
+    category: "",
     date: "",
     start_time: "",
     end_time: "",
@@ -105,10 +118,11 @@ export function AdminEventsCMS() {
         description: "Event created successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event creation error:', error);
       toast({
         title: "Error",
-        description: "Failed to create event",
+        description: error?.message || "Failed to create event",
         variant: "destructive",
       });
     },
@@ -117,7 +131,7 @@ export function AdminEventsCMS() {
       setFormData({
         title: "",
         description: "",
-        category: "Workshop",
+        category: "",
         date: "",
         start_time: "",
         end_time: "",
@@ -140,10 +154,11 @@ export function AdminEventsCMS() {
         description: "Event updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update event",
+        description: error?.message || "Failed to update event",
         variant: "destructive",
       });
     },
@@ -161,10 +176,11 @@ export function AdminEventsCMS() {
         description: "Event deleted successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event deletion error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete event",
+        description: error?.message || "Failed to delete event",
         variant: "destructive",
       });
     },
@@ -269,7 +285,7 @@ export function AdminEventsCMS() {
             </DialogHeader>
             <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto">
               <div className="space-y-2">
-                <Label htmlFor="title">Event Title</Label>
+                <Label htmlFor="title">Event Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -277,26 +293,30 @@ export function AdminEventsCMS() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Enter event title"
+                  required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <select
-                    id="category"
+                  <Label htmlFor="category">Category *</Label>
+                  <Select
                     value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, category: value })
                     }
-                    className="w-full p-2 border rounded-md"
                   >
-                    {eventCategories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="max_attendees">Max Attendees</Label>
@@ -329,7 +349,7 @@ export function AdminEventsCMS() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">Date *</Label>
                   <Input
                     id="date"
                     type="date"
@@ -337,6 +357,7 @@ export function AdminEventsCMS() {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
+                    required
                   />
                 </div>
                 <div className="space-y-2">
