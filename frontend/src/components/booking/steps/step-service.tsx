@@ -41,13 +41,15 @@ export function StepService() {
     if (serviceParam && !serviceId && services.length > 0) {
       const service = services.find((s: Service) => s.slug === serviceParam || s.id === serviceParam);
       if (service) {
-        setService(service.slug || String(service.id), service.title);
+        // Store the UUID, not the slug!
+        setService(String(service.id), service.title);
       }
     }
   }, [searchParams, serviceId, setService, services]);
 
   const handleServiceSelect = (service: Service) => {
-    setService(service.slug || String(service.id), service.title);
+    // Store the UUID, not the slug!
+    setService(String(service.id), service.title);
     // Auto-advance after selection
     setTimeout(() => nextStep(), 300);
   };
@@ -137,7 +139,8 @@ export function StepService() {
 
       <div className="grid md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
         {publishedServices.map((service: Service) => {
-          const isSelected = serviceId === (service.slug || String(service.id));
+          // Compare against UUID, not slug!
+          const isSelected = serviceId === String(service.id);
           const features = getServiceFeatures(service);
           
           return (

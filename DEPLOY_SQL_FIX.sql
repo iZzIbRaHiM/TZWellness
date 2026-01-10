@@ -7,10 +7,16 @@
 -- DROP EXISTING FUNCTIONS (Clean Slate)
 -- ============================================
 DROP FUNCTION IF EXISTS get_available_dates(INTEGER);
+DROP FUNCTION IF EXISTS get_available_dates;
 DROP FUNCTION IF EXISTS get_available_slots(TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS get_available_slots(DATE, DATE, TEXT);
+DROP FUNCTION IF EXISTS get_available_slots;
 DROP FUNCTION IF EXISTS check_slot_available(DATE, TIME, TEXT);
+DROP FUNCTION IF EXISTS check_slot_available;
 DROP FUNCTION IF EXISTS get_day_name(INTEGER);
+DROP FUNCTION IF EXISTS get_day_name;
 DROP FUNCTION IF EXISTS debug_day_mapping();
+DROP FUNCTION IF EXISTS debug_day_mapping;
 
 -- ============================================
 -- FUNCTION 1: GET AVAILABLE DATES
