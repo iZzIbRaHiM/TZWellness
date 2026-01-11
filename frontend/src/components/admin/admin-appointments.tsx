@@ -80,6 +80,17 @@ export function AdminAppointments() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+
+  // Fetch all appointments from Supabase
+  const { data: appointmentsData, isLoading, error } = useQuery({
+    queryKey: ["admin-appointments"],
+    queryFn: () => appointmentsApi.getAll(),
+  });
+
+  const appointmentsList = appointmentsData?.data || [];
+
   // Approve mutation
   const approveMutation = useMutation({
     mutationFn: (id: string) => appointmentsApi.approve(id),
