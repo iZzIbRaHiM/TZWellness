@@ -14,7 +14,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { cn } from "@/lib/utils";
-import { appointmentsApi } from "@/lib/api";
+import { appointmentsApi, type Appointment } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -55,23 +55,6 @@ import { useToast } from "@/hooks/use-toast";
 
 type ViewMode = "list" | "calendar";
 type StatusFilter = "all" | "pending" | "approved" | "rejected" | "cancelled";
-
-interface Appointment {
-  id: string;
-  reference_id: string;
-  patient_name: string;
-  patient_email: string;
-  patient_phone: string;
-  service: any;
-  scheduled_date: string;
-  scheduled_time: string;
-  modality: string;
-  patient_type: string;
-  status: string;
-  reason: string;
-  notes?: string;
-  created_at: string;
-}
 
 export function AdminAppointments() {
   const { toast } = useToast();
@@ -314,7 +297,7 @@ export function AdminAppointments() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-700">
-                        {apt.service?.title || apt.service || 'N/A'}
+                        {apt.service?.title || 'N/A'}
                       </td>
                       <td className="px-6 py-4">
                         <div>
@@ -445,7 +428,7 @@ export function AdminAppointments() {
                         <div className="font-medium">{apt.scheduled_time}</div>
                         <div className="truncate">{apt.patient_name}</div>
                         <div className="truncate text-xs opacity-75">
-                          {apt.service}
+                          {apt.service?.title || 'N/A'}
                         </div>
                       </button>
                     ))}
@@ -498,7 +481,7 @@ export function AdminAppointments() {
                   <div>
                     <Label className="text-gray-500">Service</Label>
                     <p className="font-medium">
-                      {selectedAppointment.service?.title || selectedAppointment.service || 'N/A'}
+                      {selectedAppointment.service?.title || 'N/A'}
                     </p>
                   </div>
                   <div>
