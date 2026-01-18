@@ -202,17 +202,27 @@ function BlogCard({ post, featured = false }: BlogCardProps) {
         variant="interactive"
         className={cn("h-full overflow-hidden group", featured && "md:flex")}
       >
-        {/* Image placeholder */}
+        {/* Image */}
         <div
           className={cn(
             "relative bg-gradient-to-br from-emerald-100 to-emerald-50 overflow-hidden",
             featured ? "md:w-2/5 h-48 md:h-auto" : "h-48"
           )}
         >
-          <div className="absolute inset-0 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform duration-500">
-            📖
-          </div>
-          <Badge className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-800 hover:bg-white/90" variant="secondary">
+          {post.featured_image ? (
+            <Image
+              src={post.featured_image}
+              alt={post.title}
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+              sizes={featured ? "(max-width: 768px) 100vw, 40vw" : "(max-width: 768px) 100vw, 33vw"}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-6xl">
+              📖
+            </div>
+          )}
+          <Badge className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-emerald-800 hover:bg-white/90 z-10" variant="secondary">
             {post.category?.name || "Article"}
           </Badge>
         </div>

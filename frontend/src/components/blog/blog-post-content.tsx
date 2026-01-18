@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -159,14 +160,27 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
         </div>
       </motion.header>
 
-      {/* Featured image placeholder */}
+      {/* Featured image */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative h-64 sm:h-80 bg-emerald-100 rounded-xl mb-8 flex items-center justify-center"
+        className="relative h-64 sm:h-80 bg-emerald-100 rounded-xl mb-8 overflow-hidden"
       >
-        <span className="text-8xl">📖</span>
+        {post.featured_image ? (
+          <Image
+            src={post.featured_image}
+            alt={post.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 768px"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-8xl">📖</span>
+          </div>
+        )}
       </motion.div>
 
       {/* Content */}

@@ -970,14 +970,41 @@ export const blogApi = {
         
         // Extract data from FormData if needed
         let blogPostData: any
+        let imageUrl: string | null = null
+        
         if (postData instanceof FormData) {
+          // Handle image upload if present
+          const imageFile = postData.get('featured_image') as File | null
+          if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split('.').pop()
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+            const filePath = `blog-images/${fileName}`
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('blog-images')
+              .upload(filePath, imageFile, {
+                cacheControl: '3600',
+                upsert: false
+              })
+            
+            if (uploadError) {
+              console.error('Image upload error:', uploadError)
+              // Continue without image rather than failing the entire post
+            } else {
+              const { data: { publicUrl } } = supabase.storage
+                .from('blog-images')
+                .getPublicUrl(filePath)
+              imageUrl = publicUrl
+            }
+          }
+          
           blogPostData = {
             title: postData.get('title') as string,
             slug: postData.get('slug') as string || (postData.get('title') as string)?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
             category_id: postData.get('category') as string,
             excerpt: postData.get('excerpt') as string,
             content: postData.get('content') as string,
-            featured_image: postData.get('featured_image') as string || null,
+            featured_image: imageUrl,
             is_published: true,
             is_featured: false,
             published_at: new Date().toISOString(),
@@ -1041,14 +1068,48 @@ export const blogApi = {
       }
     },
 
-    update: async (id: string, postData: Partial<BlogPost>): Promise<ApiResponse<BlogPost>> => {
+    update: async (id: string, postData: Partial<BlogPost> | FormData): Promise<ApiResponse<BlogPost>> => {
       try {
         const supabase = createClient()
         
-        // Update blog post
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .update({
+        let updateData: any
+        
+        // Handle FormData with image upload
+        if (postData instanceof FormData) {
+          let imageUrl: string | null = null
+          
+          const imageFile = postData.get('featured_image') as File | null
+          if (imageFile && imageFile.size > 0) {
+            const fileExt = imageFile.name.split('.').pop()
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+            const filePath = `blog-images/${fileName}`
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('blog-images')
+              .upload(filePath, imageFile, {
+                cacheControl: '3600',
+                upsert: false
+              })
+            
+            if (!uploadError) {
+              const { data: { publicUrl } } = supabase.storage
+                .from('blog-images')
+                .getPublicUrl(filePath)
+              imageUrl = publicUrl
+            }
+          }
+          
+          updateData = {
+            title: postData.get('title') as string,
+            slug: postData.get('slug') as string,
+            category_id: postData.get('category') as string,
+            excerpt: postData.get('excerpt') as string,
+            content: postData.get('content') as string,
+            featured_image: imageUrl || undefined,
+            updated_at: new Date().toISOString(),
+          }
+        } else {
+          updateData = {
             title: postData.title,
             slug: postData.slug,
             category_id: postData.category_id,
@@ -1066,7 +1127,13 @@ export const blogApi = {
             meta_title: postData.meta_title,
             meta_description: postData.meta_description,
             updated_at: new Date().toISOString(),
-          })
+          }
+        }
+        
+        // Update blog post
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .update(updateData)
           .eq('id', id)
           .select(`
             *,
