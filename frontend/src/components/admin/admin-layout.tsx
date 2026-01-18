@@ -47,9 +47,24 @@ export function AdminLayout() {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/admin/login");
+  const handleLogout = async () => {
+    try {
+      // Clear Supabase session first
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      
+      // Then clear local state
+      logout();
+      
+      // Redirect to login
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still clear local state and redirect on error
+      logout();
+      router.push("/admin/login");
+    }
   };
 
   const renderContent = () => {

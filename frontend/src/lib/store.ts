@@ -350,7 +350,7 @@ interface AuthState {
   isAuthenticated: boolean;
   setAuth: (access: string, refresh: string) => void;
   setUser: (user: AuthState["user"]) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   syncFromStorage: () => void;
 }
 
@@ -399,7 +399,18 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) => set({ user }),
 
-      logout: () => {
+      logout: async () => {
+        // Clear Supabase session if in browser
+        if (typeof window !== "undefined") {
+          try {
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            await supabase.auth.signOut();
+          } catch (error) {
+            console.error("Error signing out from Supabase:", error);
+          }
+        }
+        
         // Clear localStorage
         safeRemoveStorage("accessToken");
         safeRemoveStorage("refreshToken");

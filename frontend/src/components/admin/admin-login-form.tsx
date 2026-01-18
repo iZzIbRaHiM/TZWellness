@@ -46,6 +46,15 @@ export function AdminLoginForm() {
       // Set authenticated state (Supabase session is in cookies)
       setAuth("supabase_session", "supabase_session");
 
+      // Verify session was actually created
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Session creation failed");
+      }
+
       toast({
         title: "Login successful",
         description: "Welcome back!",

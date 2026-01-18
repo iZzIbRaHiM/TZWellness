@@ -59,7 +59,7 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
+  // Refresh session if expired - force revalidation, no cache
   const { data: { user }, error } = await supabase.auth.getUser()
 
   // Protect admin routes
@@ -81,6 +81,11 @@ export async function updateSession(request: NextRequest) {
       const redirectUrl = new URL('/unauthorized', request.url)
       return NextResponse.redirect(redirectUrl)
     }
+    
+    // Add cache prevention headers for admin pages
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
   }
 
   // If user is logged in and trying to access login page, redirect to dashboard
