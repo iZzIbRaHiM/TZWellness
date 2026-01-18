@@ -33,6 +33,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -50,8 +60,12 @@ import {
   User,
   LayoutList,
   CalendarDays,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { createClient } from "@/lib/supabase/client";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { logAppointmentDelete } from "@/lib/admin-activity-logger";
 
 type ViewMode = "list" | "calendar";
 type StatusFilter = "all" | "pending" | "approved" | "rejected" | "cancelled";
@@ -59,12 +73,17 @@ type StatusFilter = "all" | "pending" | "approved" | "rejected" | "cancelled";
 export function AdminAppointments() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { adminUser } = useAdminAuth();
+  const supabase = createClient();
+  
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null);
 
   // Fetch all appointments from Supabase
   const { data: appointmentsData, isLoading, error } = useQuery({
@@ -123,6 +142,48 @@ export function AdminAppointments() {
     },
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("appointments")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      return { success: true };
+    },
+    onSuccess: async (_, appointmentId) => {
+      // Log the deletion
+      if (adminUser && appointmentToDelete) {
+        await logAppointmentDelete(
+          adminUser.id,
+          appointmentId,
+          appointmentToDelete.patient_name
+        );
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
+      toast({
+        title: "Appointment Deleted",
+        description: "The appointment has been permanently removed.",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Delete appointment error:", error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to delete appointment. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setDeleteConfirmOpen(false);
+      setAppointmentToDelete(null);
+      setSelectedAppointment(null);
+    },
+  });
+
   const handleApprove = (id: string) => {
     approveMutation.mutate(id);
   };
@@ -137,6 +198,17 @@ export function AdminAppointments() {
       return;
     }
     rejectMutation.mutate({ id, reason: rejectReason });
+  };
+
+  const handleDeleteClick = (appointment: Appointment) => {
+    setAppointmentToDelete(appointment);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (appointmentToDelete) {
+      deleteMutation.mutate(appointmentToDelete.id);
+    }
   };
 
   // Filter appointments
@@ -317,35 +389,46 @@ export function AdminAppointments() {
                         {getStatusBadge(apt.status)}
                       </td>
                       <td className="px-6 py-4">
-                        {apt.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleApprove(apt.id);
-                              }}
-                              disabled={approveMutation.isPending}
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedAppointment(apt);
-                                setRejectReason("");
-                              }}
-                              disabled={rejectMutation.isPending}
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                        {apt.status !== 'pending' && (
-                          <span className="text-sm text-gray-500">-</span>
-                        )}
+                        <div className="flex gap-2">
+                          {apt.status === 'pending' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApprove(apt.id);
+                                }}
+                                disabled={approveMutation.isPending}
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAppointment(apt);
+                                  setRejectReason("");
+                                }}
+                                disabled={rejectMutation.isPending}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(apt);
+                            }}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
                       </td>
                     </tr>
                   ))}
@@ -566,6 +649,32 @@ export function AdminAppointments() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Appointment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this appointment for{" "}
+              <strong>{appointmentToDelete?.patient_name}</strong>? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -32,7 +32,8 @@ import { createClient } from "@/lib/supabase/client";
 import { appointmentsApi } from "@/lib/api";
 
 interface AdminDashboardProps {
-  onNavigate: (tab: "appointments" | "blog" | "events" | "services" | "settings") => void;
+  onNavigate: (tab: "appointments" | "blog" | "events" | "services" | "settings" | "activities") => void;
+}
 }
 
 interface DashboardStats {
@@ -61,9 +62,14 @@ interface PendingAppointment {
 
 interface Activity {
   id: string;
-  action: string;
+  action_type: string;
+  entity_type: string;
   description: string;
   created_at: string;
+  admin_users?: {
+    full_name: string | null;
+    email: string;
+  };
 }
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
@@ -152,12 +158,21 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       // Fetch recent activity logs
       const { data: activityData, error: activityError } = await supabase
         .from('activity_logs')
-        .select('*')
+        .select(`
+          *,
+          admin_users (
+            full_name,
+            email
+          )
+        `)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
 
-      if (activityError) throw activityError;
-      setActivities(activityData || []);
+      if (activityError) {
+        console.error('Activity fetch error:', activityError);
+      } else {
+        setActivities(activityData || []);
+      }
 
     } catch (error: any) {
       console.error('Dashboard fetch error:', error);
@@ -493,11 +508,6 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     </div>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
         {/* Recent Activity */}
         <motion.div
           initial={{ opacity: 1, y: 0 }}
@@ -505,9 +515,19 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           transition={{ duration: 0.2 }}
         >
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates and actions</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest admin actions (last 5)</CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate("activities")}
+              >
+                View All
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent>
               {activities.length === 0 ? (
@@ -517,24 +537,36 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {activities.slice(0, 8).map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3">
-                      <div className={`p-1.5 rounded-full ${getActivityBg(activity.action)}`}>
-                        {getActivityIcon(activity.action)}
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
+                      <div className={`p-1.5 rounded-full ${getActivityBg(activity.action_type)}`}>
+                        {getActivityIcon(activity.action_type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 capitalize">
-                          {activity.action.replace(/_/g, " ")}
-                        </p>
-                        <p className="text-sm text-gray-500 truncate">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge className="text-xs" variant="outline">
+                            {activity.action_type}
+                          </Badge>
+                          <Badge className="text-xs" variant="secondary">
+                            {activity.entity_type.replace(/_/g, " ")}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-900 mb-1">
                           {activity.description}
                         </p>
-                        <p className="text-xs text-gray-400">
-                          {formatTimeAgo(activity.created_at)}
-                        </p>
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <span>{activity.admin_users?.full_name || activity.admin_users?.email}</span>
+                          <span>•</span>
+                          <span>{formatTimeAgo(activity.created_at)}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
                 </div>
               )}
             </CardContent>
