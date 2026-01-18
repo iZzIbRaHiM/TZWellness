@@ -129,9 +129,9 @@ export function AdminLayout() {
               <Image
                 src="/main_logo.png"
                 alt="TZ Wellness Admin"
-                width={240}
-                height={80}
-                className="h-16 w-auto brightness-0 invert"
+                width={320}
+                height={107}
+                className="h-24 w-auto brightness-0 invert"
               />
             </Link>
             <button

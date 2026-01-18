@@ -24,9 +24,9 @@ export function Footer() {
               <Image
                 src="/main_logo.png"
                 alt="TZ Wellness Logo"
-                width={300}
-                height={100}
-                className="h-24 w-auto group-hover:scale-105 transition-transform duration-300 brightness-0 invert"
+                width={400}
+                height={133}
+                className="h-32 w-auto group-hover:scale-105 transition-transform duration-300 brightness-0 invert"
               />
             </Link>
 
