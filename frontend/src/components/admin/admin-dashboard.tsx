@@ -32,7 +32,7 @@ import { createClient } from "@/lib/supabase/client";
 import { appointmentsApi } from "@/lib/api";
 
 interface AdminDashboardProps {
-  onNavigate: (tab: "appointments" | "blog" | "events" | "services" | "settings") => void;
+  onNavigate: (tab: "appointments" | "blog" | "events" | "services" | "settings" | "activities") => void;
 }
 
 interface DashboardStats {
@@ -149,12 +149,12 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         weekly_change: weeklyChange,
       });
 
-      // Fetch recent activity logs
+      // Fetch recent activity logs (only 5 for dashboard widget)
       const { data: activityData, error: activityError } = await supabase
         .from('activity_logs')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
 
       if (activityError) throw activityError;
       setActivities(activityData || []);
@@ -505,9 +505,20 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           transition={{ duration: 0.2 }}
         >
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates and actions</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest 5 admin actions</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNavigate("activities" as any)}
+                className="text-emerald-600 hover:text-emerald-700"
+              >
+                View All
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
             </CardHeader>
             <CardContent>
               {activities.length === 0 ? (
@@ -517,7 +528,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {activities.slice(0, 8).map((activity) => (
+                  {activities.map((activity) => (
                     <div key={activity.id} className="flex items-start gap-3">
                       <div className={`p-1.5 rounded-full ${getActivityBg(activity.action)}`}>
                         {getActivityIcon(activity.action)}

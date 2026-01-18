@@ -189,6 +189,27 @@ export function AdminEventsCMS() {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, currentStatus }: { id: string; currentStatus: boolean }) =>
+      eventsApi.admin.togglePublish(id, currentStatus),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+      const isPublished = response.data?.is_published;
+      toast({
+        title: "Success",
+        description: `Event ${isPublished ? 'published' : 'unpublished'} successfully`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Event publish toggle error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to toggle publish status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreate = () => {
     // Validation
     if (!formData.title.trim()) {
@@ -247,8 +268,8 @@ export function AdminEventsCMS() {
     createMutation.mutate(createData as any);
   };
 
-  const handlePublish = (id: string) => {
-    updateMutation.mutate({ id, data: { is_published: true } });
+  const handleTogglePublish = (id: string, currentStatus: boolean) => {
+    togglePublishMutation.mutate({ id, currentStatus });
   };
 
   const handleDelete = (id: string) => {
@@ -535,9 +556,9 @@ export function AdminEventsCMS() {
                   {typeof event.category === "object" ? event.category?.name : event.category}
                 </Badge>
                 <Badge
-                  variant={(event.status === "published" || event.status === "upcoming") ? "success" : "secondary"}
+                  variant={(event.is_published) ? "success" : "secondary"}
                 >
-                  {event.status}
+                  {event.is_published ? "published" : "draft"}
                 </Badge>
               </div>
               <CardTitle className="text-lg mt-2">{event.title}</CardTitle>
@@ -574,19 +595,18 @@ export function AdminEventsCMS() {
               </div>
             </CardContent>
             <div className="p-4 pt-0 flex gap-2">
-              {event.status === "draft" && (
-                <Button
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handlePublish(event.id)}
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  Publish
-                </Button>
-              )}
+              <Button
+                size="sm"
+                className="flex-1"
+                variant={event.is_published ? "outline" : "default"}
+                onClick={() => handleTogglePublish(event.id, event.is_published)}
+                disabled={togglePublishMutation.isPending}
+              >
+                {togglePublishMutation.isPending && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                {event.is_published ? "Unpublish" : "Publish"}
+              </Button>
               <Button size="sm" variant="outline">
                 <Edit className="h-4 w-4" />
               </Button>

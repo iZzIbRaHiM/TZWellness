@@ -849,6 +849,54 @@ export const appointmentsApi = {
       }
     }
   },
+
+  delete: async (id: string): Promise<ApiResponse<null>> => {
+    try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
+      const supabase = createClient()
+      
+      // Get appointment details before deletion for logging
+      const { data: appointment } = await supabase
+        .from('appointments')
+        .select('reference_id, patient_name')
+        .eq('id', id)
+        .single()
+      
+      // Delete appointment
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      // Log activity
+      try {
+        await supabase.from('activity_logs').insert({
+          action: 'appointment_deleted',
+          description: `Appointment ${appointment?.reference_id || id} deleted (Patient: ${appointment?.patient_name || 'Unknown'})`,
+          metadata: { appointment_id: id, reference_id: appointment?.reference_id },
+        })
+      } catch (logError) {
+        console.error('Failed to log activity:', logError)
+      }
+
+      return {
+        success: true,
+        data: null,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'DELETE_ERROR',
+          message: error.message || 'Failed to delete appointment',
+        },
+      }
+    }
+  },
 }
 
 // ============================================
@@ -986,6 +1034,9 @@ export const blogApi = {
   admin: {
     getAll: async (): Promise<ApiResponse<BlogPost[]>> => {
       try {
+        // Validate admin session before fetching all posts
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         const { data, error } = await supabase
@@ -1015,6 +1066,9 @@ export const blogApi = {
 
     create: async (postData: Partial<BlogPost> | FormData): Promise<ApiResponse<BlogPost>> => {
       try {
+        // Validate admin session before creating
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         // Extract data from FormData if needed
@@ -1119,6 +1173,9 @@ export const blogApi = {
 
     update: async (id: string, postData: Partial<BlogPost> | FormData): Promise<ApiResponse<BlogPost>> => {
       try {
+        // Validate admin session before updating
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         let updateData: any
@@ -1220,6 +1277,9 @@ export const blogApi = {
 
     delete: async (id: string | number): Promise<ApiResponse<null>> => {
       try {
+        // Validate admin session before deleting
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         // Get post title before deletion for logging
@@ -1258,6 +1318,62 @@ export const blogApi = {
           error: {
             code: 'DELETE_ERROR',
             message: error.message || 'Failed to delete blog post',
+          },
+        }
+      }
+    },
+
+    togglePublish: async (id: string, currentStatus: boolean): Promise<ApiResponse<BlogPost>> => {
+      try {
+        // Validate admin session before toggling publish status
+        await validateAdminSession()
+        
+        const supabase = createClient()
+        const newStatus = !currentStatus
+        
+        // Update publish status and set published_at timestamp if publishing
+        const updateData: any = {
+          is_published: newStatus,
+          updated_at: new Date().toISOString(),
+        }
+        
+        if (newStatus) {
+          updateData.published_at = new Date().toISOString()
+        }
+        
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .update(updateData)
+          .eq('id', id)
+          .select(`
+            *,
+            category:blog_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: newStatus ? 'blog_post_published' : 'blog_post_unpublished',
+            description: `${newStatus ? 'Published' : 'Unpublished'} blog post: ${data.title}`,
+            metadata: { post_id: data.id, post_title: data.title, is_published: newStatus },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
+        return {
+          success: true,
+          data: data as BlogPost,
+        }
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            code: 'TOGGLE_PUBLISH_ERROR',
+            message: error.message || 'Failed to toggle publish status',
           },
         }
       }
@@ -1420,6 +1536,9 @@ export const eventsApi = {
   admin: {
     getAll: async (): Promise<ApiResponse<Event[]>> => {
       try {
+        // Validate admin session before fetching all events
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         const { data, error } = await supabase
@@ -1449,6 +1568,9 @@ export const eventsApi = {
 
     create: async (eventData: Partial<Event> | FormData): Promise<ApiResponse<Event>> => {
       try {
+        // Validate admin session before creating
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         // Extract data from FormData if needed
@@ -1537,6 +1659,9 @@ export const eventsApi = {
 
     update: async (id: string, eventData: Partial<Event>): Promise<ApiResponse<Event>> => {
       try {
+        // Validate admin session before updating
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         // Update event
@@ -1600,6 +1725,9 @@ export const eventsApi = {
 
     delete: async (id: string): Promise<ApiResponse<null>> => {
       try {
+        // Validate admin session before deleting
+        await validateAdminSession()
+        
         const supabase = createClient()
         
         // Get event title before deletion for logging
@@ -1638,6 +1766,58 @@ export const eventsApi = {
           error: {
             code: 'DELETE_ERROR',
             message: error.message || 'Failed to delete event',
+          },
+        }
+      }
+    },
+
+    togglePublish: async (id: string, currentStatus: boolean): Promise<ApiResponse<Event>> => {
+      try {
+        // Validate admin session before toggling publish status
+        await validateAdminSession()
+        
+        const supabase = createClient()
+        const newStatus = !currentStatus
+        
+        // Update publish status
+        const updateData: any = {
+          is_published: newStatus,
+          updated_at: new Date().toISOString(),
+        }
+        
+        const { data, error } = await supabase
+          .from('events')
+          .update(updateData)
+          .eq('id', id)
+          .select(`
+            *,
+            category:event_categories(*)
+          `)
+          .single()
+
+        if (error) throw error
+
+        // Log activity
+        try {
+          await supabase.from('activity_logs').insert({
+            action: newStatus ? 'event_published' : 'event_unpublished',
+            description: `${newStatus ? 'Published' : 'Unpublished'} event: ${data.title}`,
+            metadata: { event_id: data.id, event_title: data.title, is_published: newStatus },
+          })
+        } catch (logError) {
+          console.error('Failed to log activity:', logError)
+        }
+
+        return {
+          success: true,
+          data: data as Event,
+        }
+      } catch (error: any) {
+        return {
+          success: false,
+          error: {
+            code: 'TOGGLE_PUBLISH_ERROR',
+            message: error.message || 'Failed to toggle publish status',
           },
         }
       }

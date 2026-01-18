@@ -65,6 +65,7 @@ DROP POLICY IF EXISTS "Authenticated can create activity logs" ON activity_logs;
 -- ============================================
 
 -- Function to check if user has admin role
+-- SECURITY: Uses app_metadata which is NOT editable by users
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -73,11 +74,11 @@ BEGIN
     RETURN FALSE;
   END IF;
   
-  -- Check if user has admin role in metadata
-  -- Adjust this based on your auth setup
+  -- Check if user has admin role in app_metadata (secure, server-only)
+  -- app_metadata cannot be modified by users, only by server/admin
   RETURN (
     SELECT COALESCE(
-      (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin',
+      (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin',
       FALSE
     )
   );
@@ -383,14 +384,16 @@ ORDER BY tablename, policyname;
 -- STEP 20: TEST ADMIN USER SETUP
 -- ============================================
 
--- To set a user as admin, update their user_metadata:
--- Dashboard > Authentication > Users > Select User > Raw user meta data
--- Add: { "role": "admin" }
+-- To set a user as admin, update their app_metadata:
+-- IMPORTANT: Use app_metadata (NOT user_metadata) for security
+-- user_metadata is editable by users - NEVER use for roles!
 -- 
--- Or run this SQL (replace USER_ID with actual UUID):
+-- Run this SQL (replace USER_ID with actual UUID):
 -- UPDATE auth.users 
--- SET raw_user_meta_data = raw_user_meta_data || '{"role": "admin"}'::jsonb
+-- SET raw_app_meta_data = raw_app_meta_data || '{"role": "admin"}'::jsonb
 -- WHERE id = 'USER_ID';
+--
+-- Or use Supabase Management API (recommended for production)
 
 -- ============================================
 -- SECURITY AUDIT CHECKLIST
@@ -401,7 +404,7 @@ ORDER BY tablename, policyname;
 -- ✅ Public users can create appointments and event registrations
 -- ✅ Only authenticated admins can modify any data
 -- ✅ Activity logs are admin-only (no public access)
--- ✅ Admin check uses is_admin() function with user_metadata
+-- ✅ Admin check uses is_admin() function with app_metadata (secure, server-only)
 -- ✅ Policies use SECURITY DEFINER for consistent access control
 -- ✅ No table exists without enforced RLS
 -- ✅ Public users cannot modify protected data

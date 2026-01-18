@@ -74,8 +74,9 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // Check if user has admin role (if role is stored in user_metadata)
-    const userRole = user.user_metadata?.role
+    // Check if user has admin role (stored in app_metadata for security)
+    // app_metadata is NOT editable by users, only by server/admin
+    const userRole = user.app_metadata?.role
     if (userRole && userRole !== 'admin') {
       // User is authenticated but not an admin
       const redirectUrl = new URL('/unauthorized', request.url)

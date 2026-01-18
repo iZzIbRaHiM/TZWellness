@@ -50,6 +50,8 @@ import {
   User,
   LayoutList,
   CalendarDays,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -123,6 +125,29 @@ export function AdminAppointments() {
     },
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => appointmentsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
+      toast({
+        title: "Appointment Deleted",
+        description: "The appointment has been permanently removed.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Delete appointment error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to delete appointment. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setSelectedAppointment(null);
+    },
+  });
+
   const handleApprove = (id: string) => {
     approveMutation.mutate(id);
   };
@@ -137,6 +162,12 @@ export function AdminAppointments() {
       return;
     }
     rejectMutation.mutate({ id, reason: rejectReason });
+  };
+
+  const handleDelete = (appointment: Appointment) => {
+    if (window.confirm(`Are you sure you want to permanently delete this appointment?\n\nPatient: ${appointment.patient_name}\nReference: ${appointment.reference_id}\n\nThis action cannot be undone.`)) {
+      deleteMutation.mutate(appointment.id);
+    }
   };
 
   // Filter appointments
@@ -561,6 +592,31 @@ export function AdminAppointments() {
                     </p>
                   </div>
                 )}
+
+                {/* Delete button - available for all statuses */}
+                <div className="pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    onClick={() => handleDelete(selectedAppointment)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    {deleteMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Appointment
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    This action cannot be undone
+                  </p>
+                </div>
               </div>
             </>
           )}

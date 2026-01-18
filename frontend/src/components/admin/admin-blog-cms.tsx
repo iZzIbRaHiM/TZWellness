@@ -160,6 +160,27 @@ export function AdminBlogCMS() {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, currentStatus }: { id: string; currentStatus: boolean }) =>
+      blogApi.admin.togglePublish(id, currentStatus),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      const isPublished = response.data?.is_published;
+      toast({
+        title: "Success",
+        description: `Blog post ${isPublished ? 'published' : 'unpublished'} successfully`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Blog publish toggle error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to toggle publish status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreate = () => {
     // Validation
     if (!formData.title.trim()) {
@@ -210,8 +231,8 @@ export function AdminBlogCMS() {
     createMutation.mutate(formDataToSend as any);
   };
 
-  const handlePublish = (id: string) => {
-    updateMutation.mutate({ id, data: { is_published: true } });
+  const handleTogglePublish = (id: string, currentStatus: boolean) => {
+    togglePublishMutation.mutate({ id, currentStatus });
   };
 
   const handleDelete = (id: string) => {
@@ -458,18 +479,18 @@ export function AdminBlogCMS() {
                     <td className="px-6 py-4 text-gray-500">{post.views}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        {post.status === "draft" && (
-                          <Button
-                            size="sm"
-                            onClick={() => handlePublish(post.id)}
-                            disabled={updateMutation.isPending}
-                          >
-                            {updateMutation.isPending && (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            )}
-                            Publish
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant={post.is_published ? "outline" : "default"}
+                          onClick={() => handleTogglePublish(post.id, post.is_published)}
+                          disabled={togglePublishMutation.isPending}
+                          className={post.is_published ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+                        >
+                          {togglePublishMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : null}
+                          {post.is_published ? "Unpublish" : "Publish"}
+                        </Button>
                         <Button size="sm" variant="outline">
                           <Edit className="h-4 w-4" />
                         </Button>

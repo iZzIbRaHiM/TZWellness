@@ -31,8 +31,9 @@ import { AdminBlogCMS } from "./admin-blog-cms";
 import { AdminEventsCMS } from "./admin-events-cms";
 import { AdminServices } from "./admin-services";
 import { AdminSettings } from "./admin-settings";
+import { AdminActivitiesLog } from "./admin-activities-log";
 
-type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "settings";
+type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "activities" | "settings";
 
 const navItems = [
   { id: "dashboard" as const, label: "Dashboard", icon: Home },
@@ -40,6 +41,7 @@ const navItems = [
   { id: "services" as const, label: "Services", icon: Stethoscope },
   { id: "blog" as const, label: "Blog Posts", icon: FileText },
   { id: "events" as const, label: "Events", icon: CalendarDays },
+  { id: "activities" as const, label: "Activity Log", icon: Bell },
   { id: "settings" as const, label: "Settings", icon: Settings },
 ];
 
@@ -114,6 +116,12 @@ export function AdminLayout() {
         return (
           <ErrorBoundary>
             <AdminEventsCMS />
+          </ErrorBoundary>
+        );
+      case "activities":
+        return (
+          <ErrorBoundary>
+            <AdminActivitiesLog />
           </ErrorBoundary>
         );
       case "settings":

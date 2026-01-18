@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
             id: user.id,
             email: user.email || "",
             full_name: user.user_metadata?.full_name || user.email || "Admin",
-            role: user.user_metadata?.role || "admin",
+            role: user.app_metadata?.role || "admin",
           });
           
           setAuth("supabase_session", "supabase_session");

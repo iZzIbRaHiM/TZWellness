@@ -40,7 +40,7 @@ export function AdminLoginForm() {
         id: user.id,
         email: user.email || "",
         full_name: user.user_metadata?.full_name || user.email || "Admin",
-        role: user.user_metadata?.role || "admin",
+        role: user.app_metadata?.role || "admin",
       });
 
       // Set authenticated state (Supabase session is in cookies)

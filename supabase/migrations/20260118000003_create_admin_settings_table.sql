@@ -65,7 +65,7 @@ CREATE POLICY "Admin users can view their own settings"
     FOR SELECT
     USING (
         auth.uid() = user_id 
-        AND (auth.jwt() ->> 'role') = 'admin'
+        AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
     );
 
 CREATE POLICY "Admin users can insert their own settings"
@@ -73,7 +73,7 @@ CREATE POLICY "Admin users can insert their own settings"
     FOR INSERT
     WITH CHECK (
         auth.uid() = user_id 
-        AND (auth.jwt() ->> 'role') = 'admin'
+        AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
     );
 
 CREATE POLICY "Admin users can update their own settings"
@@ -81,11 +81,11 @@ CREATE POLICY "Admin users can update their own settings"
     FOR UPDATE
     USING (
         auth.uid() = user_id 
-        AND (auth.jwt() ->> 'role') = 'admin'
+        AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
     )
     WITH CHECK (
         auth.uid() = user_id 
-        AND (auth.jwt() ->> 'role') = 'admin'
+        AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
     );
 
 CREATE POLICY "Admin users can delete their own settings"
@@ -93,7 +93,7 @@ CREATE POLICY "Admin users can delete their own settings"
     FOR DELETE
     USING (
         auth.uid() = user_id 
-        AND (auth.jwt() ->> 'role') = 'admin'
+        AND (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
     );
 
 -- Create function to update updated_at timestamp
@@ -119,7 +119,7 @@ SELECT
     COALESCE(raw_user_meta_data->>'full_name', email),
     email
 FROM auth.users
-WHERE raw_user_meta_data->>'role' = 'admin'
+WHERE raw_app_meta_data->>'role' = 'admin'
 ON CONFLICT (user_id) DO NOTHING;
 
 COMMENT ON TABLE public.admin_settings IS 'Stores admin user profiles and system-wide settings. Protected by RLS - admin users only.';
