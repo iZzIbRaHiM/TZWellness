@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from "@/lib/navigation-config";
@@ -20,19 +21,13 @@ export function Footer() {
           {/* Brand & Contact */}
           <div>
             <Link href="/" className="inline-block mb-6 group">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-emerald-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                  <span className="text-white font-serif font-bold text-2xl">TZ</span>
-                </div>
-                <div>
-                  <span className="font-serif text-xl font-semibold text-white">
-                    TZ Wellness
-                  </span>
-                  <span className="block text-xs text-emerald-300 -mt-0.5">
-                    Mental Health & Wellbeing
-                  </span>
-                </div>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="TZ Wellness Logo"
+                width={200}
+                height={66}
+                className="h-16 w-auto group-hover:scale-105 transition-transform duration-300 brightness-0 invert"
+              />
             </Link>
 
             <p className="text-emerald-200/80 mb-6 max-w-sm leading-relaxed">

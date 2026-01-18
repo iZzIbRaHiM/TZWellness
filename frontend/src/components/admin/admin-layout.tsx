@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -124,11 +125,14 @@ export function AdminLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-emerald-800">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🏥</span>
-              <span className="font-serif text-xl font-bold text-white">
-                TF Wellfare
-              </span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo.png"
+                alt="TZ Wellness Admin"
+                width={160}
+                height={53}
+                className="h-12 w-auto brightness-0 invert"
+              />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}

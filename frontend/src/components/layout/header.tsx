@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Calendar } from "lucide-react";
@@ -53,17 +54,14 @@ export function Header() {
             className="flex items-center gap-2"
             aria-label="TZ Wellness - Home"
           >
-            <div className="w-10 h-10 bg-emerald-900 rounded-lg flex items-center justify-center">
-              <span className="text-white font-serif font-bold text-xl">TZ</span>
-            </div>
-            <div className="hidden sm:block">
-              <span className="font-serif text-xl font-semibold text-emerald-900">
-                TZ Wellness
-              </span>
-              <span className="block text-xs text-emerald-700 -mt-1">
-                Mental Health & Wellbeing
-              </span>
-            </div>
+            <Image
+              src="/logo.png"
+              alt="TZ Wellness Logo"
+              width={180}
+              height={60}
+              className="h-12 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
