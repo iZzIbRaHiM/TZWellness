@@ -25,16 +25,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Plus,
   Search,
   Edit,
@@ -56,17 +46,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
-import {
-  logEventCreate,
-  logEventUpdate,
-  logEventDelete,
-} from "@/lib/admin-activity-logger";
 
 export function AdminEventsCMS() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { adminUser } = useAdminAuth();
 
   // Fetch events from API
   const { data: eventsData, isLoading } = useQuery({
@@ -85,13 +68,8 @@ export function AdminEventsCMS() {
   const events: any[] = Array.isArray(eventsData?.data) 
     ? eventsData.data 
     : (Array.isArray((eventsData?.data as any)?.results) ? (eventsData?.data as any).results : []);
-  
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<(typeof events)[0] | null>(null);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<(typeof events)[0] | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -133,12 +111,7 @@ export function AdminEventsCMS() {
       }
       return eventsApi.admin.create(data as Partial<Event>);
     },
-    onSuccess: async (response) => {
-      // Log activity
-      if (adminUser && response.data?.id && response.data?.title) {
-        await logEventCreate(adminUser.id, response.data.id, response.data.title);
-      }
-      
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       toast({
         title: "Success",
@@ -174,15 +147,7 @@ export function AdminEventsCMS() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
       eventsApi.admin.update(id, data),
-    onSuccess: async (response, variables) => {
-      // Log activity
-      if (adminUser) {
-        const event = events.find(e => e.id === variables.id);
-        if (event) {
-          await logEventUpdate(adminUser.id, event.id, event.title);
-        }
-      }
-      
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       toast({
         title: "Success",
@@ -198,19 +163,13 @@ export function AdminEventsCMS() {
       });
     },
     onSettled: () => {
-      setIsEditOpen(false);
-      setEditingEvent(null);
+      // Cleanup happens automatically - toast shown in success/error
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => eventsApi.admin.delete(id),
-    onSuccess: async (_, eventId) => {
-      // Log activity
-      if (adminUser && eventToDelete) {
-        await logEventDelete(adminUser.id, eventId, eventToDelete.title);
-      }
-      
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       toast({
         title: "Success",
@@ -226,8 +185,7 @@ export function AdminEventsCMS() {
       });
     },
     onSettled: () => {
-      setDeleteConfirmOpen(false);
-      setEventToDelete(null);
+      // Cleanup happens automatically - toast shown in success/error
     },
   });
 
@@ -293,61 +251,10 @@ export function AdminEventsCMS() {
     updateMutation.mutate({ id, data: { is_published: true } });
   };
 
-  const handleDeleteClick = (event: (typeof events)[0]) => {
-    setEventToDelete(event);
-    setDeleteConfirmOpen(true);
-  };
-
-  const handleDeleteConfirm = () => {
-    if (eventToDelete) {
-      deleteMutation.mutate(eventToDelete.id);
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this event?")) {
+      deleteMutation.mutate(id);
     }
-  };
-
-  const handleEditClick = (event: (typeof events)[0]) => {
-    setEditingEvent(event);
-    setFormData({
-      title: event.title || "",
-      description: event.description || "",
-      category: event.event_category?.id || event.category_id || "",
-      date: event.date || "",
-      start_time: event.start_time || "",
-      end_time: event.end_time || "",
-      location: event.location || "",
-      is_virtual: event.is_virtual || false,
-      max_attendees: event.max_attendees || 30,
-      speaker: event.speaker || "",
-      image: null,
-    });
-    setIsEditOpen(true);
-  };
-
-  const handleUpdate = () => {
-    if (!editingEvent) return;
-
-    if (!formData.title.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Title is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const updateData: any = {
-      title: formData.title,
-      description: formData.description,
-      category_id: formData.category,
-      date: formData.date,
-      start_time: formData.start_time,
-      end_time: formData.end_time,
-      location: formData.location,
-      is_virtual: formData.is_virtual,
-      max_attendees: formData.max_attendees,
-      speaker: formData.speaker,
-    };
-
-    updateMutation.mutate({ id: editingEvent.id, data: updateData });
   };
 
   if (isLoading) {
@@ -680,17 +587,13 @@ export function AdminEventsCMS() {
                   Publish
                 </Button>
               )}
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => handleEditClick(event)}
-              >
+              <Button size="sm" variant="outline">
                 <Edit className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
-                variant="destructive"
-                onClick={() => handleDeleteClick(event)}
+                variant="outline"
+                onClick={() => handleDelete(event.id)}
                 disabled={deleteMutation.isPending}
               >
                 {deleteMutation.isPending ? (
@@ -703,149 +606,6 @@ export function AdminEventsCMS() {
           </Card>
         ))}
       </div>
-
-      {/* Edit Dialog - Add after create dialog, similar structure */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Event</DialogTitle>
-            <DialogDescription>Update event details</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="edit-title">Title *</Label>
-                <Input
-                  id="edit-title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-category">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger id="edit-category">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat: any) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-date">Date</Label>
-                <Input
-                  id="edit-date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-start-time">Start Time</Label>
-                <Input
-                  id="edit-start-time"
-                  type="time"
-                  value={formData.start_time}
-                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-end-time">End Time</Label>
-                <Input
-                  id="edit-end-time"
-                  type="time"
-                  value={formData.end_time}
-                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                />
-              </div>
-
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="edit-location">Location</Label>
-                <Input
-                  id="edit-location"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-speaker">Speaker</Label>
-                <Input
-                  id="edit-speaker"
-                  value={formData.speaker}
-                  onChange={(e) => setFormData({ ...formData, speaker: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="edit-max-attendees">Max Attendees</Label>
-                <Input
-                  id="edit-max-attendees"
-                  type="number"
-                  value={formData.max_attendees}
-                  onChange={(e) => setFormData({ ...formData, max_attendees: parseInt(e.target.value) })}
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
-                {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Event
-              </Button>
-              <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{eventToDelete?.title}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={deleteMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

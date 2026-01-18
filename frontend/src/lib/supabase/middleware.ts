@@ -74,40 +74,19 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
 
-    // CRITICAL: Verify admin role from database (not user_metadata)
-    // This prevents any authenticated user from accessing admin routes
-    const { data: adminUser, error: adminError } = await supabase
-      .from('admin_users')
-      .select('id, is_active, role')
-      .eq('id', user.id)
-      .eq('is_active', true)
-      .single()
-
-    if (adminError || !adminUser) {
-      // User is not an admin or admin is inactive - redirect to unauthorized
-      console.error('Admin verification failed:', adminError)
+    // Check if user has admin role (if role is stored in user_metadata)
+    const userRole = user.user_metadata?.role
+    if (userRole && userRole !== 'admin') {
+      // User is authenticated but not an admin
       const redirectUrl = new URL('/unauthorized', request.url)
       return NextResponse.redirect(redirectUrl)
     }
-
-    // Admin verified - proceed
-    console.log('Admin access granted:', adminUser.role)
   }
 
   // If user is logged in and trying to access login page, redirect to dashboard
   if (isLoginPage && user) {
-    // Verify they are actually an admin before redirecting to dashboard
-    const { data: adminUser } = await supabase
-      .from('admin_users')
-      .select('id, is_active')
-      .eq('id', user.id)
-      .eq('is_active', true)
-      .single()
-
-    if (adminUser) {
-      const redirectUrl = new URL('/admin', request.url)
-      return NextResponse.redirect(redirectUrl)
-    }
+    const redirectUrl = new URL('/admin', request.url)
+    return NextResponse.redirect(redirectUrl)
   }
 
   return response

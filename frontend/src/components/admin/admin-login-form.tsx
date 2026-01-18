@@ -10,8 +10,6 @@ import { useAuthStore } from "@/lib/store";
 import { authApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { logLogin } from "@/lib/admin-activity-logger";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -28,8 +26,6 @@ export function AdminLoginForm() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-
       // Call Supabase login API
       const response = await authApi.login(email, password);
 
@@ -39,35 +35,12 @@ export function AdminLoginForm() {
 
       const user = response.data;
 
-      // CRITICAL: Verify admin role from admin_users table
-      const { data: adminUser, error: adminError } = await supabase
-        .from("admin_users")
-        .select("*")
-        .eq("id", user.id)
-        .eq("is_active", true)
-        .single();
-
-      if (adminError || !adminUser) {
-        // Not an admin or inactive - logout and show error
-        await supabase.auth.signOut();
-        throw new Error("Access denied. Admin privileges required.");
-      }
-
-      // Update last_login_at in admin_users
-      await supabase
-        .from("admin_users")
-        .update({ last_login_at: new Date().toISOString() })
-        .eq("id", user.id);
-
-      // Log login activity
-      await logLogin(adminUser.id, adminUser.email);
-
       // Store user in Zustand (Supabase handles session cookies automatically)
       setUser({
         id: user.id,
         email: user.email || "",
-        full_name: adminUser.full_name || user.email || "Admin",
-        role: adminUser.role,
+        full_name: user.user_metadata?.full_name || user.email || "Admin",
+        role: user.user_metadata?.role || "admin",
       });
 
       // Set authenticated state (Supabase session is in cookies)
@@ -75,7 +48,7 @@ export function AdminLoginForm() {
 
       toast({
         title: "Login successful",
-        description: `Welcome back, ${adminUser.full_name || "Admin"}!`,
+        description: "Welcome back!",
       });
 
       // Navigate to admin dashboard

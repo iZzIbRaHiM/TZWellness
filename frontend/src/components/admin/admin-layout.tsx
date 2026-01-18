@@ -18,7 +18,6 @@ import {
   Bell,
   ChevronDown,
   Stethoscope,
-  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,11 +29,8 @@ import { AdminAppointments } from "./admin-appointments";
 import { AdminBlogCMS } from "./admin-blog-cms";
 import { AdminEventsCMS } from "./admin-events-cms";
 import { AdminServices } from "./admin-services";
-import { AdminSettings } from "./admin-settings";
-import { AdminActivities } from "./admin-activities";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
-type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "settings" | "activities";
+type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "settings";
 
 const navItems = [
   { id: "dashboard" as const, label: "Dashboard", icon: Home },
@@ -42,22 +38,18 @@ const navItems = [
   { id: "services" as const, label: "Services", icon: Stethoscope },
   { id: "blog" as const, label: "Blog Posts", icon: FileText },
   { id: "events" as const, label: "Events", icon: CalendarDays },
-  { id: "activities" as const, label: "Recent Activities", icon: Activity },
   { id: "settings" as const, label: "Settings", icon: Settings },
 ];
 
 export function AdminLayout() {
   const router = useRouter();
-  const { user, logout: zustandLogout } = useAuthStore();
-  const { adminUser, logout: authLogout, isLoading } = useAdminAuth();
+  const { user, logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = async () => {
-    // Use the secure logout from AdminAuthContext
-    await authLogout();
-    // Also clear Zustand store
-    zustandLogout();
+  const handleLogout = () => {
+    logout();
+    router.push("/admin/login");
   };
 
   const renderContent = () => {
@@ -94,16 +86,13 @@ export function AdminLayout() {
             <AdminEventsCMS />
           </ErrorBoundary>
         );
-      case "activities":
-        return (
-          <ErrorBoundary>
-            <AdminActivities />
-          </ErrorBoundary>
-        );
       case "settings":
         return (
           <ErrorBoundary>
-            <AdminSettings />
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
+              <p className="text-gray-600">Settings panel coming soon...</p>
+            </div>
           </ErrorBoundary>
         );
       default:
