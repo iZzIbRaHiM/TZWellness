@@ -5,12 +5,19 @@ import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
+import { useSessionGuard } from "@/hooks/use-session-guard";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { setUser, setAuth, logout } = useAuthStore();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+
+  // Enable continuous session validation
+  useSessionGuard({
+    enabled: isAuthenticated,
+    checkInterval: 30000, // Check every 30 seconds
+  });
 
   useEffect(() => {
     let mounted = true;

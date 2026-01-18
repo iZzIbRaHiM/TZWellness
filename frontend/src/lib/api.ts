@@ -35,6 +35,46 @@ async function logEmailFailure(
   }
 }
 
+/**
+ * Validate active session before admin operations
+ * Throws error if session is invalid, forcing re-authentication
+ */
+async function validateAdminSession(): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
+      throw new Error('No active session')
+    }
+
+    // Verify token is still valid
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      throw new Error('Invalid session token')
+    }
+
+    return true
+  } catch (error) {
+    console.error('Session validation failed:', error)
+    // Clear any stale local data
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.clear()
+        sessionStorage.clear()
+      } catch (e) {
+        console.error('Error clearing storage:', e)
+      }
+      // Force redirect to login
+      window.location.replace('/admin/login')
+    }
+    throw new Error('Session expired - please login again')
+  }
+}
+
 // ============================================
 // TYPE DEFINITIONS
 // ============================================
@@ -282,6 +322,9 @@ export const servicesApi = {
   // Admin methods for managing services (requires authentication)
   create: async (serviceData: Partial<Service>): Promise<ApiResponse<Service>> => {
     try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
       const supabase = createClient()
       
       // Insert new service
@@ -697,6 +740,9 @@ export const appointmentsApi = {
 
   approve: async (id: string): Promise<ApiResponse<Appointment>> => {
     try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
       const supabase = createClient()
       
       const { data, error } = await supabase
@@ -748,6 +794,9 @@ export const appointmentsApi = {
 
   reject: async (id: string, reason?: string): Promise<ApiResponse<Appointment>> => {
     try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
       const supabase = createClient()
       
       const { data, error } = await supabase

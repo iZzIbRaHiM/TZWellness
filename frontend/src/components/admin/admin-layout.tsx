@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { useSessionGuard } from "@/hooks/use-session-guard";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminAppointments } from "./admin-appointments";
 import { AdminBlogCMS } from "./admin-blog-cms";
@@ -46,6 +47,12 @@ export function AdminLayout() {
   const { user, logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Validate session every 30 seconds while admin panel is active
+  const { validateSession } = useSessionGuard({
+    enabled: true,
+    checkInterval: 30000,
+  });
 
   const handleLogout = async () => {
     try {
