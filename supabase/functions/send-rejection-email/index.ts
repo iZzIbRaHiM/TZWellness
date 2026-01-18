@@ -96,7 +96,7 @@ serve(async (req) => {
             </div>
             
             <div class="footer">
-              <p>TZ Wellness | Holistic Mental Health & Wellbeing</p>
+              <p>TZ Wellness Health | Nurturing Our Health</p>
               <p>📧 <a href="mailto:support@tzwellness.com">support@tzwellness.com</a> | 📞 (555) 123-4567</p>
               <p style="font-size: 12px; color: #9CA3AF; margin-top: 10px;">
                 You're receiving this because you requested an appointment with TZ Wellness.

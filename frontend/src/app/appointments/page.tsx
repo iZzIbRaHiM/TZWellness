@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { BookingWizard } from "@/components/booking/booking-wizard";
 
 export const metadata: Metadata = {
-  title: "Book Appointment | TZ Wellness",
+  title: "Book Appointment | TZ Wellness Health",
   description:
-    "Schedule your personalized mental health and wellness consultation. Choose your service, select a convenient time, and start your journey to better health.",
+    "Schedule your personalized metabolic health consultation. Choose from diabetes management, thyroid care, PCOS treatment, or obesity management services. Telehealth and in-person appointments available.",
 };
 
 export default function AppointmentsPage() {

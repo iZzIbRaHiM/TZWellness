@@ -22,20 +22,22 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "TZ Wellness | Mental Health & Holistic Wellbeing",
-    template: "%s | TZ Wellness",
+    default: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
+    template: "%s | TZ Wellness Health",
   },
   description:
-    "Expert mental health and wellness services. Book your personalized consultation for therapy, counseling, workshops, and holistic wellness programs.",
+    "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid disorders, PCOS, and obesity care with personalized treatment plans and lifestyle medicine.",
   keywords: [
-    "mental health",
-    "therapy",
-    "counseling",
-    "wellness",
-    "holistic health",
-    "workshops",
-    "mental wellbeing",
-    "therapy services",
+    "diabetes management",
+    "thyroid care",
+    "PCOS treatment",
+    "obesity management",
+    "metabolic health",
+    "chronic disease",
+    "lifestyle medicine",
+    "nutrition counseling",
+    "prediabetes",
+    "weight management",
   ],
   authors: [{ name: "TZ Wellness" }],
   creator: "TZ Wellness",
@@ -48,10 +50,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    siteName: "TZ Wellness",
-    title: "TZ Wellness | Mental Health & Holistic Wellbeing",
+    siteName: "TZ Wellness Health",
+    title: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
     description:
-      "Expert mental health and wellness services. Book your personalized consultation today.",
+      "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid, PCOS, and obesity care.",
     images: [
       {
         url: "/og-image.jpg",
@@ -63,9 +65,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TZ Wellness | Mental Health & Holistic Wellbeing",
+    title: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
     description:
-      "Expert mental health and wellness services. Book your personalized consultation today.",
+      "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid, PCOS, and obesity care.",
     images: ["/og-image.jpg"],
   },
   robots: {

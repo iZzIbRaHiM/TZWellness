@@ -194,8 +194,8 @@ serve(async (req) => {
               </div>
               
               <div class="footer">
-                <p><strong>TZ Wellness</strong></p>
-                <p>Mental Health & Wellbeing</p>
+                <p><strong>TZ Wellness Health</strong></p>
+                <p>Nurturing Our Health Through Metabolic Care</p>
                 <p style="margin-top: 15px;">
                   <a href="https://tz-wellness-health.vercel.app">Visit Website</a> • 
                   <a href="mailto:support@tzwellness.com">Contact Support</a>

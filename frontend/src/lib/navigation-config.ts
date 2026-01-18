@@ -14,6 +14,7 @@ export interface NavLink {
  */
 export const MAIN_NAVIGATION: NavLink[] = [
   { name: "Home", href: "/" },
+  { name: "About", href: "/about" },
   { name: "Services", href: "/services" },
   { name: "Book Appointment", href: "/appointments" },
   { name: "Events", href: "/events" },
@@ -26,6 +27,7 @@ export const MAIN_NAVIGATION: NavLink[] = [
  */
 export const FOOTER_LINKS = {
   main: [
+    { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Book Appointment", href: "/appointments" },
     { name: "Events", href: "/events" },

@@ -31,7 +31,7 @@ export function Footer() {
             </Link>
 
             <p className="text-emerald-200/80 mb-6 max-w-sm leading-relaxed">
-              Expert holistic mental health and wellness services. Book your consultation today.
+              Nurturing our health through comprehensive metabolic and chronic disease management. Expert care for diabetes, thyroid, PCOS, and obesity.
             </p>
 
             <div className="space-y-3 text-sm">
