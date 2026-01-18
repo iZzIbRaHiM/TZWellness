@@ -57,9 +57,9 @@ export function Header() {
             <Image
               src="/main_logo.png"
               alt="TZ Wellness Logo"
-              width={220}
-              height={73}
-              className="h-14 w-auto"
+              width={280}
+              height={93}
+              className="h-20 w-auto"
               priority
             />
           </Link>

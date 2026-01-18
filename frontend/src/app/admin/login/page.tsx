@@ -17,9 +17,9 @@ export default function AdminLoginPage() {
             <Image
               src="/main_logo.png"
               alt="TZ Wellness Logo"
-              width={240}
-              height={80}
-              className="h-20 w-auto brightness-0 invert"
+              width={300}
+              height={100}
+              className="h-24 w-auto brightness-0 invert"
             />
           </div>
           <h1 className="font-serif text-3xl font-bold text-white mb-2">
