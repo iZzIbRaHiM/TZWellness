@@ -1847,3 +1847,209 @@ export const testimonialsApi = {
     }
   },
 }
+
+// ============================================
+// ADMIN SETTINGS API
+// ============================================
+
+export interface AdminSettings {
+  id: string
+  user_id: string
+  
+  // Profile Settings
+  full_name?: string
+  email?: string
+  phone?: string
+  avatar_url?: string
+  bio?: string
+  
+  // Notification Settings
+  email_notifications: boolean
+  appointment_notifications: boolean
+  event_notifications: boolean
+  blog_notifications: boolean
+  
+  // System Settings
+  enable_online_booking: boolean
+  require_appointment_approval: boolean
+  auto_send_confirmations: boolean
+  auto_send_reminders: boolean
+  reminder_hours_before: number
+  max_appointments_per_day: number
+  booking_buffer_minutes: number
+  
+  // Business Hours
+  business_hours: {
+    [key: string]: {
+      open: string
+      close: string
+      enabled: boolean
+    }
+  }
+  
+  // Contact Information
+  clinic_name: string
+  clinic_email: string
+  clinic_phone: string
+  clinic_address?: string
+  
+  // Metadata
+  created_at: string
+  updated_at: string
+}
+
+export const adminSettingsApi = {
+  // Get current admin's settings
+  get: async (): Promise<ApiResponse<AdminSettings>> => {
+    try {
+      await validateAdminSession()
+      
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('Not authenticated')
+      }
+      
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error) {
+        // If no settings exist, create default
+        if (error.code === 'PGRST116') {
+          const { data: newData, error: insertError } = await supabase
+            .from('admin_settings')
+            .insert({
+              user_id: user.id,
+              full_name: user.user_metadata?.full_name || user.email,
+              email: user.email,
+            })
+            .select()
+            .single()
+          
+          if (insertError) throw insertError
+          
+          return {
+            success: true,
+            data: newData as AdminSettings,
+          }
+        }
+        throw error
+      }
+
+      return {
+        success: true,
+        data: data as AdminSettings,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'SETTINGS_GET_ERROR',
+          message: error.message || 'Failed to fetch settings',
+        },
+      }
+    }
+  },
+
+  // Update admin settings
+  update: async (updates: Partial<AdminSettings>): Promise<ApiResponse<AdminSettings>> => {
+    try {
+      await validateAdminSession()
+      
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('Not authenticated')
+      }
+
+      // Remove fields that shouldn't be updated directly
+      const { id, user_id, created_at, updated_at, ...updateData } = updates as any
+
+      const { data, error } = await supabase
+        .from('admin_settings')
+        .update(updateData)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Log activity
+      await supabase.from('activity_logs').insert({
+        action: 'settings_updated',
+        description: 'Admin settings updated',
+        metadata: { 
+          updated_fields: Object.keys(updateData),
+          user_id: user.id,
+        },
+      })
+
+      return {
+        success: true,
+        data: data as AdminSettings,
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          code: 'SETTINGS_UPDATE_ERROR',
+          message: error.message || 'Failed to update settings',
+        },
+      }
+    }
+  },
+
+  // Update profile only
+  updateProfile: async (profile: {
+    full_name?: string
+    email?: string
+    phone?: string
+    avatar_url?: string
+    bio?: string
+  }): Promise<ApiResponse<AdminSettings>> => {
+    return adminSettingsApi.update(profile)
+  },
+
+  // Update notification preferences
+  updateNotifications: async (notifications: {
+    email_notifications?: boolean
+    appointment_notifications?: boolean
+    event_notifications?: boolean
+    blog_notifications?: boolean
+  }): Promise<ApiResponse<AdminSettings>> => {
+    return adminSettingsApi.update(notifications)
+  },
+
+  // Update system settings
+  updateSystemSettings: async (settings: {
+    enable_online_booking?: boolean
+    require_appointment_approval?: boolean
+    auto_send_confirmations?: boolean
+    auto_send_reminders?: boolean
+    reminder_hours_before?: number
+    max_appointments_per_day?: number
+    booking_buffer_minutes?: number
+  }): Promise<ApiResponse<AdminSettings>> => {
+    return adminSettingsApi.update(settings)
+  },
+
+  // Update business hours
+  updateBusinessHours: async (businessHours: AdminSettings['business_hours']): Promise<ApiResponse<AdminSettings>> => {
+    return adminSettingsApi.update({ business_hours: businessHours })
+  },
+
+  // Update clinic contact info
+  updateClinicInfo: async (info: {
+    clinic_name?: string
+    clinic_email?: string
+    clinic_phone?: string
+    clinic_address?: string
+  }): Promise<ApiResponse<AdminSettings>> => {
+    return adminSettingsApi.update(info)
+  },
+}

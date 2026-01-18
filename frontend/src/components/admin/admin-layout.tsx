@@ -30,6 +30,7 @@ import { AdminAppointments } from "./admin-appointments";
 import { AdminBlogCMS } from "./admin-blog-cms";
 import { AdminEventsCMS } from "./admin-events-cms";
 import { AdminServices } from "./admin-services";
+import { AdminSettings } from "./admin-settings";
 
 type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "settings";
 
@@ -119,8 +120,7 @@ export function AdminLayout() {
         return (
           <ErrorBoundary>
             <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-              <p className="text-gray-600">Settings panel coming soon...</p>
+              <AdminSettings />
             </div>
           </ErrorBoundary>
         );
