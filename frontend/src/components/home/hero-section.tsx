@@ -151,22 +151,22 @@ export function HeroSection() {
               id="hero-heading"
               className="font-serif text-display-lg lg:text-display-xl text-emerald-950 mb-6"
             >
-              End Metabolic Frustration &{" "}
-              <span className="italic text-terracotta">Reboot Your Health</span>
+              Nurture Your Health &{" "}
+              <span className="italic text-terracotta">Reclaim Your Vitality</span>
             </h1>
 
             <p className="text-lg text-emerald-800/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Book Your Personalized Consultation Today. Our holistic approach
-              combines medical expertise with sustainable lifestyle changes for
+              Specialized care for diabetes, thyroid, PCOS, and obesity. Our evidence-based
+              approach combines medical expertise with sustainable lifestyle changes for
               lasting results.
             </p>
 
             {/* Value props */}
             <ul className="space-y-4 mb-10 text-left max-w-md mx-auto lg:mx-0">
               {[
-                "Regain Your Energy & Vitality",
-                "Reduce Dependency on Medications",
-                "Sustainable, Personalized Plans",
+                "Balance Blood Sugar & Hormones Naturally",
+                "Prevent & Reverse Chronic Conditions",
+                "Personalized Nutrition & Lifestyle Plans",
               ].map((prop, index) => (
                 <motion.li
                   key={index}
