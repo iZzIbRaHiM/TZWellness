@@ -136,14 +136,14 @@ export function HeroSection() {
             className="text-center lg:text-left"
           >
             {/* Trust badge */}
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.3 }}
               className="inline-flex items-center gap-2 px-4 py-2 glass-card text-emerald-800 text-sm font-medium mb-8"
             >
               <Star className="h-4 w-4 fill-terracotta text-terracotta" aria-hidden="true" />
-              <span>Rated 4.9/5 by 2,000+ Patients</span>
+              <span>Trusted by 2,000+ Patients on Their Metabolic Journey</span>
             </motion.div>
 
             {/* Main headline - Editorial typography */}
