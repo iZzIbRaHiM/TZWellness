@@ -15,11 +15,11 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <Image
-              src="/logo.png"
+              src="/main_logo.png"
               alt="TZ Wellness Logo"
-              width={200}
-              height={66}
-              className="h-16 w-auto brightness-0 invert"
+              width={240}
+              height={80}
+              className="h-20 w-auto brightness-0 invert"
             />
           </div>
           <h1 className="font-serif text-3xl font-bold text-white mb-2">

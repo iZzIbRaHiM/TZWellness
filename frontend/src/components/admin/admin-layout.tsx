@@ -127,11 +127,11 @@ export function AdminLayout() {
           <div className="p-6 border-b border-emerald-800">
             <Link href="/" className="flex items-center">
               <Image
-                src="/logo.png"
+                src="/main_logo.png"
                 alt="TZ Wellness Admin"
-                width={160}
-                height={53}
-                className="h-12 w-auto brightness-0 invert"
+                width={200}
+                height={66}
+                className="h-14 w-auto brightness-0 invert"
               />
             </Link>
             <button

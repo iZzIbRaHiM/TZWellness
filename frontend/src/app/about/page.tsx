@@ -79,7 +79,7 @@ export default function AboutPage() {
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="font-serif text-display-md lg:text-display-lg text-emerald-950 mb-6">
               Nurturing Our Health,{" "}
-              <span className="italic text-terracotta">Healing From Within</span>
+              <span className="italic text-emerald-600">Healing From Within</span>
             </h1>
             <p className="text-xl text-emerald-700/80 leading-relaxed mb-8">
               At TZ Wellness Health, we specialize in comprehensive management of
@@ -135,7 +135,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-elevated-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-terracotta-100 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100 flex items-center justify-center">
                 <Users className="h-32 w-32 text-emerald-900/20" />
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="p-8 bg-gradient-to-br from-terracotta-50 to-emerald-50 rounded-2xl">
+            <div className="p-8 bg-gradient-to-br from-teal-50 via-emerald-50 to-emerald-100 rounded-2xl">
               <h3 className="font-serif text-2xl text-emerald-950 mb-4">
                 Integrating Conventional Medicine When Needed
               </h3>

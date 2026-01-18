@@ -22,11 +22,11 @@ export function Footer() {
           <div>
             <Link href="/" className="inline-block mb-6 group">
               <Image
-                src="/logo.png"
+                src="/main_logo.png"
                 alt="TZ Wellness Logo"
-                width={200}
-                height={66}
-                className="h-16 w-auto group-hover:scale-105 transition-transform duration-300 brightness-0 invert"
+                width={240}
+                height={80}
+                className="h-20 w-auto group-hover:scale-105 transition-transform duration-300 brightness-0 invert"
               />
             </Link>
 

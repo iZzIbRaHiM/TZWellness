@@ -55,11 +55,11 @@ export function Header() {
             aria-label="TZ Wellness - Home"
           >
             <Image
-              src="/logo.png"
+              src="/main_logo.png"
               alt="TZ Wellness Logo"
-              width={180}
-              height={60}
-              className="h-12 w-auto"
+              width={220}
+              height={73}
+              className="h-14 w-auto"
               priority
             />
           </Link>

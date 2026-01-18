@@ -138,7 +138,7 @@ export function ArticleSchema({
       name: "TF Wellfare Medical Clinic",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL}/main_logo.png`,
       },
     },
     datePublished,
