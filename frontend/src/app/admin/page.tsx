@@ -25,9 +25,12 @@ export default function AdminDashboardPage() {
         
         if (sessionError || !session) {
           // No valid session - clear any stale data and redirect
-          logout();
+          await logout();
           if (mounted) {
-            router.replace("/admin/login");
+            // Force hard navigation to prevent back button
+            if (typeof window !== 'undefined') {
+              window.location.replace('/admin/login');
+            }
           }
           return;
         }
@@ -37,9 +40,11 @@ export default function AdminDashboardPage() {
 
         if (userError || !user) {
           // Token invalid - clear and redirect
-          logout();
+          await logout();
           if (mounted) {
-            router.replace("/admin/login");
+            if (typeof window !== 'undefined') {
+              window.location.replace('/admin/login');
+            }
           }
           return;
         }
@@ -59,9 +64,11 @@ export default function AdminDashboardPage() {
         }
       } catch (error) {
         console.error("Auth check failed:", error);
-        logout();
+        await logout();
         if (mounted) {
-          router.replace("/admin/login");
+          if (typeof window !== 'undefined') {
+            window.location.replace('/admin/login');
+          }
         }
       }
     };
@@ -71,23 +78,44 @@ export default function AdminDashboardPage() {
 
     // Set up auth state change listener to detect logout/session expiry
     const supabase = createClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
-        logout();
+        await logout();
         if (mounted) {
-          router.replace("/admin/login");
+          setIsAuthenticated(false);
+          // Force hard redirect to login page
+          if (typeof window !== 'undefined') {
+            window.location.replace('/admin/login');
+          }
         }
       } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         // Re-validate on token refresh
         checkAuth();
       }
     });
+    
+    // Prevent back navigation after logout by clearing history
+    const handlePopState = (e: PopStateEvent) => {
+      // Check if user is still authenticated
+      const currentAuth = isAuthenticated;
+      if (!currentAuth) {
+        e.preventDefault();
+        window.location.replace('/admin/login');
+      }
+    };
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('popstate', handlePopState);
+    }
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('popstate', handlePopState);
+      }
     };
-  }, [router, setUser, setAuth, logout]);
+  }, [router, setUser, setAuth, logout, isAuthenticated]);
 
   // Show loading while checking authentication
   if (isChecking) {

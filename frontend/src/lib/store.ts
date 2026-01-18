@@ -405,15 +405,38 @@ export const useAuthStore = create<AuthState>()(
           try {
             const { createClient } = await import("@/lib/supabase/client");
             const supabase = createClient();
-            await supabase.auth.signOut();
+            // Use 'local' scope to clear session from this device only
+            await supabase.auth.signOut({ scope: 'local' });
           } catch (error) {
             console.error("Error signing out from Supabase:", error);
           }
+          
+          // Clear ALL localStorage items (including Zustand persisted state)
+          try {
+            localStorage.removeItem("tf-wellfare-auth");
+            localStorage.removeItem("tf-wellfare-booking");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            
+            // Clear any Supabase-related storage
+            Object.keys(localStorage).forEach(key => {
+              if (key.includes('supabase') || key.includes('sb-')) {
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (error) {
+            console.error("Error clearing localStorage:", error);
+          }
+          
+          // Clear sessionStorage as well
+          try {
+            sessionStorage.clear();
+          } catch (error) {
+            console.error("Error clearing sessionStorage:", error);
+          }
         }
         
-        // Clear localStorage
-        safeRemoveStorage("accessToken");
-        safeRemoveStorage("refreshToken");
+        // Reset Zustand state
         set({
           user: null,
           accessToken: null,

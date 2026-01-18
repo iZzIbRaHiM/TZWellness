@@ -1730,9 +1730,20 @@ export const authApi = {
     try {
       const supabase = createClient()
       
-      const { error } = await supabase.auth.signOut()
+      // Sign out with 'local' scope to clear this device's session
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
 
       if (error) throw error
+      
+      // Clear all local storage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.clear()
+          sessionStorage.clear()
+        } catch (e) {
+          console.error('Error clearing storage:', e)
+        }
+      }
 
       return {
         success: true,

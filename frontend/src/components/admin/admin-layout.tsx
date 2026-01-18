@@ -49,21 +49,28 @@ export function AdminLayout() {
 
   const handleLogout = async () => {
     try {
-      // Clear Supabase session first
+      // Clear Supabase session first with scope 'local' to clear from this device
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'local' });
       
-      // Then clear local state
-      logout();
+      // Clear local state and storage
+      await logout();
       
-      // Redirect to login
-      router.push("/admin/login");
+      // Use replace instead of push to prevent back button access
+      router.replace("/admin/login");
+      
+      // Force a hard refresh to clear any cached state
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
     } catch (error) {
       console.error("Logout error:", error);
-      // Still clear local state and redirect on error
-      logout();
-      router.push("/admin/login");
+      // Even on error, force logout and redirect
+      await logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
     }
   };
 
