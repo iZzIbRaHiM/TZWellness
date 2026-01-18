@@ -368,7 +368,7 @@ export function AppointmentLookup() {
                 {appointment.status !== "cancelled" && (
                   <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                     <Button asChild variant="default" className="flex-1">
-                      <Link href="/book">Reschedule Appointment</Link>
+                      <Link href="/appointments">Reschedule Appointment</Link>
                     </Button>
                     <Button
                       variant="outline"
@@ -386,7 +386,7 @@ export function AppointmentLookup() {
                       This appointment has been cancelled.
                     </p>
                     <Button asChild>
-                      <Link href="/book">Book a New Appointment</Link>
+                      <Link href="/appointments">Book a New Appointment</Link>
                     </Button>
                   </div>
                 )}

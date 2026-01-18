@@ -116,7 +116,7 @@ export function HeroSection() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button asChild variant="cta" size="xl">
-                <Link href="/book">
+                <Link href="/appointments">
                   <Calendar className="mr-2 h-5 w-5" aria-hidden="true" />
                   Book Your Consultation
                 </Link>

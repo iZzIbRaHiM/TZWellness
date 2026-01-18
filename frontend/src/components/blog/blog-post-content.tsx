@@ -255,7 +255,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           Our specialists can help you create a customized plan for your health goals.
         </p>
         <Button asChild variant="cta" size="lg">
-          <Link href="/book">Book a Consultation</Link>
+          <Link href="/appointments">Book a Consultation</Link>
         </Button>
       </motion.div>
     </article>
