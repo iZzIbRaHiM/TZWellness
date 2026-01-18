@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -11,6 +12,7 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { appointmentsApi } from "@/lib/api";
 
 const stats = [
   { value: "10,000+", label: "Patients Treated" },
@@ -19,6 +21,77 @@ const stats = [
 ];
 
 export function HeroSection() {
+  const router = useRouter();
+  const [nextSlot, setNextSlot] = useState<{ date: string; time: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNextAvailableSlot = async () => {
+      try {
+        const response = await appointmentsApi.getAvailableDates(14);
+        if (response.success && response.data?.dates && response.data.dates.length > 0) {
+          const firstDate = response.data.dates[0];
+          
+          // Fetch slots for the first available date
+          const slotsResponse = await appointmentsApi.getAvailableSlots({
+            start_date: firstDate,
+            end_date: firstDate,
+            modality: "both"
+          });
+          
+          if (slotsResponse.success && slotsResponse.data?.slots) {
+            // Get slots for the first date
+            const dateSlots = slotsResponse.data.slots[firstDate];
+            if (dateSlots && dateSlots.length > 0) {
+              const firstSlot = dateSlots[0];
+              setNextSlot({
+                date: firstDate,
+                time: firstSlot.start_time
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching next available slot:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNextAvailableSlot();
+  }, []);
+
+  const formatSlotDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return "Tomorrow";
+    } else {
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+  };
+
+  const formatSlotTime = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const handleBookClick = () => {
+    if (nextSlot) {
+      router.push(`/appointments?date=${nextSlot.date}&time=${nextSlot.time}`);
+    } else {
+      router.push('/appointments');
+    }
+  };
+
   return (
     <section
       className="relative overflow-hidden bg-sand-100"
@@ -198,10 +271,21 @@ export function HeroSection() {
                       Next Available
                     </div>
                     <div className="text-sm text-emerald-700/70">
-                      Tomorrow, 9:00 AM
+                      {isLoading ? (
+                        "Loading..."
+                      ) : nextSlot ? (
+                        `${formatSlotDate(nextSlot.date)}, ${formatSlotTime(nextSlot.time)}`
+                      ) : (
+                        "Check availability"
+                      )}
                     </div>
                   </div>
-                  <Button size="sm" className="ml-auto flex-shrink-0">
+                  <Button 
+                    size="sm" 
+                    className="ml-auto flex-shrink-0"
+                    onClick={handleBookClick}
+                    disabled={isLoading}
+                  >
                     Book
                   </Button>
                 </div>
