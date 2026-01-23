@@ -385,6 +385,9 @@ export const servicesApi = {
 
   update: async (id: string, serviceData: Partial<Service>): Promise<ApiResponse<Service>> => {
     try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
       const supabase = createClient()
       
       // Update service
@@ -447,6 +450,9 @@ export const servicesApi = {
 
   delete: async (id: string): Promise<ApiResponse<null>> => {
     try {
+      // Validate session before admin operation
+      await validateAdminSession()
+      
       const supabase = createClient()
       
       // Get service title before deletion for logging
@@ -1104,7 +1110,7 @@ export const blogApi = {
           blogPostData = {
             title: postData.get('title') as string,
             slug: postData.get('slug') as string || (postData.get('title') as string)?.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-            category_id: postData.get('category') as string,
+            category_id: postData.get('category_id') as string,
             excerpt: postData.get('excerpt') as string,
             content: postData.get('content') as string,
             featured_image: imageUrl,
@@ -1208,7 +1214,7 @@ export const blogApi = {
           updateData = {
             title: postData.get('title') as string,
             slug: postData.get('slug') as string,
-            category_id: postData.get('category') as string,
+            category_id: postData.get('category_id') as string,
             excerpt: postData.get('excerpt') as string,
             content: postData.get('content') as string,
             featured_image: imageUrl || undefined,

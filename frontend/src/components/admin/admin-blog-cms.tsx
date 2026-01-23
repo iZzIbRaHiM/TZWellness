@@ -220,7 +220,7 @@ export function AdminBlogCMS() {
     const formDataToSend = new FormData();
     formDataToSend.append("title", formData.title);
     formDataToSend.append("slug", slug);
-    formDataToSend.append("category", formData.category); // API extracts this as category_id
+    formDataToSend.append("category_id", formData.category); // Changed from 'category' to 'category_id'
     formDataToSend.append("excerpt", formData.excerpt);
     formDataToSend.append("content", formData.content);
     

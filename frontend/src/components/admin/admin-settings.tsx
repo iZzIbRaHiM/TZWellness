@@ -94,7 +94,7 @@ export function AdminSettings() {
   };
 
   const updateBusinessHours = (day: string, field: string, value: any) => {
-    if (!settings) return;
+    if (!settings || !settings.business_hours) return;
     setSettings({
       ...settings,
       business_hours: {
@@ -394,7 +394,7 @@ export function AdminSettings() {
               <CardDescription>Set your clinic's operating hours</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {Object.entries(settings.business_hours).map(([day, hours]) => (
+              {settings.business_hours && Object.entries(settings.business_hours).map(([day, hours]) => (
                 <div key={day} className="flex items-center gap-4 p-4 border rounded-lg">
                   <div className="flex-1">
                     <Label className="capitalize">{day}</Label>
@@ -425,6 +425,9 @@ export function AdminSettings() {
                   )}
                 </div>
               ))}
+              {!settings.business_hours && (
+                <p className="text-gray-500 text-center py-4">Loading business hours...</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

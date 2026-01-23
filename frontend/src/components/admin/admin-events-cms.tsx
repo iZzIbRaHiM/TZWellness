@@ -249,7 +249,7 @@ export function AdminEventsCMS() {
     const createData = {
       title: formData.title,
       slug,
-      category_id: formData.category, // Map to category_id
+      category_id: formData.category, // Map to category_id (correct)
       description: formData.description,
       modality: formData.is_virtual ? 'virtual' : 'in_person',
       start_date: `${formData.date}T${formData.start_time || '09:00'}:00`,
@@ -258,8 +258,8 @@ export function AdminEventsCMS() {
       location_name: formData.is_virtual ? 'Online' : formData.location,
       location_address: formData.is_virtual ? null : formData.location,
       virtual_link: formData.is_virtual ? formData.location : null,
-      max_participants: formData.max_attendees, // Map to max_participants
-      what_to_bring: formData.speaker || null,
+      max_participants: formData.max_attendees, // FIXED: Changed from max_attendees to max_participants
+      what_to_bring: formData.speaker || null, // Keep mapping (what_to_bring is correct field)
       is_published: true,
       is_featured: false,
       image: null,
