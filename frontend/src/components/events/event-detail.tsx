@@ -49,8 +49,6 @@ interface EventDetailProps {
     location: string;
     address?: string;
     is_virtual: boolean;
-    max_attendees: number;
-    registered_count: number;
     price: number;
     speaker?: {
       name: string;
@@ -64,10 +62,6 @@ export function EventDetail({ event }: EventDetailProps) {
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-
-  const spotsLeft = event.max_attendees - event.registered_count;
-  const isFull = spotsLeft <= 0;
-  const isAlmostFull = spotsLeft <= 5 && !isFull;
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -249,21 +243,6 @@ export function EventDetail({ event }: EventDetailProps) {
                   </div>
                 </div>
 
-                {/* Capacity */}
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-emerald-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {event.registered_count} / {event.max_attendees} registered
-                    </p>
-                    {isAlmostFull && (
-                      <p className="text-sm text-red-600">
-                        Only {spotsLeft} spots left!
-                      </p>
-                    )}
-                  </div>
-                </div>
-
                 {/* Price */}
                 <div className="pt-4 border-t">
                   <p className="text-2xl font-bold text-emerald-700">
@@ -272,7 +251,8 @@ export function EventDetail({ event }: EventDetailProps) {
                 </div>
 
                 {/* Registration */}
-                {isRegistered ? (
+                <div className="space-y-4 pt-4 border-t">
+                  {isRegistered ? (
                   <div className="p-4 bg-green-50 rounded-lg text-center">
                     <Check className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <p className="font-medium text-green-800">
@@ -282,10 +262,6 @@ export function EventDetail({ event }: EventDetailProps) {
                       Check your email for details
                     </p>
                   </div>
-                ) : isFull ? (
-                  <Button disabled className="w-full">
-                    Event Full
-                  </Button>
                 ) : (
                   <Dialog>
                     <DialogTrigger asChild>
@@ -339,6 +315,7 @@ export function EventDetail({ event }: EventDetailProps) {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Event
                 </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

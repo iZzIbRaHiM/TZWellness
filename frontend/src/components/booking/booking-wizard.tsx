@@ -13,6 +13,7 @@ import { StepCalendarV2 } from "./steps/step-calendar-v2";
 import { StepDetails } from "./steps/step-details";
 import { StepSuccess } from "./steps/step-success";
 import Link from "next/link";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const steps = [
   { id: 1, title: "Service", description: "What brings you in?" },
@@ -40,6 +41,7 @@ const slideVariants = {
 };
 
 export function BookingWizard() {
+  const { settings } = useSiteSettings();
   const { step, reset, prevStep, canProceed, referenceId, setStep } = useBookingStore();
   const [direction, setDirection] = React.useState(1);
   const prevStepRef = React.useRef(step);
@@ -191,10 +193,10 @@ export function BookingWizard() {
           >
             Need assistance? Call us at{" "}
             <a
-              href="tel:+1234567890"
+              href={settings.clinic_phone_href}
               className="text-terracotta hover:underline font-medium"
             >
-              (123) 456-7890
+              {settings.clinic_phone}
             </a>
           </motion.p>
         )}

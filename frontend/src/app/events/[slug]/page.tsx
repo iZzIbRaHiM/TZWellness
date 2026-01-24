@@ -52,8 +52,6 @@ export default async function EventPage({ params }: EventPageProps) {
     location: event.location_name || "TZ Wellness Center",
     address: event.location_address || "",
     is_virtual: event.modality === 'virtual',
-    registered_count: event.current_participants,
-    max_attendees: event.max_participants || 50,
     price: 0,
     category: event.category?.name || "Event",
     long_description: event.description || event.title,

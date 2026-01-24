@@ -21,6 +21,7 @@ import {
   Phone,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface ServiceDetailProps {
   service: {
@@ -40,6 +41,8 @@ interface ServiceDetailProps {
 }
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
+  const { settings } = useSiteSettings();
+  
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -99,7 +102,7 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
           size="xl"
           className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
         >
-          <a href="tel:+15551234567">
+          <a href={settings.clinic_phone_href}>
             <Phone className="mr-2 h-5 w-5" />
             Call to Discuss
           </a>

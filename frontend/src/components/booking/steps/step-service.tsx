@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 // Service features mapping by category for rich display
 const serviceFeaturesByCategory: Record<string, string[]> = {
@@ -24,6 +25,7 @@ const serviceFeaturesByCategory: Record<string, string[]> = {
 const defaultFeatures = ["Expert Care", "Personalized Treatment", "Follow-up Support"];
 
 export function StepService() {
+  const { settings } = useSiteSettings();
   const searchParams = useSearchParams();
   const { serviceId, setService, nextStep } = useBookingStore();
 
@@ -207,7 +209,7 @@ export function StepService() {
 
       <div className="pt-4 flex justify-between items-center border-t">
         <p className="text-sm text-gray-500">
-          Not sure? Call us at <span className="font-medium text-emerald-700">(555) 123-4567</span>
+          Not sure? Call us at <span className="font-medium text-emerald-700">{settings.clinic_phone}</span>
         </p>
         {serviceId && (
           <Button onClick={nextStep} className="h-11 px-8">

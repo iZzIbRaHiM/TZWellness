@@ -7,7 +7,6 @@ import { Award, Shield, CheckCircle, Star } from "lucide-react";
 const certifications = [
   { icon: Award, label: "Board Certified Endocrinologist" },
   { icon: Shield, label: "HIPAA Compliant" },
-  { icon: CheckCircle, label: "10,000+ Patients Treated" },
   { icon: Star, label: "4.9/5 Patient Rating" },
   { icon: Award, label: "American Board of Internal Medicine" },
   { icon: Shield, label: "Joint Commission Accredited" },

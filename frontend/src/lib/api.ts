@@ -217,8 +217,6 @@ export interface Event {
   start_date: string
   end_date: string
   timezone: string
-  max_participants?: number
-  current_participants: number
   location_name?: string
   location_address?: string
   virtual_link?: string
@@ -1115,7 +1113,7 @@ export const blogApi = {
             content: postData.get('content') as string,
             featured_image: imageUrl,
             is_published: true,
-            is_featured: false,
+            is_featured: postData.get('is_featured') === 'true',
             published_at: new Date().toISOString(),
           }
         } else {
@@ -1520,9 +1518,6 @@ export const eventsApi = {
         })
       }
 
-      // Increment participant count
-      await supabase.rpc('increment_event_participants', { event_id })
-
       return {
         success: true,
         data,
@@ -1592,7 +1587,6 @@ export const eventsApi = {
             start_date: eventData.get('start_date') as string,
             end_date: eventData.get('end_date') as string,
             timezone: eventData.get('timezone') as string || 'UTC',
-            max_participants: eventData.get('max_participants') ? parseInt(eventData.get('max_participants') as string) : null,
             location_name: eventData.get('location_name') as string || null,
             location_address: eventData.get('location_address') as string || null,
             virtual_link: eventData.get('virtual_link') as string || null,
@@ -1613,7 +1607,6 @@ export const eventsApi = {
             start_date: eventData.start_date,
             end_date: eventData.end_date,
             timezone: eventData.timezone || 'UTC',
-            max_participants: eventData.max_participants,
             location_name: eventData.location_name,
             location_address: eventData.location_address,
             virtual_link: eventData.virtual_link,
@@ -1683,7 +1676,6 @@ export const eventsApi = {
             start_date: eventData.start_date,
             end_date: eventData.end_date,
             timezone: eventData.timezone,
-            max_participants: eventData.max_participants,
             location_name: eventData.location_name,
             location_address: eventData.location_address,
             virtual_link: eventData.virtual_link,

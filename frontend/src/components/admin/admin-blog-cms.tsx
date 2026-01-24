@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export function AdminBlogCMS() {
   const { toast } = useToast();
@@ -79,6 +80,7 @@ export function AdminBlogCMS() {
     category: "",
     content: "",
     featured_image: null as File | null,
+    is_featured: false,
   });
 
   const filteredPosts = posts.filter(
@@ -111,7 +113,7 @@ export function AdminBlogCMS() {
     },
     onSettled: () => {
       setIsCreateOpen(false);
-      setFormData({ title: "", excerpt: "", category: "", content: "", featured_image: null });
+      setFormData({ title: "", excerpt: "", category: "", content: "", featured_image: null, is_featured: false });
     },
   });
 
@@ -223,6 +225,7 @@ export function AdminBlogCMS() {
     formDataToSend.append("category_id", formData.category); // Changed from 'category' to 'category_id'
     formDataToSend.append("excerpt", formData.excerpt);
     formDataToSend.append("content", formData.content);
+    formDataToSend.append("is_featured", String(formData.is_featured));
     
     if (formData.featured_image) {
       formDataToSend.append("featured_image", formData.featured_image);
@@ -260,7 +263,7 @@ export function AdminBlogCMS() {
               New Post
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Blog Post</DialogTitle>
               <DialogDescription>
@@ -347,6 +350,18 @@ export function AdminBlogCMS() {
                   rows={10}
                   required
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_featured"
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_featured: checked })
+                  }
+                />
+                <Label htmlFor="is_featured" className="cursor-pointer">
+                  Feature this post on homepage
+                </Label>
               </div>
               <div className="flex gap-3 pt-4">
                 <Button 

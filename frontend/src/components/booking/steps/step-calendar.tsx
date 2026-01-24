@@ -42,7 +42,6 @@ export function StepCalendar() {
     queryKey: ["availableDates"],
     queryFn: async () => {
       const response = await appointmentsApi.getAvailableDates(60);
-      console.log("📅 Raw API response:", response.data?.dates);
       
       // Transform response - handle both string[] and object[] formats
       const rawDates = response.data?.dates || [];
@@ -59,7 +58,6 @@ export function StepCalendar() {
         return dateValue as string;
       }).filter(Boolean);
       
-      console.log("✅ Processed date strings:", dateStrings.slice(0, 5));
       return dateStrings;
     },
     staleTime: 60 * 1000,
@@ -77,18 +75,11 @@ export function StepCalendar() {
     queryFn: async () => {
       if (!selectedDate) return null;
       
-      console.log("🕐 Fetching slots for:", {
-        date: selectedDate,
-        modality: modality === "phone" ? "virtual" : modality,
-      });
-      
       const response = await appointmentsApi.getAvailableSlots({
         start_date: selectedDate,
         end_date: selectedDate,
         modality: modality === "phone" ? "virtual" : modality || undefined,
       });
-      
-      console.log("🕐 Slots API response:", response);
       
       if (!response.success) {
         console.error("❌ Slots API error:", response.error);
@@ -96,7 +87,6 @@ export function StepCalendar() {
       }
       
       const slotsForDate = response.data?.slots?.[selectedDate] || [];
-      console.log("✅ Slots for date:", selectedDate, slotsForDate);
       
       return slotsForDate;
     },
@@ -140,21 +130,13 @@ export function StepCalendar() {
   // Check if a date has available slots
   const isDateAvailable = useCallback(
     (dateStr: string) => {
-      const available = availableDates.includes(dateStr);
-      if (dateStr === format(new Date(), "yyyy-MM-dd")) {
-        console.log("🔍 Checking today:", dateStr, "Available:", available, "In array:", availableDates.slice(0, 3));
-      }
-      return available;
+      return availableDates.includes(dateStr);
     },
     [availableDates]
   );
 
   // Handle date selection - updates store directly
   const handleDateSelect = useCallback((dateStr: string) => {
-    console.log("🎯 Date clicked:", dateStr);
-    console.log("📋 Available dates:", availableDates);
-    console.log("✅ Is available?", availableDates.includes(dateStr));
-    
     setDateTime(dateStr, ""); // Clear time when date changes
     
     toast({
@@ -306,7 +288,6 @@ export function StepCalendar() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        console.log("🖱️ Button clicked for:", day.dateStr, "Disabled:", isDisabled);
                         if (!isDisabled) {
                           handleDateSelect(day.dateStr!);
                         }
@@ -404,8 +385,7 @@ export function StepCalendar() {
                   size="sm" 
                   onClick={() => {
                     // Show fallback slots
-                    const fallback = generateFallbackSlots(selectedDate!);
-                    console.log("Using fallback slots:", fallback);
+                    generateFallbackSlots(selectedDate!);
                   }}
                 >
                   Use Demo Times

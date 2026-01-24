@@ -156,9 +156,9 @@ export function HeroSection() {
             </h1>
 
             <p className="text-lg text-emerald-800/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Specialized care for diabetes, thyroid, PCOS, and obesity. Our evidence-based
-              approach combines medical expertise with sustainable lifestyle changes for
-              lasting results.
+              We offer specialized care for prediabetes, diabetes, fatty liver disease, and obesity.
+              Our approach is grounded in Lifestyle Medicine, which focuses on reducing the burden of lifestyle-related chronic metabolic conditions and autoimmune diseases such as rheumatoid arthritis, systemic lupus erythematosus (SLE), and thyroid disorders.
+              Through evidence-based lifestyle interventions, we aim not only to manage disease but to enhance overall health, improve quality of life, and promote longevity.
             </p>
 
             {/* Value props */}
@@ -200,24 +200,6 @@ export function HeroSection() {
                   <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                 </Link>
               </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="mt-14 pt-8 border-t border-emerald-200/50 grid grid-cols-3 gap-8">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ y: 20 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="text-center lg:text-left"
-                >
-                  <div className="font-serif text-display-xs lg:text-display-sm text-emerald-900">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-emerald-700/70">{stat.label}</div>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
 

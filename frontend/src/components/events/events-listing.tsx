@@ -404,16 +404,6 @@ function EventCard({ event, compact = false }: EventCardProps) {
               )}
             </div>
 
-            {/* Attendees */}
-            {event.max_attendees && (
-              <div className="flex items-center gap-2 text-gray-600">
-                <Users className="h-4 w-4 shrink-0" />
-                <span>
-                  {event.current_attendees || 0} / {event.max_attendees} registered
-                </span>
-              </div>
-            )}
-
             {/* Price */}
             {!compact && (
               <div className="pt-2 mt-2 border-t">

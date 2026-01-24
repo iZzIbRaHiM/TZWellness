@@ -86,20 +86,6 @@ export default function AboutPage() {
               chronic metabolic conditions through personalized care, lifestyle
               medicine, and evidence-based treatments.
             </p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-emerald-600">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                <span>10,000+ Patients Treated</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                <span>15+ Years Experience</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                <span>98% Satisfaction Rate</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>

@@ -23,7 +23,6 @@ export function StepCalendarV2() {
         console.error("Dates error:", error);
         throw error;
       }
-      console.log("✅ Dates loaded:", data);
       return (data || []) as string[];
     },
     retry: 1,
@@ -45,7 +44,6 @@ export function StepCalendarV2() {
         console.error("Slots error:", error);
         throw error;
       }
-      console.log("✅ Slots loaded for", localDate, ":", data);
       return (data || {}) as Record<string, Array<{ start_time: string; end_time: string }>>;
     },
     enabled: !!localDate,

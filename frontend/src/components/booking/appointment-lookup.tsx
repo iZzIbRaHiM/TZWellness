@@ -36,6 +36,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { formatDate } from "@/lib/utils";
 
 interface AppointmentResult {
@@ -57,6 +58,7 @@ interface AppointmentResult {
 }
 
 export function AppointmentLookup() {
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [reference, setReference] = useState("");
   const [email, setEmail] = useState("");
@@ -437,10 +439,10 @@ export function AppointmentLookup() {
       <p className="text-center text-sm text-gray-500">
         Need help?{" "}
         <a
-          href="tel:+1234567890"
+          href={settings.clinic_phone_href}
           className="text-emerald-600 hover:text-emerald-700"
         >
-          Call us at (555) 123-4567
+          Call us at {settings.clinic_phone}
         </a>
       </p>
     </div>

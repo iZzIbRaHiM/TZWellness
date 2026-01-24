@@ -5,8 +5,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Calendar, Phone, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export function CTASection() {
+  const { settings } = useSiteSettings();
   return (
     <section
       className="py-24 lg:py-32 bg-emerald-900 relative overflow-hidden"
@@ -74,9 +76,9 @@ export function CTASection() {
                 size="xl"
                 className="bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white hover:text-emerald-900 transition-all duration-300"
               >
-                <a href="tel:+1234567890">
+                <a href={settings.clinic_phone_href}>
                   <Phone className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Call (123) 456-7890
+                  Call {settings.clinic_phone}
                 </a>
               </Button>
             </div>

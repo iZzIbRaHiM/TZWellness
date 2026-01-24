@@ -81,7 +81,6 @@ export function AdminEventsCMS() {
     end_time: "",
     location: "",
     is_virtual: false,
-    max_attendees: 30,
     speaker: "",
     image: null as File | null,
   });
@@ -137,7 +136,6 @@ export function AdminEventsCMS() {
         end_time: "",
         location: "",
         is_virtual: false,
-        max_attendees: 30,
         speaker: "",
         image: null,
       });
@@ -258,7 +256,6 @@ export function AdminEventsCMS() {
       location_name: formData.is_virtual ? 'Online' : formData.location,
       location_address: formData.is_virtual ? null : formData.location,
       virtual_link: formData.is_virtual ? formData.location : null,
-      max_participants: formData.max_attendees, // FIXED: Changed from max_attendees to max_participants
       what_to_bring: formData.speaker || null, // Keep mapping (what_to_bring is correct field)
       is_published: true,
       is_featured: false,
@@ -338,20 +335,6 @@ export function AdminEventsCMS() {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max_attendees">Max Attendees</Label>
-                  <Input
-                    id="max_attendees"
-                    type="number"
-                    value={formData.max_attendees}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        max_attendees: parseInt(e.target.value),
-                      })
-                    }
-                  />
                 </div>
               </div>
 
@@ -517,9 +500,9 @@ export function AdminEventsCMS() {
               <Users className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Registrations</p>
+              <p className="text-sm text-gray-500">Total Events</p>
               <p className="text-2xl font-bold text-gray-900">
-                {events.reduce((sum, e) => sum + (e.registered_count || e.current_attendees || 0), 0)}
+                {events.length}
               </p>
             </div>
           </CardContent>
@@ -585,12 +568,6 @@ export function AdminEventsCMS() {
                     <MapPin className="h-4 w-4" />
                   )}
                   <span>{event.location}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    {event.registered_count || event.current_attendees || 0} / {event.max_attendees} registered
-                  </span>
                 </div>
               </div>
             </CardContent>

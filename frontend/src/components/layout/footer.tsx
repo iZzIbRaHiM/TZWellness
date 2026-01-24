@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from "@/lib/navigation-config";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const socialLinks = [
   { name: "Facebook", href: SOCIAL_LINKS[0].href, icon: Facebook },
@@ -13,6 +16,7 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { settings } = useSiteSettings();
   return (
     <footer className="bg-emerald-950 text-white" role="contentinfo">
       {/* Main footer content */}
@@ -36,13 +40,13 @@ export function Footer() {
 
             <div className="space-y-3 text-sm">
               <a
-                href={CONTACT_INFO.emailHref}
+                href={settings.clinic_email_href}
                 className="flex items-center gap-3 text-emerald-200/80 hover:text-white transition-colors duration-200"
               >
                 <div className="w-8 h-8 rounded-lg bg-emerald-800/50 flex items-center justify-center">
                   <Mail className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <span>{CONTACT_INFO.email}</span>
+                <span>{settings.clinic_email}</span>
               </a>
             </div>
           </div>
@@ -89,7 +93,7 @@ export function Footer() {
       <div className="container-fluid py-6">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-emerald-300">
-            © {new Date().getFullYear()} TZ Wellness. All rights reserved.
+            © {new Date().getFullYear()} {settings.clinic_name}. All rights reserved.
           </p>
 
           {/* Social links */}

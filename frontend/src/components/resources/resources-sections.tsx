@@ -30,6 +30,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { FAQSchema } from "@/components/seo/schemas";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 // Downloadable resources
 const downloads = [
@@ -151,6 +152,8 @@ const telehealthTips = [
 ];
 
 export function ResourcesSections() {
+  const { settings } = useSiteSettings();
+  
   return (
     <div className="space-y-16">
       <FAQSchema faqs={paymentFAQs} />
@@ -253,9 +256,11 @@ export function ResourcesSections() {
                   options.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <Button variant="outline" className="justify-start">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Billing: (555) 123-4567
+                  <Button variant="outline" className="justify-start" asChild>
+                    <a href={settings.clinic_phone_href}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Call Billing: {settings.clinic_phone}
+                    </a>
                   </Button>
                   <Button variant="outline" className="justify-start">
                     <Calendar className="h-4 w-4 mr-2" />
@@ -379,7 +384,7 @@ export function ResourcesSections() {
             size="lg"
             className="border-white text-white hover:bg-white/10"
           >
-            <a href="tel:+15551234567">Call Us</a>
+            <a href={settings.clinic_phone_href}>Call Us</a>
           </Button>
         </div>
       </motion.section>
