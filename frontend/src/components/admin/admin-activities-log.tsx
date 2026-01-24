@@ -311,13 +311,13 @@ export function AdminActivitiesLog() {
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 capitalize">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 capitalize break-words">
                           {activity.action.replace(/_/g, " ")}
                         </p>
-                        <p className="text-sm text-gray-600 mt-0.5">
+                        <p className="text-sm text-gray-600 mt-0.5 break-words">
                           {activity.description}
                         </p>
                       </div>
@@ -333,14 +333,14 @@ export function AdminActivitiesLog() {
 
                     {/* Metadata (if available) */}
                     {activity.metadata && Object.keys(activity.metadata).length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <div className="mt-2 flex flex-wrap gap-2 overflow-x-hidden">
                         {Object.entries(activity.metadata).map(([key, value]) => (
                           <span
                             key={key}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"
+                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 max-w-full break-all"
                           >
-                            <span className="text-gray-500">{key}:</span>
-                            <span className="ml-1">{String(value)}</span>
+                            <span className="text-gray-500 flex-shrink-0">{key}:</span>
+                            <span className="ml-1 truncate">{String(value)}</span>
                           </span>
                         ))}
                       </div>
