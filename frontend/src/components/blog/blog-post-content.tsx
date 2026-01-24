@@ -165,14 +165,14 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative h-64 sm:h-80 bg-emerald-100 rounded-xl mb-8 overflow-hidden"
+        className="relative w-full aspect-video bg-emerald-100 rounded-xl mb-8 overflow-hidden"
       >
         {post.featured_image ? (
           <Image
             src={post.featured_image}
             alt={post.title}
             fill
-            className="object-cover"
+            className="object-contain"
             sizes="(max-width: 768px) 100vw, 768px"
             priority
           />
