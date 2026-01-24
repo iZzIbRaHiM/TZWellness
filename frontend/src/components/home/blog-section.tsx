@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Calendar, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, Calendar, ArrowRight, Loader2, FileText } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { blogApi, BlogPost } from "@/lib/api";
 
@@ -56,16 +56,27 @@ const fallbackPosts = [
 ];
 
 export function BlogSection() {
-  // Fetch blog posts from API
+  // Fetch latest 3 featured blog posts from API
   const { data, isLoading, error } = useQuery({
-    queryKey: ["blog-posts-home"],
-    queryFn: () => blogApi.getPosts({ featured: true }),
+    queryKey: ["blog-posts-home", "featured"],
+    queryFn: async () => {
+      const response = await blogApi.getPosts({ featured: true });
+      if (!response.success || !response.data) {
+        return { posts: [], count: 0 };
+      }
+      // Get latest 3 featured posts
+      const featuredPosts = response.data.slice(0, 3);
+      return { posts: featuredPosts, count: featuredPosts.length };
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Extract posts with defensive handling - limit to 3 for home page
-  const apiPosts = data?.data || [];
-  const posts = apiPosts.length > 0 ? apiPosts.slice(0, 3) : fallbackPosts;
+  // Extract posts with defensive handling
+  const apiPosts = data?.posts || [];
+  const hasApiPosts = apiPosts.length > 0;
+  
+  // Use API posts if available, otherwise use fallback
+  const posts = hasApiPosts ? apiPosts : fallbackPosts.slice(0, 3);
 
   // Helper to get category name safely
   const getCategoryName = (post: any): string => {
@@ -108,8 +119,17 @@ export function BlogSection() {
           </div>
         )}
 
+        {/* Empty State - No Featured Blogs */}
+        {!isLoading && posts.length === 0 && (
+          <div className="text-center py-16">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-500 text-lg">No featured articles available at the moment.</p>
+            <p className="text-gray-400 text-sm mt-2">Check back soon for new content!</p>
+          </div>
+        )}
+
         {/* Blog Cards Grid */}
-        {!isLoading && (
+        {!isLoading && posts.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {posts.map((post: any, index: number) => (
               <motion.div

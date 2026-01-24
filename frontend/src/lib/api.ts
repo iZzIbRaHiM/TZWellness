@@ -919,15 +919,18 @@ export const blogApi = {
           category:blog_categories(*)
         `)
         .eq('is_published', true)
-        .order('published_at', { ascending: false })
 
-      if (params?.featured) {
+      // Filter by featured status if requested
+      if (params?.featured === true) {
         query = query.eq('is_featured', true)
       }
 
       if (params?.category) {
         query = query.eq('category_id', params.category)
       }
+
+      // Order by published date (newest first)
+      query = query.order('published_at', { ascending: false })
 
       const { data, error } = await query
 

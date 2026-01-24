@@ -180,7 +180,7 @@ export function AdminActivitiesLog() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div>
