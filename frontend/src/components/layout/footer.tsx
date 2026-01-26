@@ -3,16 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Mail, Facebook, Instagram } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { FOOTER_LINKS, SOCIAL_LINKS, CONTACT_INFO } from "@/lib/navigation-config";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const socialLinks = [
   { name: "Facebook", href: SOCIAL_LINKS[0].href, icon: Facebook },
-  { name: "Twitter", href: SOCIAL_LINKS[1].href, icon: Twitter },
   { name: "Instagram", href: SOCIAL_LINKS[2].href, icon: Instagram },
-  { name: "LinkedIn", href: SOCIAL_LINKS[3].href, icon: Linkedin },
 ];
 
 export function Footer() {
