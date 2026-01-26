@@ -7,13 +7,13 @@ const certifications = [
   {
     name: "PALM",
     fullName: "Pakistan Association of Lifestyle Medicine",
-    logo: "/images/certifications/palm-logo.png",
+    logo: "/images/certifications/Palmm.png",
     description: "Certified by Pakistan's leading lifestyle medicine organization",
   },
   {
     name: "IBLM",
     fullName: "International Board of Lifestyle Medicine",
-    logo: "/images/certifications/iblm-logo.png",
+    logo: "/images/certifications/IBLM-logo.png",
     description: "Internationally recognized lifestyle medicine certification",
   },
 ];
