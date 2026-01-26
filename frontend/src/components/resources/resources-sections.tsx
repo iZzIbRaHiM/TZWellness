@@ -26,11 +26,12 @@ import {
   ClipboardList,
   HeartPulse,
   CheckCircle,
-  Phone,
+  MessageCircle,
   Calendar,
 } from "lucide-react";
 import { FAQSchema } from "@/components/seo/schemas";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink, getGeneralInquiryMessage } from "@/lib/whatsapp";
 
 // Downloadable resources
 const downloads = [
@@ -257,9 +258,9 @@ export function ResourcesSections() {
                 </p>
                 <div className="flex flex-col gap-3">
                   <Button variant="outline" className="justify-start" asChild>
-                    <a href={settings.clinic_phone_href}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call Billing: {settings.clinic_phone}
+                    <a href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I have a question about billing.")} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      WhatsApp Billing
                     </a>
                   </Button>
                   <Button variant="outline" className="justify-start">
@@ -351,9 +352,11 @@ export function ResourcesSections() {
                   Our team can help you test your setup before your appointment
                 </p>
               </div>
-              <Button variant="default">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact Support
+              <Button variant="default" asChild>
+                <a href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need technical help with my virtual appointment setup.")} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp Support
+                </a>
               </Button>
             </div>
           </CardContent>
@@ -384,7 +387,10 @@ export function ResourcesSections() {
             size="lg"
             className="border-white text-white hover:bg-white/10"
           >
-            <a href={settings.clinic_phone_href}>Call Us</a>
+            <a href={getWhatsAppLink(settings.clinic_phone_href, getGeneralInquiryMessage())} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              WhatsApp Us
+            </a>
           </Button>
         </div>
       </motion.section>

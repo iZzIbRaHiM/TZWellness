@@ -14,6 +14,7 @@ import { StepDetails } from "./steps/step-details";
 import { StepSuccess } from "./steps/step-success";
 import Link from "next/link";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 const steps = [
   { id: 1, title: "Service", description: "What brings you in?" },
@@ -191,12 +192,14 @@ export function BookingWizard() {
             transition={{ delay: 0.3 }}
             className="text-center text-sm text-emerald-600/70 mt-8"
           >
-            Need assistance? Call us at{" "}
+            Need assistance?{" "}
             <a
-              href={settings.clinic_phone_href}
+              href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need help with booking an appointment.")}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-terracotta hover:underline font-medium"
             >
-              {settings.clinic_phone}
+              WhatsApp us
             </a>
           </motion.p>
         )}

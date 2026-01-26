@@ -18,10 +18,11 @@ import {
   MapPin,
   CheckCircle,
   ArrowRight,
-  Phone,
+  MessageCircle,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink, getServiceInquiryMessage } from "@/lib/whatsapp";
 
 interface ServiceDetailProps {
   service: {
@@ -102,9 +103,9 @@ export function ServiceDetail({ service }: ServiceDetailProps) {
           size="xl"
           className="border-emerald-600 text-emerald-700 hover:bg-emerald-50"
         >
-          <a href={settings.clinic_phone_href}>
-            <Phone className="mr-2 h-5 w-5" />
-            Call to Discuss
+          <a href={getWhatsAppLink(settings.clinic_phone_href, getServiceInquiryMessage(service.title))} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="mr-2 h-5 w-5" />
+            WhatsApp Us
           </a>
         </Button>
       </motion.div>

@@ -3,9 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Calendar, Phone, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, MessageCircle, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink, getGeneralInquiryMessage } from "@/lib/whatsapp";
 
 export function CTASection() {
   const { settings } = useSiteSettings();
@@ -75,9 +76,9 @@ export function CTASection() {
                 size="xl"
                 className="bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white hover:bg-white hover:text-emerald-900 transition-all duration-300"
               >
-                <a href={settings.clinic_phone_href}>
-                  <Phone className="mr-2 h-5 w-5" aria-hidden="true" />
-                  Call {settings.clinic_phone}
+                <a href={getWhatsAppLink(settings.clinic_phone_href, getGeneralInquiryMessage())} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" />
+                  WhatsApp Us
                 </a>
               </Button>
             </div>

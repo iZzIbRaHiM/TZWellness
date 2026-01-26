@@ -34,10 +34,12 @@ import {
   CheckCircle,
   Loader2,
   XCircle,
+  MessageCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { formatDate } from "@/lib/utils";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 interface AppointmentResult {
   id: string;
@@ -439,10 +441,12 @@ export function AppointmentLookup() {
       <p className="text-center text-sm text-gray-500">
         Need help?{" "}
         <a
-          href={settings.clinic_phone_href}
+          href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need help checking my appointment status.")}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-emerald-600 hover:text-emerald-700"
         >
-          Call us at {settings.clinic_phone}
+          WhatsApp us
         </a>
       </p>
     </div>
