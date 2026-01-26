@@ -3,101 +3,96 @@
 -- ============================================
 -- CHANGE: Only block slots for 'approved' or 'confirmed' appointments
 -- PRESERVES: All existing logic from all_querries.sql (lines 431-477)
--- COMPATIBLE: 100% with existing schema and function signature
+-- COMPATIBLE: 100% with existing schema (NO time_slots table)
 -- ============================================
 
 CREATE OR REPLACE FUNCTION get_available_slots(
-  start_date TEXT,          -- ✅ CORRECT: TEXT type (not date)
-  end_date TEXT,            -- ✅ CORRECT: TEXT type (not date)
+  start_date TEXT,
+  end_date TEXT,
   modality_filter TEXT DEFAULT NULL
 )
-RETURNS JSONB
-LANGUAGE plpgsql
-AS $$
+RETURNS JSONB AS $$
 DECLARE
   result JSONB := '{}'::JSONB;
-  iter_date DATE;
-  day_slots JSONB;
-  slot_record RECORD;
+  current_date DATE;
+  slot_time TIME;
+  slot_end TIME;
+  slot_info JSONB;
+  day_of_week INTEGER;
+  wa_record RECORD;
   booked_count INTEGER;
 BEGIN
-  -- Convert text dates to date type for iteration
-  iter_date := start_date::DATE;
-  
-  WHILE iter_date <= end_date::DATE LOOP
-    day_slots := '[]'::JSONB;
+  -- Loop through each date in the range
+  FOR current_date IN 
+    SELECT generate_series(start_date::TIMESTAMP, end_date::TIMESTAMP, '1 day'::INTERVAL)::DATE
+  LOOP
+    -- Convert PostgreSQL day (0=Sunday) to ISO day (0=Monday)
+    day_of_week := ((EXTRACT(DOW FROM current_date)::INTEGER + 6) % 7);
     
-    -- Get available time slots for this day
-    -- ✅ PRESERVED: ISO day conversion from all_querries.sql
-    -- ✅ PRESERVED: weekly_availability table join
-    -- ✅ PRESERVED: exception_dates handling
-    -- ✅ PRESERVED: modality filtering (allows_virtual/allows_in_person)
-    FOR slot_record IN
-      SELECT 
-        ts.time_slot,
-        ts.duration_minutes,
-        wa.allows_virtual,
-        wa.allows_in_person,
-        wa.max_appointments_per_slot
-      FROM time_slots ts
-      JOIN weekly_availability wa ON wa.id = ts.weekly_availability_id
-      WHERE 
-        -- Check day of week matches (ISO day conversion)
-        wa.day_of_week = ((EXTRACT(DOW FROM iter_date)::INTEGER + 6) % 7)
+    -- Get weekly availability for this day
+    FOR wa_record IN
+      SELECT wa.start_time, wa.end_time, wa.allows_virtual, wa.allows_in_person
+      FROM weekly_availability wa
+      WHERE wa.day_of_week = day_of_week
         AND wa.is_active = true
-        
         -- Check date is not in exception_dates (holidays/blocked dates)
         AND NOT EXISTS (
           SELECT 1 FROM exception_dates ed
-          WHERE ed.exception_date = iter_date
+          WHERE ed.exception_date = current_date
             AND ed.is_available = false
         )
-        
         -- Apply modality filter if provided
         AND (
           modality_filter IS NULL OR
           (modality_filter = 'virtual' AND wa.allows_virtual = true) OR
           (modality_filter = 'in-person' AND wa.allows_in_person = true)
         )
-      ORDER BY ts.time_slot
     LOOP
-      -- ⭐ KEY CHANGE: Only count appointments with status 'approved' or 'confirmed'
-      -- This allows multiple 'pending' appointments for the same slot
-      -- Admin can then choose which one to approve
-      SELECT COUNT(*) INTO booked_count
-      FROM appointments
-      WHERE appointment_date = iter_date
-        AND appointment_time = slot_record.time_slot
-        AND status IN ('approved', 'confirmed')  -- ⭐ CHANGED from: status != 'cancelled'
-        AND (
-          modality_filter IS NULL OR
-          (modality_filter = 'virtual' AND modality = 'virtual') OR
-          (modality_filter = 'in-person' AND modality = 'in-person')
-        );
+      -- Generate 30-minute slots between start_time and end_time
+      slot_time := wa_record.start_time;
       
-      -- Add slot if not fully booked
-      IF booked_count < slot_record.max_appointments_per_slot THEN
-        day_slots := day_slots || jsonb_build_object(
-          'time', slot_record.time_slot::TEXT,
-          'duration', slot_record.duration_minutes,
-          'available_virtual', slot_record.allows_virtual,
-          'available_in_person', slot_record.allows_in_person,
-          'spots_left', slot_record.max_appointments_per_slot - booked_count
-        );
-      END IF;
+      WHILE slot_time < wa_record.end_time LOOP
+        slot_end := slot_time + INTERVAL '30 minutes';
+        
+        -- ⭐ KEY CHANGE: Only count appointments with status 'approved' or 'confirmed'
+        -- This allows multiple 'pending' appointments for the same slot
+        SELECT COUNT(*) INTO booked_count
+        FROM appointments
+        WHERE appointment_date = current_date
+          AND appointment_time = slot_time
+          AND status IN ('approved', 'confirmed')  -- ⭐ CHANGED from: status != 'cancelled'
+          AND (
+            modality_filter IS NULL OR
+            (modality_filter = 'virtual' AND modality = 'virtual') OR
+            (modality_filter = 'in-person' AND modality = 'in-person')
+          );
+        
+        -- Add slot if not booked (assuming max 1 per slot, adjust if needed)
+        IF booked_count = 0 THEN
+          slot_info := jsonb_build_object(
+            'time', slot_time::TEXT,
+            'end_time', slot_end::TEXT,
+            'duration', 30,
+            'available_virtual', wa_record.allows_virtual,
+            'available_in_person', wa_record.allows_in_person,
+            'available', true
+          );
+          
+          result := jsonb_set(
+            result,
+            ARRAY[current_date::TEXT],
+            COALESCE(result->current_date::TEXT, '[]'::JSONB) || slot_info
+          );
+        END IF;
+        
+        slot_time := slot_end;
+      END LOOP;
     END LOOP;
-    
-    -- Add day's slots to result if any available
-    IF jsonb_array_length(day_slots) > 0 THEN
-      result := result || jsonb_build_object(iter_date::TEXT, day_slots);
-    END IF;
-    
-    iter_date := iter_date + 1;
   END LOOP;
-  
+
   RETURN result;
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 -- ============================================
 -- ADMIN WORKFLOW DOCUMENTATION
