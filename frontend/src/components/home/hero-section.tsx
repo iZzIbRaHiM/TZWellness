@@ -203,97 +203,73 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Hero Visual Element - Organic Breathing Blob */}
+          {/* Organic Animated Blob */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="relative lg:pl-8 flex items-center justify-center"
           >
-            {/* Organic blob container */}
             <div className="relative w-full max-w-lg aspect-square">
-              {/* SVG Morphing Blob */}
+              {/* Organic Breathing Blob */}
               <svg
-                viewBox="0 0 500 500"
+                viewBox="0 0 400 400"
                 className="w-full h-full"
-                xmlns="http://www.w3.org/2000/svg"
+                style={{ filter: 'drop-shadow(0 20px 60px rgba(16, 185, 129, 0.15))' }}
               >
                 <defs>
                   <linearGradient id="blobGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#10b981', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: '#059669', stopOpacity: 1 }} />
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.95" />
+                    <stop offset="50%" stopColor="#059669" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#047857" stopOpacity="0.9" />
                   </linearGradient>
-                  <filter id="blobGlow">
-                    <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-                    <feMerge>
-                      <feMergeNode in="coloredBlur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
                 </defs>
                 
-                {/* Morphing blob path */}
                 <motion.path
+                  d="M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
                   fill="url(#blobGradient)"
-                  filter="url(#blobGlow)"
-                  initial={{
-                    d: "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z"
-                  }}
                   animate={{
                     d: [
-                      // Keyframe 1: Starting shape - slightly compressed top
-                      "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z",
-                      
-                      // Keyframe 2: Expand right, compress left
-                      "M250,95 C310,95 365,115 395,155 C425,195 435,245 415,295 C395,345 355,380 290,390 C225,400 165,385 125,345 C85,305 75,250 90,195 C105,140 155,95 215,95 C235,95 245,95 250,95 Z",
-                      
-                      // Keyframe 3: Expand bottom, compress top
-                      "M250,105 C300,105 345,125 375,165 C405,205 415,255 395,310 C375,365 330,400 270,405 C210,410 155,395 115,355 C75,315 65,255 80,200 C95,145 145,105 205,105 C225,105 240,105 250,105 Z",
-                      
-                      // Keyframe 4: Expand left, compress right  
-                      "M250,100 C295,100 335,120 365,160 C395,200 405,250 385,305 C365,360 320,390 265,398 C210,406 160,391 125,351 C90,311 80,251 95,196 C110,141 160,100 220,100 C235,100 245,100 250,100 Z",
-                      
-                      // Keyframe 5: Gentle squeeze all around
-                      "M250,102 C303,102 348,122 378,162 C408,202 418,252 398,302 C378,352 338,387 278,396 C218,405 163,390 123,350 C83,310 73,250 88,195 C103,140 153,102 213,102 C233,102 243,102 250,102 Z",
-                      
-                      // Keyframe 6: Expand top right, compress bottom left
-                      "M250,98 C308,98 355,118 385,158 C415,198 425,248 405,298 C385,348 345,383 283,393 C221,403 166,388 126,348 C86,308 76,248 91,193 C106,138 156,98 216,98 C236,98 246,98 250,98 Z",
-                      
-                      // Return to start
-                      "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z"
+                      // State 1: Base form
+                      "M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z",
+                      // State 2: Expanded right
+                      "M200,55 Q290,75 330,140 T360,225 Q365,275 315,325 T225,355 Q145,345 95,295 T65,195 Q55,125 115,85 T200,55 Z",
+                      // State 3: Compressed vertically
+                      "M200,60 Q275,80 315,145 T345,230 Q350,270 305,315 T215,350 Q150,340 100,290 T70,200 Q60,135 120,90 T200,60 Z",
+                      // State 4: Expanded left
+                      "M200,52 Q285,68 325,135 T355,218 Q358,278 308,328 T218,358 Q138,348 88,298 T58,188 Q48,118 108,78 T200,52 Z",
+                      // State 5: Asymmetric bulge
+                      "M200,58 Q278,73 318,138 T348,228 Q355,285 312,332 T222,362 Q142,352 92,302 T62,192 Q52,122 112,82 T200,58 Z",
+                      // State 6: Ripple effect
+                      "M200,54 Q282,72 322,132 T352,222 Q362,282 314,334 T224,364 Q144,354 94,304 T64,194 Q54,124 114,84 T200,54 Z",
+                      // Back to base
+                      "M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
                     ]
                   }}
                   transition={{
-                    duration: 18,
+                    duration: 12,
                     repeat: Infinity,
                     ease: "easeInOut",
                     times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]
                   }}
                 />
                 
-                {/* Secondary subtle layer for depth */}
+                {/* Secondary breathing effect */}
                 <motion.path
-                  fill="rgba(16, 185, 129, 0.3)"
-                  initial={{
-                    d: "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z"
-                  }}
+                  d="M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
+                  fill="rgba(255, 255, 255, 0.1)"
                   animate={{
                     d: [
-                      "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z",
-                      "M250,118 C298,118 340,136 365,170 C390,204 398,246 383,286 C368,326 333,353 288,361 C243,369 198,358 166,328 C134,298 126,251 138,208 C150,165 188,118 233,118 C243,118 248,118 250,118 Z",
-                      "M250,122 C293,122 333,140 358,174 C383,208 391,250 376,290 C361,330 328,357 283,365 C238,373 193,362 161,332 C129,302 121,255 133,212 C145,169 183,122 228,122 C238,122 245,122 250,122 Z",
-                      "M250,120 C296,120 336,138 361,172 C386,206 394,248 379,288 C364,328 331,355 286,363 C241,371 196,360 164,330 C132,300 124,253 136,210 C148,167 186,120 231,120 C241,120 246,120 250,120 Z",
-                      "M250,121 C294,121 334,139 359,173 C384,207 392,249 377,289 C362,329 329,356 284,364 C239,372 194,361 162,331 C130,301 122,254 134,211 C146,168 184,121 229,121 C239,121 245,121 250,121 Z",
-                      "M250,119 C297,119 337,137 362,171 C387,205 395,247 380,287 C365,327 332,354 287,362 C242,370 197,359 165,329 C133,299 125,252 137,209 C149,166 187,119 232,119 C242,119 247,119 250,119 Z",
-                      "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z"
-                    ]
+                      "M200,55 Q278,72 318,132 T348,222 Q358,278 308,328 T218,358 Q142,348 92,298 T62,192 Q52,122 112,82 T200,55 Z",
+                      "M200,60 Q285,68 325,135 T355,215 Q365,275 315,325 T225,355 Q145,345 95,295 T65,195 Q55,125 115,85 T200,60 Z",
+                      "M200,55 Q278,72 318,132 T348,222 Q358,278 308,328 T218,358 Q142,348 92,298 T62,192 Q52,122 112,82 T200,55 Z"
+                    ],
+                    opacity: [0.1, 0.15, 0.1]
                   }}
                   transition={{
-                    duration: 18,
+                    duration: 8,
                     repeat: Infinity,
-                    ease: "easeInOut",
-                    times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1],
-                    delay: 0.3
+                    ease: "easeInOut"
                   }}
                 />
               </svg>
@@ -303,7 +279,7 @@ export function HeroSection() {
                 initial={{ y: 30, x: -20, opacity: 0 }}
                 animate={{ y: 0, x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 1 }}
-                className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs z-10"
+                className="absolute -bottom-8 -left-8 glass-card p-4 shadow-elevated-md max-w-xs z-10"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
