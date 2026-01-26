@@ -19,9 +19,9 @@ export default function HomePage() {
     <>
       <MedicalBusinessSchema />
       <HeroSection />
+      <PackagesSection />
       <BlogSection />
       <ValuePropsSection />
-      <PackagesSection />
       <ServicesSection />
       <TestimonialsSection />
       <CTASection />

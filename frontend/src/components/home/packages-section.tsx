@@ -1,228 +1,158 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle, 
-  Calendar, 
-  Clock, 
-  Leaf, 
-  Heart,
-  Activity,
-  BookOpen,
-  Video,
-  Apple,
-  Brain,
-  Target,
-  Sparkles,
-} from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 const packages = [
   {
-    id: "reversal-plan",
     name: "MY REVERSAL PLAN",
-    tagline: "Foundation for Healing",
-    price: "Contact for pricing",
     duration: "3 Months",
+    badge: "Popular",
     bestFor: [
-      "Pre-diabetes",
-      "New onset diabetes mellitus",
-      "Fatty liver (initial stages)",
-      "General health optimization",
+      "Pre-diabetes or new diabetes",
+      "Initial fatty liver",
     ],
     includes: [
-      { icon: Apple, text: "3-month personalized nutrition plan" },
-      { icon: Calendar, text: "2 follow-up sessions (at 1.5 & 3 months)" },
-      { icon: Heart, text: "Bone broth recipe for gut healing" },
-      { icon: BookOpen, text: "4 rules of correct eating guide" },
-      { icon: Activity, text: "Yoga sessions - 3 per week" },
-      { icon: Brain, text: "Meditation sessions - 2 per week" },
-      { icon: Target, text: "Reversal tracker notebook" },
+      "3 months nutrition plan",
+      "2 follow up sessions at 1.5 month and 3 month",
+      "Bone broth recipie",
+      "4 eating rules",
+      "Yoga 3 times a week",
+      "Meditation 2 times a week",
+      "Reversal tracker notebook",
     ],
-    color: "emerald",
-    gradient: "from-emerald-50 to-teal-50",
-    badgeColor: "bg-emerald-600",
+    gradient: "from-emerald-500 to-teal-600",
   },
   {
-    id: "reset-journey",
     name: "MY RESET JOURNEY",
-    tagline: "Complete Transformation",
-    price: "Contact for pricing",
-    duration: "6 to 9 Months",
+    duration: "6-9 Months",
+    badge: "Comprehensive",
     bestFor: [
-      "Long-duration diabetes",
-      "Advanced fatty liver disease",
-      "Significant weight reduction goals",
-      "Autoimmune diseases",
+      "Long diabetes",
+      "Advanced fatty liver",
+      "Weight reduction",
+      "Autoimmune conditions",
     ],
     includes: [
-      { icon: Sparkles, text: "Everything in MY REVERSAL PLAN" },
-      { icon: Apple, text: "Extended 6-9 month nutrition plan" },
-      { icon: Calendar, text: "Additional follow-up sessions" },
-      { icon: Heart, text: "Advanced metabolic protocols" },
-      { icon: BookOpen, text: "Comprehensive lifestyle guides" },
-      { icon: Activity, text: "Enhanced yoga & movement therapy" },
-      { icon: Brain, text: "Advanced meditation & stress management" },
-      { icon: Target, text: "Extended reversal tracking & analytics" },
+      "6-9 months nutrition plan",
+      "4 follow up sessions throughout journey",
+      "Bone broth recipie",
+      "4 eating rules",
+      "Yoga 3 times a week",
+      "Meditation 2 times a week",
+      "Reversal tracker notebook",
     ],
-    color: "emerald",
-    gradient: "from-emerald-600 to-emerald-800",
-    badgeColor: "bg-terracotta",
-    featured: true,
+    gradient: "from-teal-500 to-cyan-600",
   },
 ];
 
 export function PackagesSection() {
+  const { settings } = useSiteSettings();
+  
+  // Convert tel: link to WhatsApp link
+  const whatsappNumber = settings.clinic_phone_href?.replace("tel:+", "").replace(/\D/g, "");
+  const whatsappLink = `https://wa.me/${whatsappNumber}`;
+
   return (
-    <section className="py-20 bg-gradient-to-br from-sand-50 via-white to-emerald-50">
-      <div className="container-fluid">
-        {/* Section Header */}
+    <section className="py-20 bg-gradient-to-b from-white to-emerald-50/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center mb-16"
         >
-          <Badge className="mb-4 bg-emerald-100 text-emerald-800 border-0">
-            Healing Packages
-          </Badge>
-          <h2 className="font-serif text-display-sm lg:text-display-md text-emerald-950 mb-4">
-            Choose Your <span className="italic text-terracotta">Healing Journey</span>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Choose Your{" "}
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Healing Journey
+            </span>
           </h2>
-          <p className="text-lg text-emerald-700/80">
-            Structured programs designed to reverse disease and restore your health naturally. 
-            Each package includes personalized care, lifestyle coaching, and continuous support.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Personalized programs designed to support your wellness goals
           </p>
         </motion.div>
 
         {/* Packages Grid */}
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {packages.map((pkg, index) => (
             <motion.div
-              key={pkg.id}
+              key={pkg.name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
+              className="relative"
             >
-              <Card 
-                className={`h-full relative overflow-hidden border-2 ${
-                  pkg.featured 
-                    ? "border-terracotta shadow-elevated-lg" 
-                    : "border-emerald-200 shadow-elevated-sm hover:shadow-elevated-md"
-                } transition-all duration-300`}
-              >
-                {/* Featured Badge */}
-                {pkg.featured && (
-                  <div className="absolute top-0 right-0">
-                    <div className="bg-terracotta text-white px-6 py-1 text-sm font-semibold">
-                      Most Popular
-                    </div>
+              {/* Card */}
+              <div className="relative h-full bg-white rounded-2xl border-2 border-gray-100 overflow-hidden hover:border-emerald-200 transition-all duration-300 hover:shadow-xl">
+                {/* Badge */}
+                {pkg.badge && (
+                  <div className="absolute top-6 right-6 z-10">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${pkg.gradient} text-white shadow-lg`}>
+                      {pkg.badge}
+                    </span>
                   </div>
                 )}
 
-                {/* Card Header with Gradient */}
-                <CardHeader className={`bg-gradient-to-br ${pkg.featured ? pkg.gradient : 'from-emerald-50 to-white'} ${pkg.featured ? 'text-white' : 'text-emerald-950'} pb-8`}>
-                  <div className="space-y-2">
-                    <CardTitle className={`font-serif text-3xl ${pkg.featured ? 'text-white' : 'text-emerald-950'}`}>
-                      {pkg.name}
-                    </CardTitle>
-                    <CardDescription className={pkg.featured ? 'text-emerald-100' : 'text-emerald-700'}>
-                      {pkg.tagline}
-                    </CardDescription>
-                    <div className="flex items-baseline gap-2 pt-4">
-                      <span className={`text-sm font-medium ${pkg.featured ? 'text-emerald-100' : 'text-emerald-700'}`}>
-                        Duration:
-                      </span>
-                      <span className={`text-2xl font-bold ${pkg.featured ? 'text-white' : 'text-emerald-900'}`}>
-                        {pkg.duration}
-                      </span>
-                    </div>
+                {/* Gradient Header */}
+                <div className={`bg-gradient-to-br ${pkg.gradient} p-8 text-white`}>
+                  <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="text-lg font-medium">{pkg.duration}</span>
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="pt-8 pb-6">
-                  {/* Best For Section */}
-                  <div className="mb-8">
-                    <h4 className="font-semibold text-emerald-950 mb-3 flex items-center gap-2">
-                      <Leaf className="h-4 w-4 text-emerald-600" />
+                {/* Content */}
+                <div className="p-8">
+                  {/* Best For */}
+                  <div className="mb-6">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
                       Best For:
                     </h4>
                     <ul className="space-y-2">
                       {pkg.bestFor.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-emerald-700">
-                          <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  {/* Includes Section */}
-                  <div>
-                    <h4 className="font-semibold text-emerald-950 mb-3 flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-terracotta" />
-                      What's Included:
+                  {/* Includes */}
+                  <div className="mb-8">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                      Includes:
                     </h4>
-                    <ul className="space-y-3">
-                      {pkg.includes.map((item, i) => {
-                        const Icon = item.icon;
-                        return (
-                          <li key={i} className="flex items-start gap-3 text-sm text-emerald-700">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                              <Icon className="h-4 w-4 text-emerald-600" />
-                            </div>
-                            <span className="pt-1">{item.text}</span>
-                          </li>
-                        );
-                      })}
+                    <ul className="space-y-2">
+                      {pkg.includes.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <span className="text-emerald-600">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                </CardContent>
 
-                <CardFooter className="flex flex-col gap-3 pt-6 border-t bg-sand-50">
-                  <Button 
-                    asChild 
-                    variant={pkg.featured ? "cta" : "default"}
-                    size="lg" 
-                    className="w-full"
+                  {/* CTA Button */}
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block w-full text-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r ${pkg.gradient} text-white hover:shadow-lg hover:scale-105`}
                   >
-                    <Link href="/appointments">
-                      <Calendar className="mr-2 h-5 w-5" />
-                      Book Consultation
-                    </Link>
-                  </Button>
-                  <p className="text-xs text-center text-emerald-600">
-                    Free initial consultation • Personalized plan • Medical supervision
-                  </p>
-                </CardFooter>
-              </Card>
+                    Start Now
+                  </a>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
-        >
-          <p className="text-emerald-700/80 mb-4">
-            Not sure which package is right for you?
-          </p>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/appointments">
-              Schedule a Free Consultation
-            </Link>
-          </Button>
-        </motion.div>
       </div>
     </section>
   );
