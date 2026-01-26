@@ -15,10 +15,10 @@ export interface SiteSettings {
 
 const DEFAULT_SETTINGS: SiteSettings = {
   clinic_name: "TZ Wellness",
-  clinic_email: "support@tzwellness.com",
+  clinic_email: "tzwellnesscentre0@gmail.com",
   clinic_phone: "(555) 123-4567",
   clinic_phone_href: "tel:+15551234567",
-  clinic_email_href: "mailto:support@tzwellness.com",
+  clinic_email_href: "mailto:tzwellnesscentre0@gmail.com",
   clinic_address: undefined,
   business_hours: undefined,
 };

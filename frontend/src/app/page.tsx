@@ -6,6 +6,7 @@ import { PackagesSection } from "@/components/home/packages-section";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { BlogSection } from "@/components/home/blog-section";
 import { CTASection } from "@/components/home/cta-section";
+import { CertificationsSection } from "@/components/home/certifications-section";
 import { MedicalBusinessSchema } from "@/components/seo/schemas";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function HomePage() {
       <PackagesSection />
       <BlogSection />
       <ValuePropsSection />
+      <CertificationsSection />
       <ServicesSection />
       <TestimonialsSection />
       <CTASection />

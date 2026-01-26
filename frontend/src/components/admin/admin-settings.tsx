@@ -238,8 +238,8 @@ export function AdminSettings() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="email_notifications">Email Notifications</Label>
-                  <p className="text-sm text-gray-500">Receive email notifications for important updates</p>
+                  <Label htmlFor="email_notifications">WhatsApp Notifications</Label>
+                  <p className="text-sm text-gray-500">Receive WhatsApp notifications for important updates</p>
                 </div>
                 <Switch
                   id="email_notifications"
@@ -322,7 +322,7 @@ export function AdminSettings() {
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label htmlFor="auto_send_confirmations">Auto-send Confirmations</Label>
-                  <p className="text-sm text-gray-500">Automatically send confirmation emails</p>
+                  <p className="text-sm text-gray-500">Automatically send WhatsApp confirmations</p>
                 </div>
                 <Switch
                   id="auto_send_confirmations"

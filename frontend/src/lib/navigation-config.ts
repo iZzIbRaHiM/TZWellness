@@ -43,9 +43,9 @@ export const FOOTER_LINKS = {
  * SOCIAL MEDIA LINKS
  */
 export const SOCIAL_LINKS = [
-  { name: "Facebook", href: "https://facebook.com/tzwellness" },
+  { name: "Facebook", href: "https://www.facebook.com/profile.php?id=61584623106449" },
   { name: "Twitter", href: "https://twitter.com/tzwellness" },
-  { name: "Instagram", href: "https://instagram.com/tzwellness" },
+  { name: "Instagram", href: "https://www.instagram.com/tzwellness_centre/" },
   { name: "LinkedIn", href: "https://linkedin.com/company/tzwellness" },
 ] as const;
 
@@ -55,7 +55,7 @@ export const SOCIAL_LINKS = [
 export const CONTACT_INFO = {
   phone: "(555) 123-4567",
   phoneHref: "tel:+15551234567",
-  email: "support@tzwellness.com",
-  emailHref: "mailto:support@tzwellness.com",
+  email: "tzwellnesscentre0@gmail.com",
+  emailHref: "mailto:tzwellnesscentre0@gmail.com",
   hours: "Mon - Fri: 9:00 AM - 5:00 PM",
 } as const;

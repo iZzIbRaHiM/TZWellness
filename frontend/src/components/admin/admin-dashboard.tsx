@@ -185,7 +185,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       if (response.success) {
         toast({
           title: "Appointment Approved",
-          description: "The patient will receive a confirmation email.",
+          description: "The patient will receive a WhatsApp confirmation.",
         });
         // Remove from pending list
         setPendingAppointments((prev) =>

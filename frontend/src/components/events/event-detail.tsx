@@ -75,7 +75,7 @@ export function EventDetail({ event }: EventDetailProps) {
 
     toast({
       title: "Registration successful!",
-      description: "Check your email for confirmation details.",
+      description: "Check your WhatsApp for confirmation details.",
     });
   };
 
@@ -259,7 +259,7 @@ export function EventDetail({ event }: EventDetailProps) {
                       You're registered!
                     </p>
                     <p className="text-sm text-green-600">
-                      Check your email for details
+                      Check your WhatsApp for details
                     </p>
                   </div>
                 ) : (

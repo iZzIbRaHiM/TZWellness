@@ -83,7 +83,7 @@ export function AdminAppointments() {
       queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
       toast({
         title: "Appointment Approved",
-        description: "The patient will be notified via email.",
+        description: "The patient will be notified via WhatsApp.",
       });
     },
     onError: (error: any) => {
@@ -107,7 +107,7 @@ export function AdminAppointments() {
       queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
       toast({
         title: "Appointment Rejected",
-        description: "The patient will be notified via email.",
+        description: "The patient will be notified via WhatsApp.",
         variant: "destructive",
       });
     },

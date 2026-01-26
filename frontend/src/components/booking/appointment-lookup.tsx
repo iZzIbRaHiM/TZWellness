@@ -141,7 +141,7 @@ export function AppointmentLookup() {
         
         toast({
           title: "Appointment Cancelled",
-          description: "Your appointment has been cancelled. You will receive a confirmation email.",
+          description: "Your appointment has been cancelled. You will receive a WhatsApp confirmation.",
         });
       } else {
         toast({
@@ -212,7 +212,7 @@ export function AppointmentLookup() {
             Lookup Your Appointment
           </CardTitle>
           <CardDescription>
-            You can find your reference number in your confirmation email
+            You can find your reference number in your WhatsApp confirmation message
           </CardDescription>
         </CardHeader>
         <CardContent>
