@@ -203,83 +203,34 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Organic Animated Blob */}
+          {/* Hero Image with Blob Shape */}
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="relative lg:pl-8 flex items-center justify-center"
+            className="relative lg:pl-8"
           >
-            <div className="relative w-full max-w-lg aspect-square">
-              {/* Organic Breathing Blob */}
-              <svg
-                viewBox="0 0 400 400"
-                className="w-full h-full"
-                style={{ filter: 'drop-shadow(0 20px 60px rgba(16, 185, 129, 0.15))' }}
-              >
-                <defs>
-                  <linearGradient id="blobGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.95" />
-                    <stop offset="50%" stopColor="#059669" stopOpacity="0.85" />
-                    <stop offset="100%" stopColor="#047857" stopOpacity="0.9" />
-                  </linearGradient>
-                </defs>
-                
-                <motion.path
-                  d="M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
-                  fill="url(#blobGradient)"
-                  animate={{
-                    d: [
-                      // State 1: Base form
-                      "M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z",
-                      // State 2: Expanded right
-                      "M200,55 Q290,75 330,140 T360,225 Q365,275 315,325 T225,355 Q145,345 95,295 T65,195 Q55,125 115,85 T200,55 Z",
-                      // State 3: Compressed vertically
-                      "M200,60 Q275,80 315,145 T345,230 Q350,270 305,315 T215,350 Q150,340 100,290 T70,200 Q60,135 120,90 T200,60 Z",
-                      // State 4: Expanded left
-                      "M200,52 Q285,68 325,135 T355,218 Q358,278 308,328 T218,358 Q138,348 88,298 T58,188 Q48,118 108,78 T200,52 Z",
-                      // State 5: Asymmetric bulge
-                      "M200,58 Q278,73 318,138 T348,228 Q355,285 312,332 T222,362 Q142,352 92,302 T62,192 Q52,122 112,82 T200,58 Z",
-                      // State 6: Ripple effect
-                      "M200,54 Q282,72 322,132 T352,222 Q362,282 314,334 T224,364 Q144,354 94,304 T64,194 Q54,124 114,84 T200,54 Z",
-                      // Back to base
-                      "M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
-                    ]
-                  }}
-                  transition={{
-                    duration: 12,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]
-                  }}
-                />
-                
-                {/* Secondary breathing effect */}
-                <motion.path
-                  d="M200,50 Q280,70 320,130 T350,220 Q360,280 310,330 T220,360 Q140,350 90,300 T60,190 Q50,120 110,80 T200,50 Z"
-                  fill="rgba(255, 255, 255, 0.1)"
-                  animate={{
-                    d: [
-                      "M200,55 Q278,72 318,132 T348,222 Q358,278 308,328 T218,358 Q142,348 92,298 T62,192 Q52,122 112,82 T200,55 Z",
-                      "M200,60 Q285,68 325,135 T355,215 Q365,275 315,325 T225,355 Q145,345 95,295 T65,195 Q55,125 115,85 T200,60 Z",
-                      "M200,55 Q278,72 318,132 T348,222 Q358,278 308,328 T218,358 Q142,348 92,298 T62,192 Q52,122 112,82 T200,55 Z"
-                    ],
-                    opacity: [0.1, 0.15, 0.1]
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-              </svg>
+            {/* Floating blob-shaped image container */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
+            >
+              <div className="relative aspect-square max-w-lg mx-auto">
+                {/* Blob shape mask */}
+                <div className="absolute inset-0 blob-shape bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-elevated-lg" />
+
+                {/* Decorative rings */}
+                <div className="absolute -inset-4 border-2 border-emerald-200/30 blob-shape animate-blob" style={{ animationDelay: "-2s" }} />
+                <div className="absolute -inset-8 border border-emerald-100/20 blob-shape animate-blob" style={{ animationDelay: "-4s" }} />
+              </div>
 
               {/* Floating appointment card */}
               <motion.div
-                initial={{ y: 30, x: -20, opacity: 0 }}
-                animate={{ y: 0, x: 0, opacity: 1 }}
+                initial={{ y: 30, x: 20 }}
+                animate={{ y: 0, x: 0 }}
                 transition={{ duration: 0.6, delay: 1 }}
-                className="absolute -bottom-8 -left-8 glass-card p-4 shadow-elevated-md max-w-xs z-10"
+                className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -309,7 +260,24 @@ export function HeroSection() {
                   </Button>
                 </div>
               </motion.div>
-            </div>
+
+              {/* Floating rating badge */}
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+                className="absolute -top-4 -right-4 glass-card p-3 shadow-elevated-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-terracotta text-terracotta" />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-emerald-900">5.0</span>
+                </div>
+              </motion.div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
