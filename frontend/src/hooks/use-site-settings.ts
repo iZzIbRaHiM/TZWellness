@@ -68,10 +68,11 @@ export function useSiteSettings() {
       if (!force) setLoading(true);
       const supabase = createClient();
 
-      // Fetch the first admin user's clinic settings (public info)
+      // Fetch clinic info from public view (accessible to all users)
+      // This view only exposes clinic contact info, not personal admin data
       const { data, error: fetchError } = await supabase
-        .from("admin_settings")
-        .select("clinic_name, clinic_email, clinic_phone, clinic_address, business_hours, updated_at")
+        .from("clinic_public_info")
+        .select("clinic_name, clinic_email, clinic_phone, clinic_address, business_hours")
         .limit(1)
         .maybeSingle();
 
