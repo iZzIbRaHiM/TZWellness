@@ -203,22 +203,93 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Hero Image with Blob Shape */}
+          {/* Hero Visual Element - Animated Green Blob */}
           <motion.div
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="relative lg:pl-8"
+            className="relative lg:pl-8 flex items-center justify-center"
           >
-            {/* Floating blob-shaped image container */}
+            {/* Animated blob container */}
             <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              className="relative"
+              animate={{ 
+                y: [0, -20, 0],
+                rotate: [0, 5, 0]
+              }}
+              transition={{ 
+                duration: 8, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="relative w-full max-w-lg aspect-square"
             >
+              {/* Main green blob shape */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.05, 1],
+                  rotate: [0, 10, 0]
+                }}
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 rounded-[40%_60%_60%_40%/60%_40%_60%_40%] shadow-2xl"
+                style={{
+                  filter: "blur(2px)"
+                }}
+              />
+              
+              {/* Secondary animated layer */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.08, 1],
+                  rotate: [0, -15, 0]
+                }}
+                transition={{
+                  duration: 12,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1
+                }}
+                className="absolute inset-0 bg-gradient-to-tr from-emerald-300 to-emerald-500 rounded-[60%_40%_40%_60%/40%_60%_40%_60%] opacity-80"
+                style={{
+                  filter: "blur(3px)"
+                }}
+              />
+
+              {/* Play button overlay */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 1 }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-20 h-20 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow"
+                  aria-label="Watch our story"
+                >
+                  <Play className="h-8 w-8 text-emerald-600 ml-1" fill="currentColor" />
+                </motion.button>
+              </motion.div>
+
+              {/* Floating text label */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.2 }}
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center"
+              >
+                <p className="font-serif text-xl text-white italic drop-shadow-lg">
+                  Watch Our Story
+                </p>
+              </motion.div>
+
               {/* Floating appointment card */}
               <motion.div
-                initial={{ y: 30, x: 20 }}
+                initial={{ y: 30, x: -20 }}
                 animate={{ y: 0, x: 0 }}
                 transition={{ duration: 0.6, delay: 1 }}
                 className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs"
@@ -249,23 +320,6 @@ export function HeroSection() {
                   >
                     Book
                   </Button>
-                </div>
-              </motion.div>
-
-              {/* Floating rating badge */}
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-                className="absolute -top-4 -right-4 glass-card p-3 shadow-elevated-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-terracotta text-terracotta" />
-                    ))}
-                  </div>
-                  <span className="text-sm font-medium text-emerald-900">5.0</span>
                 </div>
               </motion.div>
             </motion.div>
