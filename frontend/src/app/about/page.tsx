@@ -238,7 +238,7 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-br from-emerald-50 via-sand-50 to-emerald-50">
         <div className="container-fluid">
           <div className="max-w-6xl mx-auto">
-            <h2 className="font-serif text-display-sm text-emerald-950 mb-12 text-center">
+            <h2 className="font-serif text-display-sm text-emerald-900 mb-12 text-center">
               Our Foundation
             </h2>
 
@@ -314,7 +314,7 @@ export default function AboutPage() {
 
             {/* Brand Personality */}
             <div className="bg-gradient-to-br from-emerald-900 to-emerald-800 p-8 rounded-2xl shadow-soft text-white">
-              <h3 className="font-serif text-2xl font-semibold mb-6 text-center">
+              <h3 className="font-serif text-2xl font-semibold mb-6 text-center text-white">
                 Brand Personality
               </h3>
               <div className="flex flex-wrap justify-center gap-3">
@@ -373,10 +373,10 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900">
         <div className="container-fluid">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h2 className="font-serif text-display-sm lg:text-display-md mb-6">
+            <h2 className="font-serif text-display-sm lg:text-display-md mb-6 text-white">
               🩺 Welcome to a New Way of Healing
             </h2>
-            <p className="text-xl text-emerald-100/90 mb-10 leading-relaxed">
+            <p className="text-xl text-white/90 mb-10 leading-relaxed">
               We are honored to be part of your transformation. Let this be your first step toward a lighter body, a clearer mind, a healthier future—and a life you love living.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
