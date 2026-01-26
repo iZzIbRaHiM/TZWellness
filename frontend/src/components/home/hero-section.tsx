@@ -10,6 +10,10 @@ import {
   ArrowRight,
   Play,
   Star,
+  Activity,
+  Heart,
+  Droplet,
+  Leaf,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { appointmentsApi } from "@/lib/api";
@@ -217,12 +221,104 @@ export function HeroSection() {
               className="relative"
             >
               <div className="relative aspect-square max-w-lg mx-auto">
+                {/* Gradient Light Rays - rotating beams */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 opacity-30"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-emerald-300/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-mint-300/20 to-transparent" />
+                </motion.div>
+
                 {/* Blob shape mask */}
                 <div className="absolute inset-0 blob-shape bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-elevated-lg" />
+
+                {/* Pulsing Wellness Rings - sonar effect */}
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 blob-shape border-2 border-emerald-400"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut", delay: 1 }}
+                  className="absolute inset-0 blob-shape border-2 border-mint-400"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut", delay: 2 }}
+                  className="absolute inset-0 blob-shape border-2 border-emerald-300"
+                />
 
                 {/* Decorative rings */}
                 <div className="absolute -inset-4 border-2 border-emerald-200/30 blob-shape animate-blob" style={{ animationDelay: "-2s" }} />
                 <div className="absolute -inset-8 border border-emerald-100/20 blob-shape animate-blob" style={{ animationDelay: "-4s" }} />
+
+                {/* Animated Health Metrics Bubbles - orbiting */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0"
+                >
+                  {/* Blood Sugar Control */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute top-[10%] right-[5%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Droplet className="h-5 w-5 text-emerald-600" />
+                  </motion.div>
+                  
+                  {/* Heart Health */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute top-[40%] right-[-5%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Heart className="h-5 w-5 text-rose-500" />
+                  </motion.div>
+
+                  {/* Energy Boost */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute bottom-[20%] right-[10%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Activity className="h-5 w-5 text-amber-500" />
+                  </motion.div>
+                </motion.div>
+
+                {/* Decorative Health Icons - floating with parallax */}
+                <motion.div
+                  animate={{ 
+                    y: [0, -15, 0],
+                    rotate: [0, 5, 0]
+                  }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute top-[15%] left-[-8%] opacity-20"
+                >
+                  <Leaf className="h-12 w-12 text-emerald-600" />
+                </motion.div>
+
+                <motion.div
+                  animate={{ 
+                    y: [0, 20, 0],
+                    rotate: [0, -5, 0]
+                  }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  className="absolute bottom-[25%] left-[-5%] opacity-15"
+                >
+                  <Heart className="h-10 w-10 text-rose-400" />
+                </motion.div>
+
+                <motion.div
+                  animate={{ 
+                    y: [0, -20, 0],
+                    x: [0, 10, 0]
+                  }}
+                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                  className="absolute top-[50%] left-[-10%] opacity-10"
+                >
+                  <Activity className="h-14 w-14 text-amber-400" />
+                </motion.div>
               </div>
 
               {/* Floating appointment card */}
