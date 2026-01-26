@@ -203,29 +203,100 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Hero Visual Element - Animated Green Circle */}
+          {/* Hero Visual Element - Organic Breathing Blob */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="relative lg:pl-8 flex items-center justify-center"
           >
-            {/* Animated circle container */}
-            <motion.div
-              animate={{ 
-                y: [0, -15, 0]
-              }}
-              transition={{ 
-                duration: 6, 
-                repeat: Infinity, 
-                ease: "easeInOut" 
-              }}
-              className="relative w-full max-w-lg aspect-square"
-            >
-              {/* Main green circle */}
-              <div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-2xl"
-              />
+            {/* Organic blob container */}
+            <div className="relative w-full max-w-lg aspect-square">
+              {/* SVG Morphing Blob */}
+              <svg
+                viewBox="0 0 500 500"
+                className="w-full h-full"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="blobGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#10b981', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: '#059669', stopOpacity: 1 }} />
+                  </linearGradient>
+                  <filter id="blobGlow">
+                    <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+                    <feMerge>
+                      <feMergeNode in="coloredBlur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+                
+                {/* Morphing blob path */}
+                <motion.path
+                  fill="url(#blobGradient)"
+                  filter="url(#blobGlow)"
+                  initial={{
+                    d: "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z"
+                  }}
+                  animate={{
+                    d: [
+                      // Keyframe 1: Starting shape - slightly compressed top
+                      "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z",
+                      
+                      // Keyframe 2: Expand right, compress left
+                      "M250,95 C310,95 365,115 395,155 C425,195 435,245 415,295 C395,345 355,380 290,390 C225,400 165,385 125,345 C85,305 75,250 90,195 C105,140 155,95 215,95 C235,95 245,95 250,95 Z",
+                      
+                      // Keyframe 3: Expand bottom, compress top
+                      "M250,105 C300,105 345,125 375,165 C405,205 415,255 395,310 C375,365 330,400 270,405 C210,410 155,395 115,355 C75,315 65,255 80,200 C95,145 145,105 205,105 C225,105 240,105 250,105 Z",
+                      
+                      // Keyframe 4: Expand left, compress right  
+                      "M250,100 C295,100 335,120 365,160 C395,200 405,250 385,305 C365,360 320,390 265,398 C210,406 160,391 125,351 C90,311 80,251 95,196 C110,141 160,100 220,100 C235,100 245,100 250,100 Z",
+                      
+                      // Keyframe 5: Gentle squeeze all around
+                      "M250,102 C303,102 348,122 378,162 C408,202 418,252 398,302 C378,352 338,387 278,396 C218,405 163,390 123,350 C83,310 73,250 88,195 C103,140 153,102 213,102 C233,102 243,102 250,102 Z",
+                      
+                      // Keyframe 6: Expand top right, compress bottom left
+                      "M250,98 C308,98 355,118 385,158 C415,198 425,248 405,298 C385,348 345,383 283,393 C221,403 166,388 126,348 C86,308 76,248 91,193 C106,138 156,98 216,98 C236,98 246,98 250,98 Z",
+                      
+                      // Return to start
+                      "M250,100 C305,100 350,120 380,160 C410,200 420,250 400,300 C380,350 340,385 280,395 C220,405 160,390 120,350 C80,310 70,250 85,195 C100,140 150,100 210,100 C230,100 240,100 250,100 Z"
+                    ]
+                  }}
+                  transition={{
+                    duration: 18,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1]
+                  }}
+                />
+                
+                {/* Secondary subtle layer for depth */}
+                <motion.path
+                  fill="rgba(16, 185, 129, 0.3)"
+                  initial={{
+                    d: "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z"
+                  }}
+                  animate={{
+                    d: [
+                      "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z",
+                      "M250,118 C298,118 340,136 365,170 C390,204 398,246 383,286 C368,326 333,353 288,361 C243,369 198,358 166,328 C134,298 126,251 138,208 C150,165 188,118 233,118 C243,118 248,118 250,118 Z",
+                      "M250,122 C293,122 333,140 358,174 C383,208 391,250 376,290 C361,330 328,357 283,365 C238,373 193,362 161,332 C129,302 121,255 133,212 C145,169 183,122 228,122 C238,122 245,122 250,122 Z",
+                      "M250,120 C296,120 336,138 361,172 C386,206 394,248 379,288 C364,328 331,355 286,363 C241,371 196,360 164,330 C132,300 124,253 136,210 C148,167 186,120 231,120 C241,120 246,120 250,120 Z",
+                      "M250,121 C294,121 334,139 359,173 C384,207 392,249 377,289 C362,329 329,356 284,364 C239,372 194,361 162,331 C130,301 122,254 134,211 C146,168 184,121 229,121 C239,121 245,121 250,121 Z",
+                      "M250,119 C297,119 337,137 362,171 C387,205 395,247 380,287 C365,327 332,354 287,362 C242,370 197,359 165,329 C133,299 125,252 137,209 C149,166 187,119 232,119 C242,119 247,119 250,119 Z",
+                      "M250,120 C295,120 335,138 360,172 C385,206 393,248 378,288 C363,328 330,355 285,363 C240,371 195,360 163,330 C131,300 123,253 135,210 C147,167 185,120 230,120 C240,120 245,120 250,120 Z"
+                    ]
+                  }}
+                  transition={{
+                    duration: 18,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    times: [0, 0.15, 0.3, 0.45, 0.6, 0.8, 1],
+                    delay: 0.3
+                  }}
+                />
+              </svg>
 
               {/* Floating appointment card */}
               <motion.div
@@ -262,7 +333,7 @@ export function HeroSection() {
                   </Button>
                 </div>
               </motion.div>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
