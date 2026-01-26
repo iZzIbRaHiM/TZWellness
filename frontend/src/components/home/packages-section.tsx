@@ -52,7 +52,12 @@ export function PackagesSection() {
   
   // Convert tel: link to WhatsApp link - extract only digits after tel:
   const whatsappNumber = settings.clinic_phone_href?.replace(/^tel:\+?/, "").replace(/\D/g, "");
-  const whatsappLink = `https://wa.me/${whatsappNumber}`;
+  
+  // Helper function to create WhatsApp link with pre-filled message
+  const getWhatsAppLink = (packageName: string) => {
+    const message = `Hi! I'm interested in "${packageName}". It'd be great if you'd guide me more.`;
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  };
 
   return (
     <section className="py-20 bg-gradient-to-b from-white to-emerald-50/30">
@@ -141,7 +146,7 @@ export function PackagesSection() {
 
                   {/* CTA Button */}
                   <a
-                    href={whatsappLink}
+                    href={getWhatsAppLink(pkg.name)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`block w-full text-center px-6 py-3 rounded-xl font-semibold transition-all duration-300 bg-gradient-to-r ${pkg.gradient} text-white hover:shadow-lg hover:scale-105`}
