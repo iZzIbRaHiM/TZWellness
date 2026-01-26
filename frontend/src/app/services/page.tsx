@@ -3,9 +3,9 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { ServicesGrid } from "@/components/services/services-grid";
 
 export const metadata: Metadata = {
-  title: "Our Services",
+  title: "Our Services | Lifestyle Medicine for Metabolic Health",
   description:
-    "Comprehensive medical services including Diabetes Management, Thyroid Care, PCOS Treatment, and Obesity Management. Holistic, personalized healthcare.",
+    "Science-backed lifestyle medicine services to reverse diabetes, heal fatty liver, and restore metabolic health. Personalized nutrition plans, medication reduction, root-cause treatment. Both in-clinic and online consultations available.",
 };
 
 export default async function ServicesPage() {
@@ -18,11 +18,11 @@ export default async function ServicesPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h1 className="font-serif text-4xl sm:text-5xl font-bold text-emerald-950 mb-4">
-            Our <span className="text-terracotta">Specialized</span> Services
+            Our <span className="text-terracotta">Lifestyle Medicine</span> Services
           </h1>
           <p className="text-lg text-gray-600">
-            We offer comprehensive care for metabolic and hormonal conditions.
-            Each service is designed with your complete wellness in mind.
+            Evidence-based lifestyle interventions to reverse disease and restore health.
+            Each service uses food, movement, sleep, and stress relief as therapeutic tools.
           </p>
         </div>
 

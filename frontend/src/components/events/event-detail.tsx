@@ -246,7 +246,7 @@ export function EventDetail({ event }: EventDetailProps) {
                 {/* Price */}
                 <div className="pt-4 border-t">
                   <p className="text-2xl font-bold text-emerald-700">
-                    {event.price === 0 ? "Free" : `$${event.price}`}
+                    {event.price === 0 ? "Free" : `PKR ${event.price.toLocaleString('en-US')}`}
                   </p>
                 </div>
 
@@ -267,7 +267,7 @@ export function EventDetail({ event }: EventDetailProps) {
                     <DialogTrigger asChild>
                       <Button variant="cta" className="w-full">
                         {event.price > 0
-                          ? `Register - $${event.price}`
+                          ? `Register - PKR ${event.price.toLocaleString('en-US')}`
                           : "Register Free"}
                       </Button>
                     </DialogTrigger>

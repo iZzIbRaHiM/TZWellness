@@ -108,7 +108,7 @@ const paymentFAQs = [
   {
     question: "What is your cancellation policy?",
     answer:
-      "We require 24 hours notice for appointment cancellations. Late cancellations or no-shows may be subject to a $50 fee. We understand emergencies happen and will work with you on a case-by-case basis.",
+      "We require 24 hours notice for appointment cancellations. Late cancellations or no-shows may be subject to a PKR 1,000 fee. We understand emergencies happen and will work with you on a case-by-case basis.",
   },
   {
     question: "What are your consultation fees?",

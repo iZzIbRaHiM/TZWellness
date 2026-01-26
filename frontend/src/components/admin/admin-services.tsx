@@ -376,12 +376,15 @@ export function AdminServices() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="create-price">Price ($)</Label>
+                    <Label htmlFor="create-price">Price (PKR)</Label>
                     <Input
                       id="create-price"
+                      type="number"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="0.00"
+                      placeholder="0"
+                      min="0"
+                      step="1"
                     />
                   </div>
                 </div>
@@ -498,8 +501,7 @@ export function AdminServices() {
                   )}
                   {service.price && (
                     <span className="flex items-center">
-                      <DollarSign className="h-3 w-3 mr-1" />
-                      {service.price}
+                      PKR {service.price.toLocaleString('en-US')}
                     </span>
                   )}
                   {service.modality && (
@@ -627,12 +629,15 @@ export function AdminServices() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-price">Price ($)</Label>
+                  <Label htmlFor="edit-price">Price (PKR)</Label>
                   <Input
                     id="edit-price"
+                    type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="0.00"
+                    placeholder="0"
+                    min="0"
+                    step="1"
                   />
                 </div>
               </div>

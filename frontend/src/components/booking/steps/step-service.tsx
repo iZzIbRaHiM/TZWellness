@@ -198,7 +198,7 @@ export function StepService() {
 
                 {service.price && (
                   <p className="text-sm font-semibold text-emerald-700 mt-3">
-                    ${service.price}
+                    PKR {service.price.toLocaleString('en-US')}
                   </p>
                 )}
               </div>

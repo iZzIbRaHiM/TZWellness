@@ -216,27 +216,6 @@ export function HeroSection() {
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="relative"
             >
-              <div className="relative aspect-square max-w-lg mx-auto">
-                {/* Blob shape mask */}
-                <div className="absolute inset-0 blob-shape bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-elevated-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white p-8">
-                      <motion.div 
-                        whileHover={{ scale: 1.1 }}
-                        className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer backdrop-blur-sm"
-                      >
-                        <Play className="h-10 w-10 ml-1" />
-                      </motion.div>
-                      <p className="font-serif text-xl italic">Watch Our Story</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Decorative rings */}
-                <div className="absolute -inset-4 border-2 border-emerald-200/30 blob-shape animate-blob" style={{ animationDelay: "-2s" }} />
-                <div className="absolute -inset-8 border border-emerald-100/20 blob-shape animate-blob" style={{ animationDelay: "-4s" }} />
-              </div>
-
               {/* Floating appointment card */}
               <motion.div
                 initial={{ y: 30, x: 20 }}

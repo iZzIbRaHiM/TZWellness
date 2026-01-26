@@ -56,12 +56,11 @@ export function CTASection() {
               id="cta-heading"
               className="font-serif text-display-sm sm:text-display-md lg:text-display-lg text-white mb-6"
             >
-              Ready to <span className="italic text-terracotta-300">Transform</span> Your Health?
+              Ready to Begin <span className="italic text-terracotta-300">Healing</span> Naturally?
             </h2>
             <p className="text-lg text-emerald-100/90 mb-10 max-w-xl mx-auto leading-relaxed">
-              Start your journey to better health today. Book a personalized
-              consultation and discover how our holistic approach can transform
-              your wellbeing.
+              Start your journey to reverse disease and restore health. Book a personalized
+              lifestyle medicine consultation and discover the power of your body&apos;s natural healing ability.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

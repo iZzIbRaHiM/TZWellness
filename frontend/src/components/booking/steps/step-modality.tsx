@@ -25,7 +25,7 @@ const modalities: {
       "Easy prescription refills",
       "Screen sharing for results review",
     ],
-    priceNote: "Starting at $150",
+    priceNote: "Starting at PKR 3,500",
   },
   {
     type: "in_person",
@@ -38,7 +38,7 @@ const modalities: {
       "Comprehensive consultation",
       "Tour our facility",
     ],
-    priceNote: "Starting at $200",
+    priceNote: "Starting at PKR 5,000",
   },
   {
     type: "phone",
@@ -51,7 +51,7 @@ const modalities: {
       "Great for follow-ups",
       "Prescription refills",
     ],
-    priceNote: "Starting at $75",
+    priceNote: "Starting at PKR 1,500",
   },
 ];
 

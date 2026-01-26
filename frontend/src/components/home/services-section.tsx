@@ -88,7 +88,7 @@ export function ServicesSection() {
                       )}
                       {service.price && (
                         <p className="text-lg font-semibold text-emerald-700">
-                          ${service.price}
+                          PKR {service.price.toLocaleString('en-US')}
                           {service.price_note && <span className="text-xs font-normal text-gray-500 ml-1">({service.price_note})</span>}
                         </p>
                       )}

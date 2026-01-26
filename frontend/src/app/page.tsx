@@ -1,18 +1,16 @@
 import { Metadata } from "next";
 import { HeroSection } from "@/components/home/hero-section";
-import { TrustMarquee } from "@/components/home/trust-marquee";
 import { ValuePropsSection } from "@/components/home/value-props-section";
 import { ServicesSection } from "@/components/home/services-section";
-import { CertificationsBar } from "@/components/home/certifications-bar";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { BlogSection } from "@/components/home/blog-section";
 import { CTASection } from "@/components/home/cta-section";
 import { MedicalBusinessSchema } from "@/components/seo/schemas";
 
 export const metadata: Metadata = {
-  title: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
+  title: "TZ Wellness | Reversing Diabetes • Healing Fatty Liver • Restoring Metabolic Health",
   description:
-    "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid disorders, PCOS, and obesity care with personalized treatment plans, nutrition counseling, and lifestyle medicine.",
+    "Dedicated lifestyle medicine center helping you reverse disease—not just manage it. Specialized care for prediabetes, diabetes, fatty liver, autoimmune diseases through evidence-based lifestyle interventions. Natural healing, personalized plans, compassionate care.",
 };
 
 export default function HomePage() {
@@ -20,10 +18,8 @@ export default function HomePage() {
     <>
       <MedicalBusinessSchema />
       <HeroSection />
-      <TrustMarquee />
       <BlogSection />
       <ValuePropsSection />
-      <CertificationsBar />
       <ServicesSection />
       <TestimonialsSection />
       <CTASection />

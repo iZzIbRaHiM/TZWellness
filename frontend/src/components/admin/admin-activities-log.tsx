@@ -331,18 +331,20 @@ export function AdminActivitiesLog() {
                       </div>
                     </div>
 
-                    {/* Metadata (if available) */}
+                    {/* Metadata (if available) - exclude updated_fields */}
                     {activity.metadata && Object.keys(activity.metadata).length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2 overflow-x-hidden">
-                        {Object.entries(activity.metadata).map(([key, value]) => (
-                          <span
-                            key={key}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 max-w-full break-all"
-                          >
-                            <span className="text-gray-500 flex-shrink-0">{key}:</span>
-                            <span className="ml-1 truncate">{String(value)}</span>
-                          </span>
-                        ))}
+                        {Object.entries(activity.metadata)
+                          .filter(([key]) => key !== 'updated_fields')
+                          .map(([key, value]) => (
+                            <span
+                              key={key}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 max-w-full break-all"
+                            >
+                              <span className="text-gray-500 flex-shrink-0">{key}:</span>
+                              <span className="ml-1 truncate">{String(value)}</span>
+                            </span>
+                          ))}
                       </div>
                     )}
                   </div>

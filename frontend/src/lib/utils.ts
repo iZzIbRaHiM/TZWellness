@@ -24,10 +24,7 @@ export function formatTime(time: string): string {
 }
 
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
+  return `PKR ${price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 export function generateReferenceId(): string {
