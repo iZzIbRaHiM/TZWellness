@@ -54,9 +54,9 @@ export function useSiteSettings() {
         }
 
         if (data) {
-          // Format phone number for href
+          // Format phone number for href - preserve international format
           const phoneDigits = data.clinic_phone?.replace(/\D/g, "") || "15551234567";
-          const phoneHref = `tel:+${phoneDigits.startsWith("1") ? phoneDigits : "1" + phoneDigits}`;
+          const phoneHref = `tel:+${phoneDigits}`;
 
           setSettings({
             clinic_name: data.clinic_name || DEFAULT_SETTINGS.clinic_name,

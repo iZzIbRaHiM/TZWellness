@@ -50,8 +50,8 @@ const packages = [
 export function PackagesSection() {
   const { settings } = useSiteSettings();
   
-  // Convert tel: link to WhatsApp link
-  const whatsappNumber = settings.clinic_phone_href?.replace("tel:+", "").replace(/\D/g, "");
+  // Convert tel: link to WhatsApp link - extract only digits after tel:
+  const whatsappNumber = settings.clinic_phone_href?.replace(/^tel:\+?/, "").replace(/\D/g, "");
   const whatsappLink = `https://wa.me/${whatsappNumber}`;
 
   return (
