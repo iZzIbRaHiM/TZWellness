@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type PatientType = "new" | "returning" | "discovery";
+export type PatientType = "new" | "returning";
 export type Modality = "virtual" | "in_person" | "phone";
 
 export interface PatientDetails {

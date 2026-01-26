@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useBookingStore, PatientType } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { UserPlus, RotateCcw, Phone, ArrowRight } from "lucide-react";
+import { UserPlus, RotateCcw, ArrowRight } from "lucide-react";
 
 const patientTypes: {
   type: PatientType;
@@ -17,7 +17,7 @@ const patientTypes: {
     type: "new",
     title: "New Patient",
     description:
-      "First time visiting TF Wellfare? Start here for a comprehensive initial consultation.",
+      "First time visiting TZ Wellness? Start here for a comprehensive initial consultation.",
     icon: UserPlus,
     duration: "60 minutes",
   },
@@ -28,14 +28,6 @@ const patientTypes: {
       "Already a patient? Book a follow-up appointment to continue your care journey.",
     icon: RotateCcw,
     duration: "30 minutes",
-  },
-  {
-    type: "discovery",
-    title: "Discovery Call",
-    description:
-      "Not sure if we're the right fit? Schedule a free 15-minute call to discuss your needs.",
-    icon: Phone,
-    duration: "15 minutes",
   },
 ];
 

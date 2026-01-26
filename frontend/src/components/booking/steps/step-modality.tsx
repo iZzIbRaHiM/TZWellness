@@ -55,11 +55,8 @@ export function StepModality() {
   const { modality, setModality, nextStep, canProceed, patientType } =
     useBookingStore();
 
-  // Discovery calls are always phone
-  const availableModalities =
-    patientType === "discovery"
-      ? modalities.filter((m) => m.type === "phone")
-      : modalities;
+  // All patients can choose any modality
+  const availableModalities = modalities;
 
   return (
     <div className="space-y-6">

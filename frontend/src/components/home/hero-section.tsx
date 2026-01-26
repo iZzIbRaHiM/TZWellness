@@ -140,23 +140,12 @@ export function HeroSection() {
             className="text-center lg:text-left"
           >
             {/* Trust badge */}
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="inline-flex items-center gap-2 px-4 py-2 glass-card text-emerald-800 text-sm font-medium mb-8"
-            >
-              <Star className="h-4 w-4 fill-terracotta text-terracotta" aria-hidden="true" />
-              <span>Trusted by 2,000+ Patients on Their Metabolic Journey</span>
-            </motion.div>
-
             {/* Main headline - Editorial typography */}
             <h1
               id="hero-heading"
               className="font-serif text-display-lg lg:text-display-xl text-emerald-950 mb-6"
             >
-              Nurture Your Health &{" "}
-              <span className="italic text-terracotta">Reclaim Your Vitality</span>
+              <span className="italic text-terracotta">Heal From Within</span>
             </h1>
 
             <p className="text-lg text-emerald-800/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">

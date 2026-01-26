@@ -101,6 +101,11 @@ export function StepDetails() {
     setError(null);
 
     try {
+      // Ensure patient_type is valid (database constraint allows only 'new' or 'returning')
+      const validPatientType = (patientType && ['new', 'returning'].includes(patientType)) 
+        ? patientType 
+        : 'new';
+      
       const bookingData = {
         service_id: serviceId || undefined,
         modality: modality || 'virtual',
@@ -109,7 +114,7 @@ export function StepDetails() {
         patient_name: patientDetails.name,
         patient_email: patientDetails.email,
         patient_phone: patientDetails.phone,
-        patient_type: patientType || 'new',
+        patient_type: validPatientType,
         reason,
       };
 
