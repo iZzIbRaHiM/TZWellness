@@ -203,96 +203,36 @@ export function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Hero Visual Element - Animated Green Blob */}
+          {/* Hero Visual Element - Animated Green Circle */}
           <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="relative lg:pl-8 flex items-center justify-center"
           >
-            {/* Animated blob container */}
+            {/* Animated circle container */}
             <motion.div
               animate={{ 
-                y: [0, -20, 0],
-                rotate: [0, 5, 0]
+                y: [0, -15, 0]
               }}
               transition={{ 
-                duration: 8, 
+                duration: 6, 
                 repeat: Infinity, 
                 ease: "easeInOut" 
               }}
               className="relative w-full max-w-lg aspect-square"
             >
-              {/* Main green blob shape */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.05, 1],
-                  rotate: [0, 10, 0]
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute inset-0 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 rounded-[40%_60%_60%_40%/60%_40%_60%_40%] shadow-2xl"
-                style={{
-                  filter: "blur(2px)"
-                }}
+              {/* Main green circle */}
+              <div
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-2xl"
               />
-              
-              {/* Secondary animated layer */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.08, 1],
-                  rotate: [0, -15, 0]
-                }}
-                transition={{
-                  duration: 12,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1
-                }}
-                className="absolute inset-0 bg-gradient-to-tr from-emerald-300 to-emerald-500 rounded-[60%_40%_40%_60%/40%_60%_40%_60%] opacity-80"
-                style={{
-                  filter: "blur(3px)"
-                }}
-              />
-
-              {/* Play button overlay */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 1 }}
-                className="absolute inset-0 flex items-center justify-center"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-20 h-20 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl hover:shadow-2xl transition-shadow"
-                  aria-label="Watch our story"
-                >
-                  <Play className="h-8 w-8 text-emerald-600 ml-1" fill="currentColor" />
-                </motion.button>
-              </motion.div>
-
-              {/* Floating text label */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center"
-              >
-                <p className="font-serif text-xl text-white italic drop-shadow-lg">
-                  Watch Our Story
-                </p>
-              </motion.div>
 
               {/* Floating appointment card */}
               <motion.div
-                initial={{ y: 30, x: -20 }}
-                animate={{ y: 0, x: 0 }}
+                initial={{ y: 30, x: -20, opacity: 0 }}
+                animate={{ y: 0, x: 0, opacity: 1 }}
                 transition={{ duration: 0.6, delay: 1 }}
-                className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs"
+                className="absolute -bottom-6 -left-6 glass-card p-4 shadow-elevated-md max-w-xs z-10"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
