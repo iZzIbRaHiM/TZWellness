@@ -501,7 +501,7 @@ export function AdminServices() {
                   )}
                   {service.price && (
                     <span className="flex items-center">
-                      PKR {service.price.toLocaleString('en-US')}
+                      PKR {service.price?.toLocaleString('en-US')}
                     </span>
                   )}
                   {service.modality && (

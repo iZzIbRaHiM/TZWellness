@@ -411,7 +411,7 @@ function EventCard({ event, compact = false }: EventCardProps) {
                   <span className="font-semibold text-emerald-700">Free Event</span>
                 ) : (
                   <span className="font-semibold text-emerald-700">
-                    PKR {event.price.toLocaleString('en-US')}
+                    PKR {event.price?.toLocaleString('en-US')}
                   </span>
                 )}
               </div>
