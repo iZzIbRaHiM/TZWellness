@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import {
   Users,
   Target,
   Award,
-  Clock,
   CheckCircle,
   Calendar,
 } from "lucide-react";
@@ -88,7 +86,7 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-elevated-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100 flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 via-emerald-50 to-emerald-100 flex items-center justify-center">
                 <Users className="h-32 w-32 text-emerald-900/20" />
               </div>
             </div>
@@ -227,10 +225,10 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="p-8 bg-gradient-to-br from-teal-50 via-emerald-50 to-emerald-100 rounded-2xl">
-              <h3 className="font-serif text-2xl text-emerald-950 mb-4 text-center">
+            <div className="p-8 bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-100 rounded-2xl border border-emerald-200">
+              <p className="font-serif text-2xl text-emerald-950 text-center leading-relaxed">
                 Our goal is not just better lab results—it is a complete transformation in how you feel, move, eat, sleep, and live.
-              </h3>
+              </p>
             </div>
           </div>
         </div>

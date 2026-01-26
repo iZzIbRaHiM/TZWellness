@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { HeroSection } from "@/components/home/hero-section";
 import { ValuePropsSection } from "@/components/home/value-props-section";
 import { ServicesSection } from "@/components/home/services-section";
+import { PackagesSection } from "@/components/home/packages-section";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { BlogSection } from "@/components/home/blog-section";
 import { CTASection } from "@/components/home/cta-section";
@@ -20,6 +21,7 @@ export default function HomePage() {
       <HeroSection />
       <BlogSection />
       <ValuePropsSection />
+      <PackagesSection />
       <ServicesSection />
       <TestimonialsSection />
       <CTASection />
