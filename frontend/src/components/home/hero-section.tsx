@@ -145,7 +145,10 @@ export function HeroSection() {
               id="hero-heading"
               className="font-serif text-display-lg lg:text-display-xl text-emerald-950 mb-6"
             >
-              <span className="italic text-terracotta">Heal From Within</span>
+              <span className="italic">
+                <span className="text-black">Heal From</span>{" "}
+                <span className="text-terracotta">Within</span>
+              </span>
             </h1>
 
             <p className="text-lg text-emerald-800/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">

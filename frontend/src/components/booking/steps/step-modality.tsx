@@ -142,12 +142,7 @@ export function StepModality() {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4" />
           <span>
-            {patientType === "new"
-              ? "60 min"
-              : patientType === "returning"
-              ? "30 min"
-              : "15 min"}{" "}
-            consultation
+            {patientType === "new" ? "60 min" : "30 min"} consultation
           </span>
         </div>
       </div>
