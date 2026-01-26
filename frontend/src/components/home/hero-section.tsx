@@ -260,23 +260,6 @@ export function HeroSection() {
                   </Button>
                 </div>
               </motion.div>
-
-              {/* Floating rating badge */}
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-                className="absolute -top-4 -right-4 glass-card p-3 shadow-elevated-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-terracotta text-terracotta" />
-                    ))}
-                  </div>
-                  <span className="text-sm font-medium text-emerald-900">5.0</span>
-                </div>
-              </motion.div>
             </motion.div>
           </motion.div>
         </div>
