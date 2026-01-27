@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tz-wellness-health.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tzwellnesscentre.com";
   
   // Create Supabase client with environment variables
   const supabase = createClient(
@@ -10,20 +10,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // Static routes
-  const routes = [
-    "",
-    "/about",
-    "/services",
-    "/blog",
-    "/events",
-    "/appointments",
-    "/appointments/lookup",
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
+  // Static routes with SEO-optimized priorities and change frequencies
+  const staticRoutes = [
+    { path: "", priority: 1.0, changeFreq: "weekly" as const },
+    { path: "/about", priority: 0.9, changeFreq: "monthly" as const },
+    { path: "/services", priority: 0.9, changeFreq: "weekly" as const },
+    { path: "/appointments", priority: 0.8, changeFreq: "daily" as const },
+    { path: "/appointments/lookup", priority: 0.5, changeFreq: "daily" as const },
+    { path: "/blog", priority: 0.7, changeFreq: "weekly" as const },
+    { path: "/events", priority: 0.7, changeFreq: "weekly" as const },
+  ];
+
+  const routes = staticRoutes.map((route) => ({
+    url: `${baseUrl}${route.path}`,
     lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    changeFrequency: route.changeFreq,
+    priority: route.priority,
   }));
 
   // Fetch dynamic services from database
@@ -37,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/services/${service.slug}`,
     lastModified: new Date(service.updated_at),
     changeFrequency: "monthly" as const,
-    priority: 0.7,
+    priority: 0.8,
   }));
 
   // Fetch dynamic blog posts from database
