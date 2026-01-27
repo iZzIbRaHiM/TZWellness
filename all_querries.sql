@@ -2208,6 +2208,304 @@ USING (bucket_id = 'blog-images');
 -- SELECT * FROM pg_policies WHERE tablename = 'objects' AND policyname LIKE '%blog%';
 
 
+-- =====================================================
+-- CRITICAL PRODUCTION SETUP SCRIPTS
+-- Run these after initial schema deployment
+-- =====================================================
+
+-- ============================================
+-- 1. FIX is_admin() FUNCTION (REQUIRED)
+-- ============================================
+-- Root cause: Function reads from JWT token which doesn't 
+-- include app_metadata by default in Supabase.
+-- Solution: Read directly from auth.users table instead.
+-- =====================================================
+
+DROP FUNCTION IF EXISTS public.is_admin();
+
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+BEGIN
+  -- Check if user is authenticated
+  IF auth.uid() IS NULL THEN
+    RETURN FALSE;
+  END IF;
+  
+  -- Read app_metadata directly from database (not JWT)
+  -- This is secure because:
+  -- 1. SECURITY DEFINER gives function elevated privileges
+  -- 2. app_metadata in auth.users cannot be modified by users
+  -- 3. Only server/admin can modify app_metadata
+  RETURN (
+    SELECT COALESCE(
+      (raw_app_meta_data->>'role') = 'admin',
+      FALSE
+    )
+    FROM auth.users
+    WHERE id = auth.uid()
+  );
+END;
+$$;
+
+COMMENT ON FUNCTION public.is_admin() IS 
+'Checks if current user has admin role. Reads from auth.users table (not JWT) for security.';
+
+
+-- ============================================
+-- 2. SETUP BOOKING AVAILABILITY (REQUIRED)
+-- ============================================
+-- Configure clinic operating hours (Mon-Fri, 9 AM - 5 PM)
+-- Uses ISO day format: 0=Monday, 1=Tuesday, ... 6=Sunday
+-- ============================================
+
+INSERT INTO weekly_availability (day_of_week, start_time, end_time, is_active, allows_virtual, allows_in_person) VALUES
+(0, '09:00', '17:00', true, true, true), -- Monday
+(1, '09:00', '17:00', true, true, true), -- Tuesday
+(2, '09:00', '17:00', true, true, true), -- Wednesday
+(3, '09:00', '17:00', true, true, true), -- Thursday
+(4, '09:00', '17:00', true, true, true)  -- Friday
+ON CONFLICT DO NOTHING;
+
+-- NOTE: The get_available_slots() function will automatically generate
+-- 30-minute slots between start_time and end_time when called.
+-- Each day will show 16 slots: 9:00, 9:30, 10:00, ..., 16:00, 16:30
+
+
+-- ============================================
+-- 3. FIX WEEKLY AVAILABILITY (IF DUPLICATES EXIST)
+-- ============================================
+-- Remove duplicate 30-minute slot entries if they were created
+-- Keep only full-day availability entries
+-- ============================================
+
+DELETE FROM weekly_availability
+WHERE end_time = start_time + INTERVAL '30 minutes';
+
+
+-- ============================================
+-- 4. UPDATE get_available_slots() FUNCTION (CRITICAL FIX)
+-- ============================================
+-- CHANGE: Only block slots for 'approved' or 'confirmed' appointments
+-- ALLOWS: Multiple 'pending' bookings for same slot (admin chooses which to approve)
+-- ============================================
+
+CREATE OR REPLACE FUNCTION get_available_slots(
+  start_date TEXT,
+  end_date TEXT,
+  modality_filter TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+  result JSONB := '{}'::JSONB;
+  current_date DATE;
+  slot_time TIME;
+  slot_end TIME;
+  slot_info JSONB;
+  day_of_week INTEGER;
+  wa_record RECORD;
+  booked_count INTEGER;
+BEGIN
+  -- Loop through each date in the range
+  FOR current_date IN 
+    SELECT generate_series(start_date::TIMESTAMP, end_date::TIMESTAMP, '1 day'::INTERVAL)::DATE
+  LOOP
+    -- Convert PostgreSQL day (0=Sunday) to ISO day (0=Monday)
+    day_of_week := ((EXTRACT(DOW FROM current_date)::INTEGER + 6) % 7);
+    
+    -- Get weekly availability for this day
+    FOR wa_record IN
+      SELECT wa.start_time, wa.end_time, wa.allows_virtual, wa.allows_in_person
+      FROM weekly_availability wa
+      WHERE wa.day_of_week = day_of_week
+        AND wa.is_active = true
+        -- Check date is not in exception_dates (holidays/blocked dates)
+        AND NOT EXISTS (
+          SELECT 1 FROM exception_dates ed
+          WHERE ed.exception_date = current_date
+            AND ed.is_available = false
+        )
+        -- Apply modality filter if provided
+        AND (
+          modality_filter IS NULL OR
+          (modality_filter = 'virtual' AND wa.allows_virtual = true) OR
+          (modality_filter = 'in-person' AND wa.allows_in_person = true)
+        )
+    LOOP
+      -- Generate 30-minute slots between start_time and end_time
+      slot_time := wa_record.start_time;
+      
+      WHILE slot_time < wa_record.end_time LOOP
+        slot_end := slot_time + INTERVAL '30 minutes';
+        
+        -- ⭐ KEY CHANGE: Only count appointments with status 'approved' or 'confirmed'
+        -- This allows multiple 'pending' appointments for the same slot
+        SELECT COUNT(*) INTO booked_count
+        FROM appointments
+        WHERE appointment_date = current_date
+          AND appointment_time = slot_time
+          AND status IN ('approved', 'confirmed')  -- ⭐ CHANGED from: status != 'cancelled'
+          AND (
+            modality_filter IS NULL OR
+            (modality_filter = 'virtual' AND modality = 'virtual') OR
+            (modality_filter = 'in-person' AND modality = 'in-person')
+          );
+        
+        -- Add slot if not booked (assuming max 1 per slot, adjust if needed)
+        IF booked_count = 0 THEN
+          slot_info := jsonb_build_object(
+            'time', slot_time::TEXT,
+            'end_time', slot_end::TEXT,
+            'duration', 30,
+            'available_virtual', wa_record.allows_virtual,
+            'available_in_person', wa_record.allows_in_person,
+            'available', true
+          );
+          
+          result := jsonb_set(
+            result,
+            ARRAY[current_date::TEXT],
+            COALESCE(result->current_date::TEXT, '[]'::JSONB) || slot_info
+          );
+        END IF;
+        
+        slot_time := slot_end;
+      END LOOP;
+    END LOOP;
+  END LOOP;
+
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION get_available_slots(TEXT, TEXT, TEXT) IS 
+'Returns available appointment slots for date range. 
+Only approved/confirmed appointments block slots, allowing multiple pending bookings.
+Admin has flexibility to choose which pending appointment to approve.';
+
+
+-- ============================================
+-- 5. ASSIGN ADMIN ROLE TO YOUR USER (REQUIRED)
+-- ============================================
+-- INSTRUCTIONS:
+-- 1. First, find your user ID by running:
+--    SELECT id, email FROM auth.users WHERE email = 'your-email@gmail.com';
+-- 2. Replace 'YOUR_USER_ID_HERE' and 'your-email@gmail.com' below
+-- 3. Run the UPDATE statement
+-- 4. IMPORTANT: Log out and log back in for changes to take effect
+-- ============================================
+
+-- Example (replace with your actual user ID and email):
+/*
+UPDATE auth.users
+SET raw_app_meta_data = jsonb_set(
+    COALESCE(raw_app_meta_data, '{}'::jsonb),
+    '{role}',
+    '"admin"'
+)
+WHERE id = 'YOUR_USER_ID_HERE'
+AND email = 'your-email@gmail.com';
+*/
+
+-- Verification query (run after update):
+/*
+SELECT 
+    id,
+    email,
+    raw_app_meta_data->>'role' as role,
+    CASE 
+        WHEN raw_app_meta_data->>'role' = 'admin' THEN '✅ SUCCESS - Admin role assigned'
+        ELSE '❌ FAILED - No admin role found'
+    END as status
+FROM auth.users 
+WHERE email = 'your-email@gmail.com';
+*/
+
+
+-- ============================================
+-- 6. VERIFICATION QUERIES (READ-ONLY)
+-- ============================================
+-- Run these to confirm everything is set up correctly
+-- ============================================
+
+-- Test 1: Check if is_admin() function exists and works
+/*
+SELECT 
+    '=== is_admin() Function Test ===' as test,
+    public.is_admin() as result,
+    CASE 
+        WHEN public.is_admin() = true THEN '✅ Function returns TRUE - Admin access granted'
+        WHEN public.is_admin() = false THEN '❌ Returns FALSE - Check admin role assignment'
+        ELSE '❓ Returns NULL - Function may have errors'
+    END as status;
+*/
+
+-- Test 2: Check weekly availability setup
+/*
+SELECT 
+  '=== Weekly Availability Check ===' as test,
+  day_of_week,
+  CASE day_of_week
+    WHEN 0 THEN 'Monday'
+    WHEN 1 THEN 'Tuesday'
+    WHEN 2 THEN 'Wednesday'
+    WHEN 3 THEN 'Thursday'
+    WHEN 4 THEN 'Friday'
+    WHEN 5 THEN 'Saturday'
+    WHEN 6 THEN 'Sunday'
+  END as day_name,
+  start_time,
+  end_time,
+  allows_virtual,
+  allows_in_person,
+  is_active,
+  CASE 
+    WHEN is_active = true THEN '✅ Active'
+    ELSE '❌ Inactive'
+  END as status
+FROM weekly_availability
+ORDER BY day_of_week;
+*/
+
+-- Test 3: Test get_available_slots() function (next 7 days)
+/*
+SELECT 
+  '=== Available Slots Test ===' as test,
+  get_available_slots(
+    CURRENT_DATE::TEXT,
+    (CURRENT_DATE + INTERVAL '7 days')::TEXT,
+    NULL
+  ) as slots_by_date;
+*/
+
+-- Test 4: Count admin users
+/*
+SELECT 
+    '=== Admin Users Count ===' as test,
+    COUNT(*) as total_admins,
+    json_agg(json_build_object('email', email, 'id', id)) as admin_list
+FROM auth.users
+WHERE raw_app_meta_data->>'role' = 'admin';
+*/
+
+
+-- ============================================
+-- DEPLOYMENT CHECKLIST
+-- ============================================
+-- [ ] 1. Run main schema (all_querries.sql lines 1-850)
+-- [ ] 2. Run is_admin() function fix (above)
+-- [ ] 3. Run weekly_availability setup (above)
+-- [ ] 4. Assign admin role to your user (above)
+-- [ ] 5. Log out and log back in to refresh JWT token
+-- [ ] 6. Run verification queries (above)
+-- [ ] 7. Test admin panel access in frontend
+-- [ ] 8. Test booking system (select date, see slots)
+-- ============================================
+
+
 
 
 
