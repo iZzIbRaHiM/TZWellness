@@ -35,14 +35,14 @@ export function HeroSection() {
         const response = await appointmentsApi.getAvailableDates(14);
         if (response.success && response.data?.dates && response.data.dates.length > 0) {
           const firstDate = response.data.dates[0];
-          
+
           // Fetch slots for the first available date
           const slotsResponse = await appointmentsApi.getAvailableSlots({
             start_date: firstDate,
             end_date: firstDate,
             modality: "both"
           });
-          
+
           if (slotsResponse.success && slotsResponse.data?.slots) {
             // Get slots for the first date
             const dateSlots = slotsResponse.data.slots[firstDate];
@@ -103,30 +103,30 @@ export function HeroSection() {
     >
       {/* Background decoration - subtle organic shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.05, 1],
-            opacity: [0.3, 0.4, 0.3] 
+            opacity: [0.3, 0.4, 0.3]
           }}
-          transition={{ 
-            duration: 8, 
+          transition={{
+            duration: 8,
             repeat: Infinity,
-            ease: "easeInOut" 
+            ease: "easeInOut"
           }}
-          className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-emerald-100 rounded-full blur-3xl" 
+          className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-emerald-100 rounded-full blur-3xl"
         />
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.08, 1],
-            opacity: [0.2, 0.3, 0.2] 
+            opacity: [0.2, 0.3, 0.2]
           }}
-          transition={{ 
-            duration: 10, 
+          transition={{
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
             delay: 2
           }}
-          className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-terracotta-100 rounded-full blur-3xl" 
+          className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-terracotta-100 rounded-full blur-3xl"
         />
       </div>
 
@@ -147,7 +147,7 @@ export function HeroSection() {
             >
               <span className="italic">
                 <span className="text-black">Heal From</span>{" "}
-                <span className="text-terracotta">Within</span>
+                <span className="text-black">Within</span>
               </span>
             </h1>
 
@@ -260,7 +260,7 @@ export function HeroSection() {
                   >
                     <Droplet className="h-5 w-5 text-emerald-600" />
                   </motion.div>
-                  
+
                   {/* Heart Health */}
                   <motion.div
                     whileHover={{ scale: 1.15 }}
@@ -280,7 +280,7 @@ export function HeroSection() {
 
                 {/* Decorative Health Icons - floating with parallax */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     y: [0, -15, 0],
                     rotate: [0, 5, 0]
                   }}
@@ -291,7 +291,7 @@ export function HeroSection() {
                 </motion.div>
 
                 <motion.div
-                  animate={{ 
+                  animate={{
                     y: [0, 20, 0],
                     rotate: [0, -5, 0]
                   }}
@@ -302,7 +302,7 @@ export function HeroSection() {
                 </motion.div>
 
                 <motion.div
-                  animate={{ 
+                  animate={{
                     y: [0, -20, 0],
                     x: [0, 10, 0]
                   }}
@@ -338,8 +338,8 @@ export function HeroSection() {
                       )}
                     </div>
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="ml-auto flex-shrink-0"
                     onClick={handleBookClick}
                     disabled={isLoading}
