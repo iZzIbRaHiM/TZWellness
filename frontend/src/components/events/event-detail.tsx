@@ -41,7 +41,7 @@ interface EventDetailProps {
     title: string;
     slug: string;
     description: string;
-    long_description: string;
+    long_description?: string;
     category: string;
     date: string;
     start_time: string;
@@ -49,10 +49,8 @@ interface EventDetailProps {
     location: string;
     address?: string;
     is_virtual: boolean;
-    max_attendees: number;
-    registered_count: number;
     price: number;
-    speaker: {
+    speaker?: {
       name: string;
       title: string;
       bio: string;
@@ -64,10 +62,6 @@ export function EventDetail({ event }: EventDetailProps) {
   const { toast } = useToast();
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-
-  const spotsLeft = event.max_attendees - event.registered_count;
-  const isFull = spotsLeft <= 0;
-  const isAlmostFull = spotsLeft <= 5 && !isFull;
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,12 +75,13 @@ export function EventDetail({ event }: EventDetailProps) {
 
     toast({
       title: "Registration successful!",
-      description: "Check your email for confirmation details.",
+      description: "Check your WhatsApp for confirmation details.",
     });
   };
 
   // Parse markdown-like content
   const parseContent = (content: string) => {
+    if (!content) return null;
     const sections = content.split("\n\n").filter(Boolean);
     return sections.map((section, i) => {
       if (section.startsWith("## ")) {
@@ -171,31 +166,33 @@ export function EventDetail({ event }: EventDetailProps) {
 
             {/* Details */}
             <div className="prose prose-emerald max-w-none">
-              {parseContent(event.long_description)}
+              {parseContent(event.long_description || event.description || "")}
             </div>
 
             {/* Speaker */}
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="text-lg">About the Speaker</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-full bg-emerald-200 flex items-center justify-center shrink-0">
-                    <User className="h-8 w-8 text-emerald-700" />
+            {event.speaker && (
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">About the Speaker</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-200 flex items-center justify-center shrink-0">
+                      <User className="h-8 w-8 text-emerald-700" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-emerald-950">
+                        {event.speaker.name}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {event.speaker.title}
+                      </p>
+                      <p className="text-gray-700">{event.speaker.bio}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-emerald-950">
-                      {event.speaker.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {event.speaker.title}
-                    </p>
-                    <p className="text-gray-700">{event.speaker.bio}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
         </div>
 
@@ -216,7 +213,7 @@ export function EventDetail({ event }: EventDetailProps) {
                   <Calendar className="h-5 w-5 text-emerald-600" />
                   <div>
                     <p className="font-medium text-gray-900">
-                      {format(parseISO(event.date), "EEEE, MMMM d, yyyy")}
+                      {event.date ? format(parseISO(event.date), "EEEE, MMMM d, yyyy") : "Date TBD"}
                     </p>
                   </div>
                 </div>
@@ -246,49 +243,31 @@ export function EventDetail({ event }: EventDetailProps) {
                   </div>
                 </div>
 
-                {/* Capacity */}
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-emerald-600" />
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      {event.registered_count} / {event.max_attendees} registered
-                    </p>
-                    {isAlmostFull && (
-                      <p className="text-sm text-red-600">
-                        Only {spotsLeft} spots left!
-                      </p>
-                    )}
-                  </div>
-                </div>
-
                 {/* Price */}
                 <div className="pt-4 border-t">
                   <p className="text-2xl font-bold text-emerald-700">
-                    {event.price === 0 ? "Free" : `$${event.price}`}
+                    {event.price === 0 ? "Free" : `PKR ${event.price?.toLocaleString('en-US')}`}
                   </p>
                 </div>
 
                 {/* Registration */}
-                {isRegistered ? (
+                <div className="space-y-4 pt-4 border-t">
+                  {isRegistered ? (
                   <div className="p-4 bg-green-50 rounded-lg text-center">
                     <Check className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <p className="font-medium text-green-800">
                       You're registered!
                     </p>
                     <p className="text-sm text-green-600">
-                      Check your email for details
+                      Check your WhatsApp for details
                     </p>
                   </div>
-                ) : isFull ? (
-                  <Button disabled className="w-full">
-                    Event Full
-                  </Button>
                 ) : (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="cta" className="w-full">
                         {event.price > 0
-                          ? `Register - $${event.price}`
+                          ? `Register - PKR ${event.price?.toLocaleString('en-US')}`
                           : "Register Free"}
                       </Button>
                     </DialogTrigger>
@@ -336,6 +315,7 @@ export function EventDetail({ event }: EventDetailProps) {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Event
                 </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

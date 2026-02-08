@@ -14,58 +14,29 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, Calendar, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, Calendar, ArrowRight, Loader2, FileText } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { blogApi, BlogPost } from "@/lib/api";
 
-// Fallback posts (used only if API fails or returns empty)
-const fallbackPosts = [
-  {
-    id: 1,
-    title: "Understanding Blood Sugar: A Complete Guide",
-    slug: "understanding-blood-sugar-complete-guide",
-    excerpt:
-      "Learn how blood sugar works, what affects it, and how to keep it in a healthy range for optimal energy and wellbeing.",
-    category: { name: "Health Tips" },
-    published_at: "2024-01-15",
-    read_time_minutes: 8,
-    featured_image: null,
-  },
-  {
-    id: 2,
-    title: "10 Thyroid-Friendly Foods to Add to Your Diet",
-    slug: "thyroid-friendly-foods-diet",
-    excerpt:
-      "Discover the best foods to support thyroid function and boost your metabolism naturally.",
-    category: { name: "Nutrition" },
-    published_at: "2024-01-12",
-    read_time_minutes: 6,
-    featured_image: null,
-  },
-  {
-    id: 3,
-    title: "Managing PCOS Naturally: Lifestyle Changes That Work",
-    slug: "managing-pcos-naturally-lifestyle",
-    excerpt:
-      "Evidence-based lifestyle modifications that can help manage PCOS symptoms effectively.",
-    category: { name: "Health Tips" },
-    published_at: "2024-01-10",
-    read_time_minutes: 10,
-    featured_image: null,
-  },
-];
 
 export function BlogSection() {
-  // Fetch blog posts from API
+  // Fetch latest 3 featured blog posts from API
   const { data, isLoading, error } = useQuery({
-    queryKey: ["blog-posts-home"],
-    queryFn: () => blogApi.getPosts({ featured: true }),
+    queryKey: ["blog-posts-home", "featured"],
+    queryFn: async () => {
+      const response = await blogApi.getPosts({ featured: true });
+      if (!response.success || !response.data) {
+        return { posts: [], count: 0 };
+      }
+      // Get latest 3 featured posts
+      const featuredPosts = response.data.slice(0, 3);
+      return { posts: featuredPosts, count: featuredPosts.length };
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Extract posts with defensive handling - limit to 3 for home page
-  const apiPosts = data?.data?.results || [];
-  const posts = apiPosts.length > 0 ? apiPosts.slice(0, 3) : fallbackPosts;
+  // Extract posts with defensive handling
+  const posts = data?.posts || [];
 
   // Helper to get category name safely
   const getCategoryName = (post: any): string => {
@@ -108,8 +79,17 @@ export function BlogSection() {
           </div>
         )}
 
+        {/* Empty State - No Featured Blogs */}
+        {!isLoading && posts.length === 0 && (
+          <div className="text-center py-16">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-500 text-lg">No featured articles available at the moment.</p>
+            <p className="text-gray-400 text-sm mt-2">Check back soon for new content!</p>
+          </div>
+        )}
+
         {/* Blog Cards Grid */}
-        {!isLoading && (
+        {!isLoading && posts.length > 0 && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {posts.map((post: any, index: number) => (
               <motion.div
@@ -148,7 +128,7 @@ export function BlogSection() {
                         {post.title}
                       </CardTitle>
                       <CardDescription className="line-clamp-2">
-                        {post.excerpt}
+                        {post.excerpt || post.title}
                       </CardDescription>
                     </CardHeader>
 

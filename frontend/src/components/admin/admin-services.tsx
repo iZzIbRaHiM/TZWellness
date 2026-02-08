@@ -31,7 +31,7 @@ const defaultFormData: ServiceFormData = {
   title: "",
   description: "",
   icon: "🩺",
-  category: "",
+  category: "" as any,
   modality: "both",
   duration: 30,
   price: "",
@@ -55,7 +55,7 @@ export function AdminServices() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.results || [];
+  const services = data?.data || [];
 
   // Fetch categories
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
@@ -95,7 +95,7 @@ export function AdminServices() {
 
   // Update service mutation
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<ServiceFormData> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<ServiceFormData> }) =>
       servicesApi.update(id, data as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services-admin"] });
@@ -167,7 +167,25 @@ export function AdminServices() {
       return;
     }
 
-    createMutation.mutate(formData);
+    // Generate slug from title
+    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const createData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Use category as category_id
+      description: formData.description,
+      icon: formData.icon,
+      modality: formData.modality,
+      duration_minutes: formData.duration,
+      price: formData.price ? parseFloat(formData.price) : null,
+      is_featured: formData.is_featured,
+      is_published: formData.is_published,
+      order: 0,
+    };
+
+    createMutation.mutate(createData as any);
   };
 
   // Handle form submission for update
@@ -195,11 +213,28 @@ export function AdminServices() {
       return;
     }
 
-    updateMutation.mutate({ id: selectedService.id, data: formData });
+    // Generate slug from title
+    const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const updateData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Use category as category_id
+      description: formData.description,
+      icon: formData.icon,
+      modality: formData.modality,
+      duration_minutes: formData.duration,
+      price: formData.price ? parseFloat(formData.price) : null,
+      is_featured: formData.is_featured,
+      is_published: formData.is_published,
+    };
+
+    updateMutation.mutate({ id: selectedService.id, data: updateData as any });
   };
 
   // Handle delete
-  const handleDelete = (serviceId: number) => {
+  const handleDelete = (serviceId: string) => {
     if (confirm("Are you sure you want to delete this service? This action cannot be undone.")) {
       deleteMutation.mutate(serviceId);
     }
@@ -213,9 +248,9 @@ export function AdminServices() {
       title: service.title,
       description: service.description || "",
       icon: service.icon || "🩺",
-      category: categoryId,
+      category: categoryId || "",
       modality: service.modality || "both",
-      duration: service.duration_minutes || service.duration || 30,
+      duration: service.duration_minutes || 30,
       price: service.price?.toString() || "",
       is_featured: service.is_featured || false,
       is_published: service.is_published !== false,
@@ -291,17 +326,17 @@ export function AdminServices() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="create-category">Category *</Label>
+                    <Label htmlFor="edit-category">Category *</Label>
                     <Select
-                      value={String(formData.category)}
-                      onValueChange={(value: string) => setFormData({ ...formData, category: parseInt(value) })}
+                      value={formData.category ? String(formData.category) : ""}
+                      onValueChange={(value: string) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger id="create-category">
+                      <SelectTrigger id="edit-category">
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((cat: ServiceCategory) => (
-                          <SelectItem key={cat.id} value={String(cat.id)}>
+                          <SelectItem key={cat.id} value={cat.id}>
                             {cat.name}
                           </SelectItem>
                         ))}
@@ -341,12 +376,15 @@ export function AdminServices() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="create-price">Price ($)</Label>
+                    <Label htmlFor="create-price">Price (PKR)</Label>
                     <Input
                       id="create-price"
+                      type="number"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="0.00"
+                      placeholder="0"
+                      min="0"
+                      step="1"
                     />
                   </div>
                 </div>
@@ -455,16 +493,15 @@ export function AdminServices() {
                   {service.description || "No description"}
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                  {(service.duration_minutes || service.duration) && (
+                  {service.duration_minutes && (
                     <span className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      {service.duration_minutes || service.duration} min
+                      {service.duration_minutes} min
                     </span>
                   )}
                   {service.price && (
                     <span className="flex items-center">
-                      <DollarSign className="h-3 w-3 mr-1" />
-                      {service.price}
+                      PKR {service.price?.toLocaleString('en-US')}
                     </span>
                   )}
                   {service.modality && (
@@ -592,12 +629,15 @@ export function AdminServices() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-price">Price ($)</Label>
+                  <Label htmlFor="edit-price">Price (PKR)</Label>
                   <Input
                     id="edit-price"
+                    type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="0.00"
+                    placeholder="0"
+                    min="0"
+                    step="1"
                   />
                 </div>
               </div>

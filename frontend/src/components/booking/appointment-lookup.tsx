@@ -34,12 +34,15 @@ import {
   CheckCircle,
   Loader2,
   XCircle,
+  MessageCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { formatDate } from "@/lib/utils";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 interface AppointmentResult {
-  id: number;
+  id: string;
   reference: string;
   patient: {
     name: string;
@@ -57,6 +60,7 @@ interface AppointmentResult {
 }
 
 export function AppointmentLookup() {
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [reference, setReference] = useState("");
   const [email, setEmail] = useState("");
@@ -85,7 +89,7 @@ export function AppointmentLookup() {
         }
 
         // Map API response to UI format
-        const serviceTitle = response.data.service?.title || response.data.service_title || null;
+        const serviceTitle = response.data.service?.title || null;
         const normalizedModality = response.data.modality === "in_person" ? "in-person" : response.data.modality as "virtual" | "in-person" | "phone";
         const normalizedStatus = response.data.status === "approved" ? "confirmed" : response.data.status as "pending" | "confirmed" | "cancelled" | "approved" | "rejected" | "completed";
         
@@ -137,7 +141,7 @@ export function AppointmentLookup() {
         
         toast({
           title: "Appointment Cancelled",
-          description: response.data?.message || "Your appointment has been cancelled. You will receive a confirmation email.",
+          description: "Your appointment has been cancelled. You will receive a WhatsApp confirmation.",
         });
       } else {
         toast({
@@ -208,7 +212,7 @@ export function AppointmentLookup() {
             Lookup Your Appointment
           </CardTitle>
           <CardDescription>
-            You can find your reference number in your confirmation email
+            You can find your reference number in your WhatsApp confirmation message
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -368,7 +372,7 @@ export function AppointmentLookup() {
                 {appointment.status !== "cancelled" && (
                   <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                     <Button asChild variant="default" className="flex-1">
-                      <Link href="/book">Reschedule Appointment</Link>
+                      <Link href="/appointments">Reschedule Appointment</Link>
                     </Button>
                     <Button
                       variant="outline"
@@ -386,7 +390,7 @@ export function AppointmentLookup() {
                       This appointment has been cancelled.
                     </p>
                     <Button asChild>
-                      <Link href="/book">Book a New Appointment</Link>
+                      <Link href="/appointments">Book a New Appointment</Link>
                     </Button>
                   </div>
                 )}
@@ -437,10 +441,12 @@ export function AppointmentLookup() {
       <p className="text-center text-sm text-gray-500">
         Need help?{" "}
         <a
-          href="tel:+1234567890"
+          href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need help checking my appointment status.")}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-emerald-600 hover:text-emerald-700"
         >
-          Call us at (555) 123-4567
+          WhatsApp us
         </a>
       </p>
     </div>

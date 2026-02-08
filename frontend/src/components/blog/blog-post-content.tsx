@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
 
   // Parse markdown-like content into sections
   const parseContent = (content: string) => {
+    if (!content) return [];
     const sections = content.split("\n\n").filter(Boolean);
     return sections.map((section, i) => {
       if (section.startsWith("## ")) {
@@ -158,14 +160,27 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
         </div>
       </motion.header>
 
-      {/* Featured image placeholder */}
+      {/* Featured image */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="relative h-64 sm:h-80 bg-emerald-100 rounded-xl mb-8 flex items-center justify-center"
+        className="relative w-full aspect-video bg-emerald-100 rounded-xl mb-8 overflow-hidden"
       >
-        <span className="text-8xl">📖</span>
+        {post.featured_image ? (
+          <Image
+            src={post.featured_image}
+            alt={post.title}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 768px"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-8xl">📖</span>
+          </div>
+        )}
       </motion.div>
 
       {/* Content */}
@@ -240,7 +255,7 @@ export function BlogPostContent({ post }: BlogPostContentProps) {
           Our specialists can help you create a customized plan for your health goals.
         </p>
         <Button asChild variant="cta" size="lg">
-          <Link href="/book">Book a Consultation</Link>
+          <Link href="/appointments">Book a Consultation</Link>
         </Button>
       </motion.div>
     </article>

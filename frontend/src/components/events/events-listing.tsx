@@ -56,7 +56,7 @@ export function EventsListing() {
     queryKey: ["events", activeCategory],
     queryFn: () => eventsApi.getAll({
       category: activeCategory !== "All" ? activeCategory : undefined,
-      status: "upcoming",
+      upcoming: true,
     }),
   });
 
@@ -66,7 +66,7 @@ export function EventsListing() {
     queryFn: () => eventsApi.getCategories(),
   });
 
-  const events = eventsData?.data?.results || [];
+  const events = eventsData?.data || [];
   const apiCategories: EventCategory[] = Array.isArray(categoriesData?.data) 
     ? categoriesData.data 
     : (Array.isArray((categoriesData?.data as any)?.results) ? (categoriesData?.data as any).results : []);
@@ -84,7 +84,8 @@ export function EventsListing() {
   // Get events for the current month (calendar view)
   const monthEvents = useMemo(() => {
     return filteredEvents.filter((event: Event) => {
-      const eventDate = parseISO(event.start_datetime);
+      if (!event.start_date) return false;
+      const eventDate = parseISO(event.start_date);
       return isSameMonth(eventDate, currentMonth);
     });
   }, [filteredEvents, currentMonth]);
@@ -95,17 +96,6 @@ export function EventsListing() {
       <div className="flex flex-col items-center justify-center py-16 text-gray-500">
         <Loader2 className="h-8 w-8 animate-spin mb-3 text-emerald-600" />
         <p>Loading events...</p>
-      </div>
-    );
-  }
-
-  // Error state
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-red-600">
-        <AlertCircle className="h-12 w-12 mb-3" />
-        <p className="font-semibold mb-1">Unable to load events</p>
-        <p className="text-sm text-gray-600">Please try again later</p>
       </div>
     );
   }
@@ -229,6 +219,7 @@ function CalendarView({
   const eventsByDate = useMemo(() => {
     const grouped: Record<string, any[]> = {};
     events.forEach((event) => {
+      if (!event.start_datetime) return;
       const dateKey = format(parseISO(event.start_datetime), "yyyy-MM-dd");
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -351,7 +342,7 @@ interface EventCardProps {
 }
 
 function EventCard({ event, compact = false }: EventCardProps) {
-  const eventDate = parseISO(event.start_datetime);
+  const eventDate = event.start_datetime ? parseISO(event.start_datetime) : new Date();
   const spotsLeft = event.spots_left;
   const isFull = event.is_full;
 
@@ -377,7 +368,7 @@ function EventCard({ event, compact = false }: EventCardProps) {
           </CardTitle>
           {!compact && (
             <CardDescription className="line-clamp-2">
-              {event.short_description}
+              {event.description || event.title}
             </CardDescription>
           )}
         </CardHeader>
@@ -413,16 +404,6 @@ function EventCard({ event, compact = false }: EventCardProps) {
               )}
             </div>
 
-            {/* Attendees */}
-            {event.max_attendees && (
-              <div className="flex items-center gap-2 text-gray-600">
-                <Users className="h-4 w-4 shrink-0" />
-                <span>
-                  {event.current_attendees || 0} / {event.max_attendees} registered
-                </span>
-              </div>
-            )}
-
             {/* Price */}
             {!compact && (
               <div className="pt-2 mt-2 border-t">
@@ -430,7 +411,7 @@ function EventCard({ event, compact = false }: EventCardProps) {
                   <span className="font-semibold text-emerald-700">Free Event</span>
                 ) : (
                   <span className="font-semibold text-emerald-700">
-                    ${event.price}
+                    PKR {event.price?.toLocaleString('en-US')}
                   </span>
                 )}
               </div>

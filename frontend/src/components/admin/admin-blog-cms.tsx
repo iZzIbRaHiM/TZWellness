@@ -39,8 +39,14 @@ import {
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-const categories = ["Health Tips", "Nutrition", "Stress", "Motivation"];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 export function AdminBlogCMS() {
   const { toast } = useToast();
@@ -51,6 +57,14 @@ export function AdminBlogCMS() {
     queryKey: ["admin-blog-posts"],
     queryFn: () => blogApi.admin.getAll(),
   });
+
+  // Fetch blog categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ["blog-categories"],
+    queryFn: () => blogApi.getCategories(),
+  });
+
+  const categories = categoriesData?.data || [];
 
   const posts: any[] = Array.isArray(postsData?.data) 
     ? postsData.data 
@@ -63,9 +77,10 @@ export function AdminBlogCMS() {
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
-    category: "Health Tips",
+    category: "",
     content: "",
     featured_image: null as File | null,
+    is_featured: false,
   });
 
   const filteredPosts = posts.filter(
@@ -78,15 +93,7 @@ export function AdminBlogCMS() {
 
   // Mutations for CRUD operations
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; excerpt: string; content: string; category: string; featured_image?: File | null }) => {
-      const formDataToSend = new FormData();
-      formDataToSend.append("title", data.title);
-      formDataToSend.append("excerpt", data.excerpt);
-      formDataToSend.append("content", data.content);
-      formDataToSend.append("category", data.category);
-      if (data.featured_image) {
-        formDataToSend.append("featured_image", data.featured_image);
-      }
+    mutationFn: (formDataToSend: FormData) => {
       return blogApi.admin.create(formDataToSend);
     },
     onSuccess: () => {
@@ -96,21 +103,22 @@ export function AdminBlogCMS() {
         description: "Blog post created successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog creation error:', error);
       toast({
         title: "Error",
-        description: "Failed to create blog post",
+        description: error?.message || "Failed to create blog post",
         variant: "destructive",
       });
     },
     onSettled: () => {
       setIsCreateOpen(false);
-      setFormData({ title: "", excerpt: "", category: "Health Tips", content: "", featured_image: null });
+      setFormData({ title: "", excerpt: "", category: "", content: "", featured_image: null, is_featured: false });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<{ is_published: boolean }> }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<{ is_published: boolean }> }) =>
       blogApi.admin.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
@@ -119,10 +127,11 @@ export function AdminBlogCMS() {
         description: "Blog post updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update blog post",
+        description: error?.message || "Failed to update blog post",
         variant: "destructive",
       });
     },
@@ -132,7 +141,7 @@ export function AdminBlogCMS() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => blogApi.admin.delete(id),
+    mutationFn: (id: string) => blogApi.admin.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       toast({
@@ -140,10 +149,11 @@ export function AdminBlogCMS() {
         description: "Blog post deleted successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Blog deletion error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete blog post",
+        description: error?.message || "Failed to delete blog post",
         variant: "destructive",
       });
     },
@@ -152,21 +162,83 @@ export function AdminBlogCMS() {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, currentStatus }: { id: string; currentStatus: boolean }) =>
+      blogApi.admin.togglePublish(id, currentStatus),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      const isPublished = response.data?.is_published;
+      toast({
+        title: "Success",
+        description: `Blog post ${isPublished ? 'published' : 'unpublished'} successfully`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Blog publish toggle error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to toggle publish status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreate = () => {
-    createMutation.mutate({
-      title: formData.title,
-      excerpt: formData.excerpt,
-      content: formData.content,
-      category: formData.category,
-      featured_image: formData.featured_image,
-    });
+    // Validation
+    if (!formData.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.category) {
+      toast({
+        title: "Validation Error",
+        description: "Category is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Content is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate slug from title
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Create FormData with proper field mapping
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("slug", slug);
+    formDataToSend.append("category_id", formData.category); // Changed from 'category' to 'category_id'
+    formDataToSend.append("excerpt", formData.excerpt);
+    formDataToSend.append("content", formData.content);
+    formDataToSend.append("is_featured", String(formData.is_featured));
+    
+    if (formData.featured_image) {
+      formDataToSend.append("featured_image", formData.featured_image);
+    }
+
+    createMutation.mutate(formDataToSend as any);
   };
 
-  const handlePublish = (id: number) => {
-    updateMutation.mutate({ id, data: { is_published: true } });
+  const handleTogglePublish = (id: string, currentStatus: boolean) => {
+    togglePublishMutation.mutate({ id, currentStatus });
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this post?")) {
       deleteMutation.mutate(id);
     }
@@ -191,7 +263,7 @@ export function AdminBlogCMS() {
               New Post
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Blog Post</DialogTitle>
               <DialogDescription>
@@ -200,7 +272,7 @@ export function AdminBlogCMS() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -208,24 +280,28 @@ export function AdminBlogCMS() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Enter post title"
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
+                <Label htmlFor="category">Category *</Label>
+                <Select
                   value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
+                  onValueChange={(value: string) =>
+                    setFormData({ ...formData, category: value })
                   }
-                  className="w-full p-2 border rounded-md"
                 >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat: any) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="excerpt">Excerpt</Label>
@@ -263,7 +339,7 @@ export function AdminBlogCMS() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
+                <Label htmlFor="content">Content *</Label>
                 <Textarea
                   id="content"
                   value={formData.content}
@@ -272,7 +348,20 @@ export function AdminBlogCMS() {
                   }
                   placeholder="Write your blog post content here..."
                   rows={10}
+                  required
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_featured"
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_featured: checked })
+                  }
+                />
+                <Label htmlFor="is_featured" className="cursor-pointer">
+                  Feature this post on homepage
+                </Label>
               </div>
               <div className="flex gap-3 pt-4">
                 <Button 
@@ -283,7 +372,7 @@ export function AdminBlogCMS() {
                   {createMutation.isPending && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   )}
-                  Save as Draft
+                  Create Post
                 </Button>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
@@ -383,7 +472,7 @@ export function AdminBlogCMS() {
                           {post.title}
                         </p>
                         <p className="text-sm text-gray-500 line-clamp-1">
-                          {post.excerpt}
+                          {post.excerpt || "No excerpt"}
                         </p>
                       </div>
                     </td>
@@ -405,18 +494,18 @@ export function AdminBlogCMS() {
                     <td className="px-6 py-4 text-gray-500">{post.views}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        {post.status === "draft" && (
-                          <Button
-                            size="sm"
-                            onClick={() => handlePublish(post.id)}
-                            disabled={updateMutation.isPending}
-                          >
-                            {updateMutation.isPending && (
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            )}
-                            Publish
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant={post.is_published ? "outline" : "default"}
+                          onClick={() => handleTogglePublish(post.id, post.is_published)}
+                          disabled={togglePublishMutation.isPending}
+                          className={post.is_published ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+                        >
+                          {togglePublishMutation.isPending ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : null}
+                          {post.is_published ? "Unpublish" : "Publish"}
+                        </Button>
                         <Button size="sm" variant="outline">
                           <Edit className="h-4 w-4" />
                         </Button>

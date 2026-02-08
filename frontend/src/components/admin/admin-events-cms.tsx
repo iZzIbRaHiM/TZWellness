@@ -39,8 +39,13 @@ import {
 } from "lucide-react";
 import { formatDate, cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-
-const eventCategories = ["Workshop", "Live Q&A", "Support Group"];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AdminEventsCMS() {
   const { toast } = useToast();
@@ -52,6 +57,14 @@ export function AdminEventsCMS() {
     queryFn: () => eventsApi.admin.getAll(),
   });
 
+  // Fetch event categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ["event-categories"],
+    queryFn: () => eventsApi.getCategories(),
+  });
+
+  const categories = categoriesData?.data || [];
+
   const events: any[] = Array.isArray(eventsData?.data) 
     ? eventsData.data 
     : (Array.isArray((eventsData?.data as any)?.results) ? (eventsData?.data as any).results : []);
@@ -62,13 +75,12 @@ export function AdminEventsCMS() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "Workshop",
+    category: "",
     date: "",
     start_time: "",
     end_time: "",
     location: "",
     is_virtual: false,
-    max_attendees: 30,
     speaker: "",
     image: null as File | null,
   });
@@ -105,10 +117,11 @@ export function AdminEventsCMS() {
         description: "Event created successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event creation error:', error);
       toast({
         title: "Error",
-        description: "Failed to create event",
+        description: error?.message || "Failed to create event",
         variant: "destructive",
       });
     },
@@ -117,13 +130,12 @@ export function AdminEventsCMS() {
       setFormData({
         title: "",
         description: "",
-        category: "Workshop",
+        category: "",
         date: "",
         start_time: "",
         end_time: "",
         location: "",
         is_virtual: false,
-        max_attendees: 30,
         speaker: "",
         image: null,
       });
@@ -131,7 +143,7 @@ export function AdminEventsCMS() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
       eventsApi.admin.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
@@ -140,10 +152,11 @@ export function AdminEventsCMS() {
         description: "Event updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event update error:', error);
       toast({
         title: "Error",
-        description: "Failed to update event",
+        description: error?.message || "Failed to update event",
         variant: "destructive",
       });
     },
@@ -153,7 +166,7 @@ export function AdminEventsCMS() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => eventsApi.admin.delete(id),
+    mutationFn: (id: string) => eventsApi.admin.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-events"] });
       toast({
@@ -161,10 +174,11 @@ export function AdminEventsCMS() {
         description: "Event deleted successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Event deletion error:', error);
       toast({
         title: "Error",
-        description: "Failed to delete event",
+        description: error?.message || "Failed to delete event",
         variant: "destructive",
       });
     },
@@ -173,15 +187,89 @@ export function AdminEventsCMS() {
     },
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: ({ id, currentStatus }: { id: string; currentStatus: boolean }) =>
+      eventsApi.admin.togglePublish(id, currentStatus),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+      const isPublished = response.data?.is_published;
+      toast({
+        title: "Success",
+        description: `Event ${isPublished ? 'published' : 'unpublished'} successfully`,
+      });
+    },
+    onError: (error: any) => {
+      console.error('Event publish toggle error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to toggle publish status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreate = () => {
-    createMutation.mutate(formData);
+    // Validation
+    if (!formData.title.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Title is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.category) {
+      toast({
+        title: "Validation Error",
+        description: "Category is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.date) {
+      toast({
+        title: "Validation Error",
+        description: "Date is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate slug from title
+    const slug = formData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Map form data to API structure
+    const createData = {
+      title: formData.title,
+      slug,
+      category_id: formData.category, // Map to category_id (correct)
+      description: formData.description,
+      modality: formData.is_virtual ? 'virtual' : 'in_person',
+      start_date: `${formData.date}T${formData.start_time || '09:00'}:00`,
+      end_date: `${formData.date}T${formData.end_time || '10:00'}:00`,
+      timezone: 'Africa/Dar_es_Salaam',
+      location_name: formData.is_virtual ? 'Online' : formData.location,
+      location_address: formData.is_virtual ? null : formData.location,
+      virtual_link: formData.is_virtual ? formData.location : null,
+      what_to_bring: formData.speaker || null, // Keep mapping (what_to_bring is correct field)
+      is_published: true,
+      is_featured: false,
+      image: null,
+    };
+
+    createMutation.mutate(createData as any);
   };
 
-  const handlePublish = (id: number) => {
-    updateMutation.mutate({ id, data: { is_published: true } });
+  const handleTogglePublish = (id: string, currentStatus: boolean) => {
+    togglePublishMutation.mutate({ id, currentStatus });
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this event?")) {
       deleteMutation.mutate(id);
     }
@@ -215,7 +303,7 @@ export function AdminEventsCMS() {
             </DialogHeader>
             <div className="space-y-4 mt-4 max-h-[60vh] overflow-y-auto">
               <div className="space-y-2">
-                <Label htmlFor="title">Event Title</Label>
+                <Label htmlFor="title">Event Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
@@ -223,40 +311,30 @@ export function AdminEventsCMS() {
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="Enter event title"
+                  required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <select
-                    id="category"
+                  <Label htmlFor="category">Category *</Label>
+                  <Select
                     value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
+                    onValueChange={(value: string) =>
+                      setFormData({ ...formData, category: value })
                     }
-                    className="w-full p-2 border rounded-md"
                   >
-                    {eventCategories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max_attendees">Max Attendees</Label>
-                  <Input
-                    id="max_attendees"
-                    type="number"
-                    value={formData.max_attendees}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        max_attendees: parseInt(e.target.value),
-                      })
-                    }
-                  />
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -275,7 +353,7 @@ export function AdminEventsCMS() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">Date *</Label>
                   <Input
                     id="date"
                     type="date"
@@ -283,6 +361,7 @@ export function AdminEventsCMS() {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -379,7 +458,7 @@ export function AdminEventsCMS() {
                   {createMutation.isPending && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   )}
-                  Save as Draft
+                  Create Event
                 </Button>
                 <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
@@ -421,9 +500,9 @@ export function AdminEventsCMS() {
               <Users className="h-6 w-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Registrations</p>
+              <p className="text-sm text-gray-500">Total Events</p>
               <p className="text-2xl font-bold text-gray-900">
-                {events.reduce((sum, e) => sum + (e.registered_count || e.current_attendees || 0), 0)}
+                {events.length}
               </p>
             </div>
           </CardContent>
@@ -460,9 +539,9 @@ export function AdminEventsCMS() {
                   {typeof event.category === "object" ? event.category?.name : event.category}
                 </Badge>
                 <Badge
-                  variant={(event.status === "published" || event.status === "upcoming") ? "success" : "secondary"}
+                  variant={(event.is_published) ? "success" : "secondary"}
                 >
-                  {event.status}
+                  {event.is_published ? "published" : "draft"}
                 </Badge>
               </div>
               <CardTitle className="text-lg mt-2">{event.title}</CardTitle>
@@ -490,28 +569,21 @@ export function AdminEventsCMS() {
                   )}
                   <span>{event.location}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    {event.registered_count || event.current_attendees || 0} / {event.max_attendees} registered
-                  </span>
-                </div>
               </div>
             </CardContent>
             <div className="p-4 pt-0 flex gap-2">
-              {event.status === "draft" && (
-                <Button
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => handlePublish(event.id)}
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  Publish
-                </Button>
-              )}
+              <Button
+                size="sm"
+                className="flex-1"
+                variant={event.is_published ? "outline" : "default"}
+                onClick={() => handleTogglePublish(event.id, event.is_published)}
+                disabled={togglePublishMutation.isPending}
+              >
+                {togglePublishMutation.isPending && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                {event.is_published ? "Unpublish" : "Publish"}
+              </Button>
               <Button size="sm" variant="outline">
                 <Edit className="h-4 w-4" />
               </Button>

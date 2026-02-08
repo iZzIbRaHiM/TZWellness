@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 // Service features mapping by category for rich display
 const serviceFeaturesByCategory: Record<string, string[]> = {
@@ -24,6 +25,7 @@ const serviceFeaturesByCategory: Record<string, string[]> = {
 const defaultFeatures = ["Expert Care", "Personalized Treatment", "Follow-up Support"];
 
 export function StepService() {
+  const { settings } = useSiteSettings();
   const searchParams = useSearchParams();
   const { serviceId, setService, nextStep } = useBookingStore();
 
@@ -33,21 +35,23 @@ export function StepService() {
     queryFn: () => servicesApi.getAll(),
   });
 
-  const services = data?.data?.results || [];
+  const services = data?.data || [];
 
   // Pre-select service from URL query param
   useEffect(() => {
     const serviceParam = searchParams.get("service");
     if (serviceParam && !serviceId && services.length > 0) {
-      const service = services.find((s: Service) => s.slug === serviceParam || s.id === parseInt(serviceParam));
+      const service = services.find((s: Service) => s.slug === serviceParam || s.id === serviceParam);
       if (service) {
-        setService(service.slug || String(service.id), service.title);
+        // Store the UUID, not the slug!
+        setService(String(service.id), service.title);
       }
     }
   }, [searchParams, serviceId, setService, services]);
 
   const handleServiceSelect = (service: Service) => {
-    setService(service.slug || String(service.id), service.title);
+    // Store the UUID, not the slug!
+    setService(String(service.id), service.title);
     // Auto-advance after selection
     setTimeout(() => nextStep(), 300);
   };
@@ -137,7 +141,8 @@ export function StepService() {
 
       <div className="grid md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
         {publishedServices.map((service: Service) => {
-          const isSelected = serviceId === (service.slug || String(service.id));
+          // Compare against UUID, not slug!
+          const isSelected = serviceId === String(service.id);
           const features = getServiceFeatures(service);
           
           return (
@@ -176,8 +181,8 @@ export function StepService() {
                 <div className="text-4xl mb-2">{service.icon || "🩺"}</div>
                 <h3 className="text-lg font-semibold flex items-center justify-between mb-2">
                   {service.title}
-                  {(service.duration_minutes || service.duration) && (
-                    <span className="text-sm font-normal text-gray-500">{service.duration_minutes || service.duration} min</span>
+                  {service.duration_minutes && (
+                    <span className="text-sm font-normal text-gray-500">{service.duration_minutes} min</span>
                   )}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
@@ -193,7 +198,7 @@ export function StepService() {
 
                 {service.price && (
                   <p className="text-sm font-semibold text-emerald-700 mt-3">
-                    ${service.price}
+                    PKR {service.price?.toLocaleString('en-US')}
                   </p>
                 )}
               </div>
@@ -204,7 +209,7 @@ export function StepService() {
 
       <div className="pt-4 flex justify-between items-center border-t">
         <p className="text-sm text-gray-500">
-          Not sure? Call us at <span className="font-medium text-emerald-700">(555) 123-4567</span>
+          Not sure? Call us at <span className="font-medium text-emerald-700">{settings.clinic_phone}</span>
         </p>
         {serviceId && (
           <Button onClick={nextStep} className="h-11 px-8">

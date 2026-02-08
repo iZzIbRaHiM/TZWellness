@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useBookingStore } from "@/lib/store";
-import { appointmentsApi, BookingRequest } from "@/lib/api";
+import { appointmentsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 export function StepDetails() {
   const {
+    serviceId,
     patientType,
     modality,
     selectedDate,
@@ -100,13 +101,20 @@ export function StepDetails() {
     setError(null);
 
     try {
-      const bookingData: BookingRequest = {
-        patient_type: patientType,
-        patient_details: patientDetails,
-        scheduled_date: selectedDate,
-        scheduled_time: selectedTime,
-        modality: modality,
-        timezone,
+      // Ensure patient_type is valid (database constraint allows only 'new' or 'returning')
+      const validPatientType = (patientType && ['new', 'returning'].includes(patientType)) 
+        ? patientType 
+        : 'new';
+      
+      const bookingData = {
+        service_id: serviceId || undefined,
+        modality: modality || 'virtual',
+        scheduled_date: selectedDate || '',
+        scheduled_time: selectedTime || '',
+        patient_name: patientDetails.name,
+        patient_email: patientDetails.email,
+        patient_phone: patientDetails.phone,
+        patient_type: validPatientType,
         reason,
       };
 

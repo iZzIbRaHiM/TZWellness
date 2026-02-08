@@ -22,50 +22,54 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "TZ Wellness Health | Holistic Healthcare",
+    default: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
     template: "%s | TZ Wellness Health",
   },
   description:
-    "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today. Expert care for Diabetes, Thyroid, PCOS, and Metabolic Health.",
+    "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid disorders, PCOS, and obesity care with personalized treatment plans and lifestyle medicine.",
   keywords: [
-    "medical clinic",
-    "metabolic health",
-    "diabetes care",
-    "thyroid treatment",
-    "PCOS specialist",
+    "diabetes management",
+    "thyroid care",
+    "PCOS treatment",
     "obesity management",
-    "holistic healthcare",
-    "wellness",
+    "metabolic health",
+    "chronic disease",
+    "lifestyle medicine",
+    "nutrition counseling",
+    "prediabetes",
+    "weight management",
   ],
-  authors: [{ name: "TZ Wellness Health" }],
-  creator: "TZ Wellness Health",
+  authors: [{ name: "TZ Wellness" }],
+  creator: "TZ Wellness",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || 
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-    "https://tzwellnesshealth.com"
+    "https://tzwellnesscentre.com"
   ),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "/",
     siteName: "TZ Wellness Health",
-    title: "TZ Wellness Health | Holistic Healthcare",
+    title: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
     description:
-      "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today.",
+      "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid, PCOS, and obesity care.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "TF Wellfare Medical Clinic",
+        alt: "TZ Wellness",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TF Wellfare Medical Clinic | Holistic Healthcare",
+    title: "TZ Wellness Health | Nurturing Our Health Through Metabolic Care",
     description:
-      "End Metabolic Frustration & Reboot Your Health — Book Your Personalized Consultation Today.",
+      "Expert metabolic and chronic disease management. Specializing in diabetes, thyroid, PCOS, and obesity care.",
     images: ["/og-image.jpg"],
   },
   robots: {

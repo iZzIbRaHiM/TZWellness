@@ -64,12 +64,12 @@ export function ValuePropsSection() {
             id="values-heading"
             className="font-serif text-display-sm sm:text-display-md text-emerald-950 mb-4"
           >
-            Why Patients Choose{" "}
-            <span className="italic text-terracotta">TZ Wellness Health</span>
+            Your Partner in{" "}
+            <span className="italic text-terracotta">Metabolic Wellness</span>
           </h2>
           <p className="text-lg text-emerald-700/80">
-            We combine medical expertise with a compassionate, patient-centered
-            approach to help you achieve your health goals.
+            We specialize in preventing, treating, and reversing metabolic conditions
+            with a compassionate, evidence-based approach.
           </p>
         </motion.div>
 

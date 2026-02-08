@@ -14,7 +14,7 @@ import { z } from "zod";
 // PRIMITIVE SCHEMAS
 // ============================================
 
-export const PatientTypeSchema = z.enum(["new", "returning", "discovery"]);
+export const PatientTypeSchema = z.enum(["new", "returning"]);
 export type PatientType = z.infer<typeof PatientTypeSchema>;
 
 export const ModalitySchema = z.enum(["virtual", "in_person", "phone"]);

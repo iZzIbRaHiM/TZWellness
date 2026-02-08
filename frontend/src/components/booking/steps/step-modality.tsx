@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useBookingStore, Modality } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { Video, MapPin, Phone, ArrowRight, Clock, DollarSign } from "lucide-react";
+import { Video, MapPin, Phone, ArrowRight, Clock } from "lucide-react";
 
 const modalities: {
   type: Modality;
@@ -12,7 +12,6 @@ const modalities: {
   description: string;
   icon: React.ElementType;
   features: string[];
-  priceNote?: string;
 }[] = [
   {
     type: "virtual",
@@ -25,7 +24,6 @@ const modalities: {
       "Easy prescription refills",
       "Screen sharing for results review",
     ],
-    priceNote: "Starting at $150",
   },
   {
     type: "in_person",
@@ -38,7 +36,6 @@ const modalities: {
       "Comprehensive consultation",
       "Tour our facility",
     ],
-    priceNote: "Starting at $200",
   },
   {
     type: "phone",
@@ -51,7 +48,6 @@ const modalities: {
       "Great for follow-ups",
       "Prescription refills",
     ],
-    priceNote: "Starting at $75",
   },
 ];
 
@@ -59,11 +55,8 @@ export function StepModality() {
   const { modality, setModality, nextStep, canProceed, patientType } =
     useBookingStore();
 
-  // Discovery calls are always phone
-  const availableModalities =
-    patientType === "discovery"
-      ? modalities.filter((m) => m.type === "phone")
-      : modalities;
+  // All patients can choose any modality
+  const availableModalities = modalities;
 
   return (
     <div className="space-y-6">
@@ -102,16 +95,9 @@ export function StepModality() {
                 <m.icon className="h-6 w-6" aria-hidden="true" />
               </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-lg text-gray-900">
-                    {m.title}
-                  </h3>
-                  {m.priceNote && (
-                    <span className="text-sm text-emerald-700 font-medium">
-                      {m.priceNote}
-                    </span>
-                  )}
-                </div>
+                <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                  {m.title}
+                </h3>
                 <p className="text-gray-600 mb-3">{m.description}</p>
                 <ul className="grid grid-cols-2 gap-2">
                   {m.features.map((feature, i) => (
@@ -156,12 +142,7 @@ export function StepModality() {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4" />
           <span>
-            {patientType === "new"
-              ? "60 min"
-              : patientType === "returning"
-              ? "30 min"
-              : "15 min"}{" "}
-            consultation
+            {patientType === "new" ? "60 min" : "30 min"} consultation
           </span>
         </div>
       </div>

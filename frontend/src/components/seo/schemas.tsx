@@ -138,7 +138,7 @@ export function ArticleSchema({
       name: "TF Wellfare Medical Clinic",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL}/main_logo.png`,
       },
     },
     datePublished,
@@ -208,14 +208,14 @@ export function EventSchema({
       ? {
           "@type": "Offer",
           price,
-          priceCurrency: "USD",
+          priceCurrency: "PKR",
           availability: "https://schema.org/InStock",
           url,
         }
       : {
           "@type": "Offer",
           price: 0,
-          priceCurrency: "USD",
+          priceCurrency: "PKR",
           availability: "https://schema.org/InStock",
           url,
         },

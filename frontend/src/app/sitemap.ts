@@ -1,61 +1,74 @@
 import { MetadataRoute } from "next";
+import { createClient } from "@supabase/supabase-js";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tzwellnesshealth.com";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tzwellnesscentre.com";
+  
+  // Create Supabase client with environment variables
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
-  // Static routes
-  const routes = [
-    "",
-    "/services",
-    "/blog",
-    "/events",
-    "/resources",
-    "/book",
-    "/appointments/lookup",
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
+  // Static routes with SEO-optimized priorities and change frequencies
+  const staticRoutes = [
+    { path: "", priority: 1.0, changeFreq: "weekly" as const },
+    { path: "/about", priority: 0.9, changeFreq: "monthly" as const },
+    { path: "/services", priority: 0.9, changeFreq: "weekly" as const },
+    { path: "/appointments", priority: 0.8, changeFreq: "daily" as const },
+    { path: "/appointments/lookup", priority: 0.5, changeFreq: "daily" as const },
+    { path: "/blog", priority: 0.7, changeFreq: "weekly" as const },
+    { path: "/events", priority: 0.7, changeFreq: "weekly" as const },
+  ];
+
+  const routes = staticRoutes.map((route) => ({
+    url: `${baseUrl}${route.path}`,
     lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    changeFrequency: route.changeFreq,
+    priority: route.priority,
   }));
 
-  // Dynamic service routes
-  const services = [
-    "diabetes-management",
-    "weight-management",
-    "thyroid-care",
-    "heart-health",
-    "preventive-care",
-  ].map((slug) => ({
-    url: `${baseUrl}/services/${slug}`,
-    lastModified: new Date(),
+  // Fetch dynamic services from database
+  const { data: services } = await supabase
+    .from("services")
+    .select("slug, updated_at")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  const serviceRoutes = (services || []).map((service) => ({
+    url: `${baseUrl}/services/${service.slug}`,
+    lastModified: new Date(service.updated_at),
     changeFrequency: "monthly" as const,
-    priority: 0.7,
+    priority: 0.8,
   }));
 
-  // Dynamic blog routes
-  const blogPosts = [
-    "understanding-blood-sugar-complete-guide",
-    "healthy-eating-tips",
-    "exercise-and-wellness",
-  ].map((slug) => ({
-    url: `${baseUrl}/blog/${slug}`,
-    lastModified: new Date(),
+  // Fetch dynamic blog posts from database
+  const { data: blogPosts } = await supabase
+    .from("blog_posts")
+    .select("slug, updated_at")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false });
+
+  const blogRoutes = (blogPosts || []).map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(post.updated_at),
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  // Dynamic event routes
-  const events = [
-    "diabetes-awareness-workshop",
-    "healthy-cooking-class",
-    "wellness-seminar",
-  ].map((slug) => ({
-    url: `${baseUrl}/events/${slug}`,
-    lastModified: new Date(),
+  // Fetch dynamic events from database
+  const { data: events } = await supabase
+    .from("events")
+    .select("slug, updated_at")
+    .eq("is_active", true)
+    .order("start_date", { ascending: false });
+
+  const eventRoutes = (events || []).map((event) => ({
+    url: `${baseUrl}/events/${event.slug}`,
+    lastModified: new Date(event.updated_at),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
 
-  return [...routes, ...services, ...blogPosts, ...events];
+  return [...routes, ...serviceRoutes, ...blogRoutes, ...eventRoutes];
 }

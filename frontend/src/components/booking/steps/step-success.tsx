@@ -12,11 +12,13 @@ import {
   MapPin,
   Video,
   Phone,
-  Mail,
+  MessageCircle,
   Copy,
   Home,
   FileText,
 } from "lucide-react";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink, getAppointmentWhatsAppMessage } from "@/lib/whatsapp";
 
 const confettiColors = [
   "#064E3B",
@@ -37,6 +39,7 @@ export function StepSuccess() {
     reset,
   } = useBookingStore();
 
+  const { settings } = useSiteSettings();
   const [showConfetti, setShowConfetti] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -174,11 +177,11 @@ export function StepSuccess() {
           </div>
 
           <div className="flex items-start gap-3">
-            <Mail className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
+            <MessageCircle className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-gray-900">{patientDetails.email}</p>
+              <p className="font-medium text-gray-900">{patientDetails.phone}</p>
               <p className="text-sm text-gray-500">
-                Confirmation will be sent here
+                WhatsApp confirmation will be sent here
               </p>
             </div>
           </div>
@@ -194,7 +197,7 @@ export function StepSuccess() {
               1
             </span>
             <p className="text-gray-700">
-              Check your email for a confirmation message within 24 hours.
+              We'll send you a WhatsApp confirmation within 24 hours on your registered number.
             </p>
           </li>
           <li className="flex items-start gap-3">
@@ -202,7 +205,7 @@ export function StepSuccess() {
               2
             </span>
             <p className="text-gray-700">
-              You'll receive a calendar invite once your appointment is approved.
+              You'll receive appointment details and reminders via WhatsApp.
             </p>
           </li>
           <li className="flex items-start gap-3">
@@ -211,7 +214,7 @@ export function StepSuccess() {
             </span>
             <p className="text-gray-700">
               {modality === "virtual"
-                ? "A video link will be sent before your appointment."
+                ? "A video link will be sent via WhatsApp before your appointment."
                 : modality === "phone"
                 ? "We'll call you at the scheduled time."
                 : "Arrive 15 minutes early to complete check-in."}
@@ -228,7 +231,21 @@ export function StepSuccess() {
             Check Status
           </Link>
         </Button>
-        <Button asChild variant="outline" className="flex-1" onClick={reset}>
+        <Button 
+          asChild 
+          variant="outline" 
+          className="flex-1 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+        >
+          <a 
+            href={getWhatsAppLink(settings.clinic_phone_href, getAppointmentWhatsAppMessage(referenceId || ""))}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <MessageCircle className="mr-2 h-4 w-4" />
+            WhatsApp Us
+          </a>
+        </Button>
+        <Button asChild variant="ghost" className="flex-1" onClick={reset}>
           <Link href="/">
             <Home className="mr-2 h-4 w-4" />
             Return Home

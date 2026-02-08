@@ -25,14 +25,14 @@ import {
   Phone,
   Loader2,
   RefreshCw,
-  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate, formatTime } from "@/lib/utils";
-import { API_BASE_URL } from "@/lib/env";
+import { createClient } from "@/lib/supabase/client";
+import { appointmentsApi } from "@/lib/api";
 
 interface AdminDashboardProps {
-  onNavigate: (tab: "appointments" | "blog" | "events") => void;
+  onNavigate: (tab: "appointments" | "blog" | "events" | "services" | "settings" | "activities") => void;
 }
 
 interface DashboardStats {
@@ -41,42 +41,29 @@ interface DashboardStats {
   total_patients: number;
   completion_rate: number;
   weekly_change: number;
-  upcoming_appointments: number;
 }
 
 interface PendingAppointment {
-  id: number;
+  id: string;
   reference_id: string;
   patient_name: string;
   patient_email: string;
-  service: string;
+  service_id?: string;
   scheduled_date: string;
   scheduled_time: string;
   modality: string;
-  modality_display: string;
-  patient_type_display: string;
+  patient_type: string;
   created_at: string;
+  service?: {
+    title: string;
+  };
 }
 
 interface Activity {
-  id: number;
-  action_type: string;
-  action_display: string;
+  id: string;
+  action: string;
   description: string;
-  time_ago: string;
   created_at: string;
-}
-
-const API_URL = API_BASE_URL;
-
-// SSR-safe localStorage access
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem("accessToken");
-  } catch {
-    return null;
-  }
 }
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
@@ -85,48 +72,95 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [pendingAppointments, setPendingAppointments] = useState<PendingAppointment[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Fetch dashboard data
+  // Fetch dashboard data from Supabase
   const fetchDashboardData = async () => {
     setLoading(true);
-    const token = getToken();
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+    const supabase = createClient();
 
     try {
-      // Fetch stats, pending appointments, and activity in parallel
-      const [statsRes, pendingRes, activityRes] = await Promise.all([
-        fetch(`${API_URL}/api/v1/dashboard/summary/`, { headers }),
-        fetch(`${API_URL}/api/v1/dashboard/pending/`, { headers }),
-        fetch(`${API_URL}/api/v1/dashboard/activity/`, { headers }),
-      ]);
+      // Fetch pending appointments
+      const { data: pending, error: pendingError } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          service:services(title)
+        `)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        if (statsData.success) {
-          setStats(statsData.data.stats);
-        }
-      }
+      if (pendingError) throw pendingError;
+      setPendingAppointments(pending || []);
 
-      if (pendingRes.ok) {
-        const pendingData = await pendingRes.json();
-        if (pendingData.success) {
-          setPendingAppointments(pendingData.data.appointments);
-        }
-      }
+      // Fetch today's appointments
+      const today = new Date().toISOString().split('T')[0];
+      const { count: todayCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('scheduled_date', today)
+        .neq('status', 'cancelled');
 
-      if (activityRes.ok) {
-        const activityData = await activityRes.json();
-        if (activityData.success) {
-          setActivities(activityData.data.activities);
-        }
-      }
-    } catch (error) {
+      // Fetch total unique patients
+      const { count: totalPatients } = await supabase
+        .from('appointments')
+        .select('patient_email', { count: 'exact', head: true });
+
+      // Fetch completed appointments for completion rate
+      const { count: completedCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'completed');
+
+      const { count: allCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .neq('status', 'cancelled');
+
+      const completionRate = allCount ? Math.round((completedCount || 0) / allCount * 100) : 0;
+
+      // Calculate weekly change (last 7 days vs previous 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+
+      const { count: lastWeekCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', sevenDaysAgo.toISOString());
+
+      const { count: previousWeekCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', fourteenDaysAgo.toISOString())
+        .lt('created_at', sevenDaysAgo.toISOString());
+
+      const weeklyChange = previousWeekCount
+        ? Math.round(((lastWeekCount || 0) - previousWeekCount) / previousWeekCount * 100)
+        : 0;
+
+      setStats({
+        pending_appointments: pending?.length || 0,
+        today_appointments: todayCount || 0,
+        total_patients: totalPatients || 0,
+        completion_rate: completionRate,
+        weekly_change: weeklyChange,
+      });
+
+      // Fetch recent activity logs (only 5 for dashboard widget)
+      const { data: activityData, error: activityError } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (activityError) throw activityError;
+      setActivities(activityData || []);
+
+    } catch (error: any) {
+      console.error('Dashboard fetch error:', error);
       toast({
         title: "Error",
         description: "Failed to load dashboard data. Please refresh.",
@@ -142,30 +176,18 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   }, []);
 
   // Approve appointment
-  const handleApprove = async (appointmentId: number) => {
+  const handleApprove = async (appointmentId: string) => {
     setActionLoading(appointmentId);
-    const token = getToken();
-    
+
     try {
-      const response = await fetch(
-        `${API_URL}/api/v1/dashboard/appointments/${appointmentId}/approve/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        }
-      );
+      const response = await appointmentsApi.approve(appointmentId);
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         toast({
           title: "Appointment Approved",
-          description: "The patient will receive a confirmation email.",
+          description: "The patient will receive a WhatsApp confirmation.",
         });
-        // Remove from pending list (optimistic UI)
+        // Remove from pending list
         setPendingAppointments((prev) =>
           prev.filter((apt) => apt.id !== appointmentId)
         );
@@ -174,7 +196,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       } else {
         toast({
           title: "Error",
-          description: data.error?.message || "Failed to approve appointment",
+          description: response.error?.message || "Failed to approve appointment",
           variant: "destructive",
         });
       }
@@ -190,29 +212,16 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   };
 
   // Reject appointment
-  const handleReject = async (appointmentId: number) => {
+  const handleReject = async (appointmentId: string) => {
     const reason = prompt("Please enter a reason for rejection (optional):");
     if (reason === null) return; // User cancelled
 
     setActionLoading(appointmentId);
-    const token = getToken();
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/v1/dashboard/appointments/${appointmentId}/reject/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ reason: reason || "No reason provided" }),
-        }
-      );
+      const response = await appointmentsApi.reject(appointmentId, reason || "No reason provided");
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.success) {
         toast({
           title: "Appointment Rejected",
           description: "The patient will be notified to reschedule.",
@@ -225,7 +234,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       } else {
         toast({
           title: "Error",
-          description: data.error?.message || "Failed to reject appointment",
+          description: response.error?.message || "Failed to reject appointment",
           variant: "destructive",
         });
       }
@@ -253,24 +262,55 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  const getActivityIcon = (actionType: string) => {
-    if (actionType.includes("approved") || actionType.includes("created")) {
+  const getModalityDisplay = (modality: string) => {
+    switch (modality) {
+      case "virtual":
+        return "Virtual";
+      case "in_person":
+        return "In-Person";
+      case "phone":
+        return "Phone";
+      default:
+        return modality;
+    }
+  };
+
+  const getActivityIcon = (action: string) => {
+    if (action.includes("approved") || action.includes("created")) {
       return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
-    if (actionType.includes("cancelled") || actionType.includes("rejected")) {
+    if (action.includes("cancelled") || action.includes("rejected")) {
       return <AlertCircle className="h-4 w-4 text-amber-600" />;
     }
     return <Calendar className="h-4 w-4 text-blue-600" />;
   };
 
-  const getActivityBg = (actionType: string) => {
-    if (actionType.includes("approved") || actionType.includes("created")) {
+  const getActivityBg = (action: string) => {
+    if (action.includes("approved") || action.includes("created")) {
       return "bg-green-100";
     }
-    if (actionType.includes("cancelled") || actionType.includes("rejected")) {
+    if (action.includes("cancelled") || action.includes("rejected")) {
       return "bg-amber-100";
     }
     return "bg-blue-100";
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString();
   };
 
   if (loading) {
@@ -318,26 +358,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header with Refresh and Export Buttons */}
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(`${API_URL}/api/v1/dashboard/export/appointments/`, '_blank')}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Appointments
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open(`${API_URL}/api/v1/dashboard/export/stats/`, '_blank')}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export Stats
-          </Button>
-        </div>
+      {/* Header with Refresh Button */}
+      <div className="flex justify-end items-center">
         <Button
           variant="outline"
           size="sm"
@@ -351,7 +373,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsCards.map((stat, index) => (
+        {statsCards.map((stat) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 1, y: 0 }}
@@ -431,11 +453,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                             className="text-xs"
                           >
                             {getModalityIcon(appointment.modality)}
-                            {appointment.modality_display}
+                            {getModalityDisplay(appointment.modality)}
                           </Badge>
                         </div>
                         <p className="text-sm text-gray-500">
-                          {appointment.service}
+                          {appointment.service?.title || "Service"}
                         </p>
                         <p className="text-sm text-gray-400">
                           {formatDate(appointment.scheduled_date)} at{" "}
@@ -483,9 +505,20 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           transition={{ duration: 0.2 }}
         >
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates and actions</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest 5 admin actions</CardDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNavigate("activities" as any)}
+                className="text-emerald-600 hover:text-emerald-700"
+              >
+                View All
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
             </CardHeader>
             <CardContent>
               {activities.length === 0 ? (
@@ -497,17 +530,19 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <div className="space-y-4">
                   {activities.map((activity) => (
                     <div key={activity.id} className="flex items-start gap-3">
-                      <div className={`p-1.5 rounded-full ${getActivityBg(activity.action_type)}`}>
-                        {getActivityIcon(activity.action_type)}
+                      <div className={`p-1.5 rounded-full ${getActivityBg(activity.action)}`}>
+                        {getActivityIcon(activity.action)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
-                          {activity.action_display}
+                        <p className="text-sm font-medium text-gray-900 capitalize">
+                          {activity.action.replace(/_/g, " ")}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
                           {activity.description}
                         </p>
-                        <p className="text-xs text-gray-400">{activity.time_ago}</p>
+                        <p className="text-xs text-gray-400">
+                          {formatTimeAgo(activity.created_at)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -541,9 +576,17 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <Button
                 variant="outline"
                 className="h-auto py-4 flex flex-col gap-2"
-                onClick={() => onNavigate("blog")}
+                onClick={() => onNavigate("services")}
               >
                 <ArrowRight className="h-6 w-6 text-blue-600" />
+                <span>Manage Services</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col gap-2"
+                onClick={() => onNavigate("blog")}
+              >
+                <ArrowRight className="h-6 w-6 text-purple-600" />
                 <span>New Blog Post</span>
               </Button>
               <Button
@@ -551,15 +594,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 className="h-auto py-4 flex flex-col gap-2"
                 onClick={() => onNavigate("events")}
               >
-                <Users className="h-6 w-6 text-purple-600" />
+                <Users className="h-6 w-6 text-amber-600" />
                 <span>Create Event</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto py-4 flex flex-col gap-2"
-              >
-                <TrendingUp className="h-6 w-6 text-amber-600" />
-                <span>View Analytics</span>
               </Button>
             </div>
           </CardContent>

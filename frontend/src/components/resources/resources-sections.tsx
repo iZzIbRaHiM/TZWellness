@@ -26,10 +26,12 @@ import {
   ClipboardList,
   HeartPulse,
   CheckCircle,
-  Phone,
+  MessageCircle,
   Calendar,
 } from "lucide-react";
 import { FAQSchema } from "@/components/seo/schemas";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink, getGeneralInquiryMessage } from "@/lib/whatsapp";
 
 // Downloadable resources
 const downloads = [
@@ -107,7 +109,7 @@ const paymentFAQs = [
   {
     question: "What is your cancellation policy?",
     answer:
-      "We require 24 hours notice for appointment cancellations. Late cancellations or no-shows may be subject to a $50 fee. We understand emergencies happen and will work with you on a case-by-case basis.",
+      "We require 24 hours notice for appointment cancellations. Late cancellations or no-shows may be subject to a PKR 1,000 fee. We understand emergencies happen and will work with you on a case-by-case basis.",
   },
   {
     question: "What are your consultation fees?",
@@ -151,6 +153,8 @@ const telehealthTips = [
 ];
 
 export function ResourcesSections() {
+  const { settings } = useSiteSettings();
+  
   return (
     <div className="space-y-16">
       <FAQSchema faqs={paymentFAQs} />
@@ -253,9 +257,11 @@ export function ResourcesSections() {
                   options.
                 </p>
                 <div className="flex flex-col gap-3">
-                  <Button variant="outline" className="justify-start">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Billing: (555) 123-4567
+                  <Button variant="outline" className="justify-start" asChild>
+                    <a href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I have a question about billing.")} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      WhatsApp Billing
+                    </a>
                   </Button>
                   <Button variant="outline" className="justify-start">
                     <Calendar className="h-4 w-4 mr-2" />
@@ -346,9 +352,11 @@ export function ResourcesSections() {
                   Our team can help you test your setup before your appointment
                 </p>
               </div>
-              <Button variant="default">
-                <Phone className="h-4 w-4 mr-2" />
-                Contact Support
+              <Button variant="default" asChild>
+                <a href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need technical help with my virtual appointment setup.")} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp Support
+                </a>
               </Button>
             </div>
           </CardContent>
@@ -371,7 +379,7 @@ export function ResourcesSections() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild variant="cta" size="lg">
-            <Link href="/book">Book Appointment</Link>
+            <Link href="/appointments">Book Appointment</Link>
           </Button>
           <Button
             asChild
@@ -379,7 +387,10 @@ export function ResourcesSections() {
             size="lg"
             className="border-white text-white hover:bg-white/10"
           >
-            <a href="tel:+1234567890">Call Us</a>
+            <a href={getWhatsAppLink(settings.clinic_phone_href, getGeneralInquiryMessage())} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              WhatsApp Us
+            </a>
           </Button>
         </div>
       </motion.section>

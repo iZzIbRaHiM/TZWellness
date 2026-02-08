@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -22,13 +23,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { useSessionGuard } from "@/hooks/use-session-guard";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminAppointments } from "./admin-appointments";
 import { AdminBlogCMS } from "./admin-blog-cms";
 import { AdminEventsCMS } from "./admin-events-cms";
 import { AdminServices } from "./admin-services";
+import { AdminSettings } from "./admin-settings";
+import { AdminActivitiesLog } from "./admin-activities-log";
 
-type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "settings";
+type AdminTab = "dashboard" | "appointments" | "services" | "blog" | "events" | "activities" | "settings";
 
 const navItems = [
   { id: "dashboard" as const, label: "Dashboard", icon: Home },
@@ -36,6 +41,7 @@ const navItems = [
   { id: "services" as const, label: "Services", icon: Stethoscope },
   { id: "blog" as const, label: "Blog Posts", icon: FileText },
   { id: "events" as const, label: "Events", icon: CalendarDays },
+  { id: "activities" as const, label: "Activity Log", icon: Bell },
   { id: "settings" as const, label: "Settings", icon: Settings },
 ];
 
@@ -45,33 +51,86 @@ export function AdminLayout() {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    router.push("/admin/login");
+  // Validate session every 30 seconds while admin panel is active
+  const { validateSession } = useSessionGuard({
+    enabled: true,
+    checkInterval: 30000,
+  });
+
+  const handleLogout = async () => {
+    try {
+      // Clear Supabase session first with scope 'local' to clear from this device
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      await supabase.auth.signOut({ scope: 'local' });
+      
+      // Clear local state and storage
+      await logout();
+      
+      // Use replace instead of push to prevent back button access
+      router.replace("/admin/login");
+      
+      // Force a hard refresh to clear any cached state
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even on error, force logout and redirect
+      await logout();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
+    }
   };
 
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
-        return <AdminDashboard onNavigate={setActiveTab} />;
+        return (
+          <ErrorBoundary>
+            <AdminDashboard onNavigate={setActiveTab} />
+          </ErrorBoundary>
+        );
       case "appointments":
-        return <AdminAppointments />;
+        return (
+          <ErrorBoundary>
+            <AdminAppointments />
+          </ErrorBoundary>
+        );
       case "services":
         return (
-          <div className="p-8">
-            <AdminServices />
-          </div>
+          <ErrorBoundary>
+            <div className="p-8">
+              <AdminServices />
+            </div>
+          </ErrorBoundary>
         );
       case "blog":
-        return <AdminBlogCMS />;
+        return (
+          <ErrorBoundary>
+            <AdminBlogCMS />
+          </ErrorBoundary>
+        );
       case "events":
-        return <AdminEventsCMS />;
+        return (
+          <ErrorBoundary>
+            <AdminEventsCMS />
+          </ErrorBoundary>
+        );
+      case "activities":
+        return (
+          <ErrorBoundary>
+            <AdminActivitiesLog />
+          </ErrorBoundary>
+        );
       case "settings":
         return (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-            <p className="text-gray-600">Settings panel coming soon...</p>
-          </div>
+          <ErrorBoundary>
+            <div className="p-8">
+              <AdminSettings />
+            </div>
+          </ErrorBoundary>
         );
       default:
         return null;
@@ -103,11 +162,14 @@ export function AdminLayout() {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-emerald-800">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl">🏥</span>
-              <span className="font-serif text-xl font-bold text-white">
-                TF Wellfare
-              </span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/main_logo.png"
+                alt="TZ Wellness Admin"
+                width={320}
+                height={107}
+                className="h-24 w-auto brightness-0 invert"
+              />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}

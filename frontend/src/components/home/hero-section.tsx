@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -9,8 +10,13 @@ import {
   ArrowRight,
   Play,
   Star,
+  Activity,
+  Heart,
+  Droplet,
+  Leaf,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { appointmentsApi } from "@/lib/api";
 
 const stats = [
   { value: "10,000+", label: "Patients Treated" },
@@ -19,6 +25,77 @@ const stats = [
 ];
 
 export function HeroSection() {
+  const router = useRouter();
+  const [nextSlot, setNextSlot] = useState<{ date: string; time: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNextAvailableSlot = async () => {
+      try {
+        const response = await appointmentsApi.getAvailableDates(14);
+        if (response.success && response.data?.dates && response.data.dates.length > 0) {
+          const firstDate = response.data.dates[0];
+
+          // Fetch slots for the first available date
+          const slotsResponse = await appointmentsApi.getAvailableSlots({
+            start_date: firstDate,
+            end_date: firstDate,
+            modality: "both"
+          });
+
+          if (slotsResponse.success && slotsResponse.data?.slots) {
+            // Get slots for the first date
+            const dateSlots = slotsResponse.data.slots[firstDate];
+            if (dateSlots && dateSlots.length > 0) {
+              const firstSlot = dateSlots[0];
+              setNextSlot({
+                date: firstDate,
+                time: firstSlot.start_time
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching next available slot:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNextAvailableSlot();
+  }, []);
+
+  const formatSlotDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return "Tomorrow";
+    } else {
+      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+  };
+
+  const formatSlotTime = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  const handleBookClick = () => {
+    if (nextSlot) {
+      router.push(`/appointments?date=${nextSlot.date}&time=${nextSlot.time}`);
+    } else {
+      router.push('/appointments');
+    }
+  };
+
   return (
     <section
       className="relative overflow-hidden bg-sand-100"
@@ -26,30 +103,30 @@ export function HeroSection() {
     >
       {/* Background decoration - subtle organic shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.05, 1],
-            opacity: [0.3, 0.4, 0.3] 
+            opacity: [0.3, 0.4, 0.3]
           }}
-          transition={{ 
-            duration: 8, 
+          transition={{
+            duration: 8,
             repeat: Infinity,
-            ease: "easeInOut" 
+            ease: "easeInOut"
           }}
-          className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-emerald-100 rounded-full blur-3xl" 
+          className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-emerald-100 rounded-full blur-3xl"
         />
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.08, 1],
-            opacity: [0.2, 0.3, 0.2] 
+            opacity: [0.2, 0.3, 0.2]
           }}
-          transition={{ 
-            duration: 10, 
+          transition={{
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
             delay: 2
           }}
-          className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-terracotta-100 rounded-full blur-3xl" 
+          className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-terracotta-100 rounded-full blur-3xl"
         />
       </div>
 
@@ -63,37 +140,29 @@ export function HeroSection() {
             className="text-center lg:text-left"
           >
             {/* Trust badge */}
-            <motion.div 
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 glass-card text-emerald-800 text-sm font-medium mb-8"
-            >
-              <Star className="h-4 w-4 fill-terracotta text-terracotta" aria-hidden="true" />
-              <span>Rated 4.9/5 by 2,000+ Patients</span>
-            </motion.div>
-
             {/* Main headline - Editorial typography */}
             <h1
               id="hero-heading"
               className="font-serif text-display-lg lg:text-display-xl text-emerald-950 mb-6"
             >
-              End Metabolic Frustration &{" "}
-              <span className="italic text-terracotta">Reboot Your Health</span>
+              <span className="italic">
+                <span className="text-black">Heal From</span>{" "}
+                <span className="text-black">Within</span>
+              </span>
             </h1>
 
             <p className="text-lg text-emerald-800/80 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Book Your Personalized Consultation Today. Our holistic approach
-              combines medical expertise with sustainable lifestyle changes for
-              lasting results.
+              We offer specialized care for prediabetes, diabetes, fatty liver disease, and obesity.
+              Our approach is grounded in Lifestyle Medicine, which focuses on reducing the burden of lifestyle-related chronic metabolic conditions and autoimmune diseases such as rheumatoid arthritis, systemic lupus erythematosus (SLE), and thyroid disorders.
+              Through evidence-based lifestyle interventions, we aim not only to manage disease but to enhance overall health, improve quality of life, and promote longevity.
             </p>
 
             {/* Value props */}
             <ul className="space-y-4 mb-10 text-left max-w-md mx-auto lg:mx-0">
               {[
-                "Regain Your Energy & Vitality",
-                "Reduce Dependency on Medications",
-                "Sustainable, Personalized Plans",
+                "Balance Blood Sugar & Hormones Naturally",
+                "Prevent & Reverse Chronic Conditions",
+                "Personalized Nutrition & Lifestyle Plans",
               ].map((prop, index) => (
                 <motion.li
                   key={index}
@@ -116,7 +185,7 @@ export function HeroSection() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button asChild variant="cta" size="xl">
-                <Link href="/book">
+                <Link href="/appointments">
                   <Calendar className="mr-2 h-5 w-5" aria-hidden="true" />
                   Book Your Consultation
                 </Link>
@@ -127,24 +196,6 @@ export function HeroSection() {
                   <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                 </Link>
               </Button>
-            </div>
-
-            {/* Stats */}
-            <div className="mt-14 pt-8 border-t border-emerald-200/50 grid grid-cols-3 gap-8">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ y: 20 }}
-                  animate={{ y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="text-center lg:text-left"
-                >
-                  <div className="font-serif text-display-xs lg:text-display-sm text-emerald-900">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-emerald-700/70">{stat.label}</div>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
 
@@ -162,24 +213,104 @@ export function HeroSection() {
               className="relative"
             >
               <div className="relative aspect-square max-w-lg mx-auto">
+                {/* Gradient Light Rays - rotating beams */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 opacity-30"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-emerald-300/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-mint-300/20 to-transparent" />
+                </motion.div>
+
                 {/* Blob shape mask */}
-                <div className="absolute inset-0 blob-shape bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-elevated-lg">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-white p-8">
-                      <motion.div 
-                        whileHover={{ scale: 1.1 }}
-                        className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 cursor-pointer backdrop-blur-sm"
-                      >
-                        <Play className="h-10 w-10 ml-1" />
-                      </motion.div>
-                      <p className="font-serif text-xl italic">Watch Our Story</p>
-                    </div>
-                  </div>
-                </div>
+                <div className="absolute inset-0 blob-shape bg-gradient-to-br from-emerald-600 to-emerald-800 shadow-elevated-lg" />
+
+                {/* Pulsing Wellness Rings - sonar effect */}
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 blob-shape border-2 border-emerald-400"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut", delay: 1 }}
+                  className="absolute inset-0 blob-shape border-2 border-mint-400"
+                />
+                <motion.div
+                  animate={{ scale: [1, 1.3, 1.3], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeOut", delay: 2 }}
+                  className="absolute inset-0 blob-shape border-2 border-emerald-300"
+                />
 
                 {/* Decorative rings */}
                 <div className="absolute -inset-4 border-2 border-emerald-200/30 blob-shape animate-blob" style={{ animationDelay: "-2s" }} />
                 <div className="absolute -inset-8 border border-emerald-100/20 blob-shape animate-blob" style={{ animationDelay: "-4s" }} />
+
+                {/* Animated Health Metrics Bubbles - orbiting */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0"
+                >
+                  {/* Blood Sugar Control */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute top-[10%] right-[5%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Droplet className="h-5 w-5 text-emerald-600" />
+                  </motion.div>
+
+                  {/* Heart Health */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute top-[40%] right-[-5%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Heart className="h-5 w-5 text-rose-500" />
+                  </motion.div>
+
+                  {/* Energy Boost */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    className="absolute bottom-[20%] right-[10%] glass-card p-3 rounded-full shadow-sm"
+                  >
+                    <Activity className="h-5 w-5 text-amber-500" />
+                  </motion.div>
+                </motion.div>
+
+                {/* Decorative Health Icons - floating with parallax */}
+                <motion.div
+                  animate={{
+                    y: [0, -15, 0],
+                    rotate: [0, 5, 0]
+                  }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute top-[15%] left-[-8%] opacity-20"
+                >
+                  <Leaf className="h-12 w-12 text-emerald-600" />
+                </motion.div>
+
+                <motion.div
+                  animate={{
+                    y: [0, 20, 0],
+                    rotate: [0, -5, 0]
+                  }}
+                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  className="absolute bottom-[25%] left-[-5%] opacity-15"
+                >
+                  <Heart className="h-10 w-10 text-rose-400" />
+                </motion.div>
+
+                <motion.div
+                  animate={{
+                    y: [0, -20, 0],
+                    x: [0, 10, 0]
+                  }}
+                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                  className="absolute top-[50%] left-[-10%] opacity-10"
+                >
+                  <Activity className="h-14 w-14 text-amber-400" />
+                </motion.div>
               </div>
 
               {/* Floating appointment card */}
@@ -198,29 +329,23 @@ export function HeroSection() {
                       Next Available
                     </div>
                     <div className="text-sm text-emerald-700/70">
-                      Tomorrow, 9:00 AM
+                      {isLoading ? (
+                        "Loading..."
+                      ) : nextSlot ? (
+                        `${formatSlotDate(nextSlot.date)}, ${formatSlotTime(nextSlot.time)}`
+                      ) : (
+                        "Check availability"
+                      )}
                     </div>
                   </div>
-                  <Button size="sm" className="ml-auto flex-shrink-0">
+                  <Button
+                    size="sm"
+                    className="ml-auto flex-shrink-0"
+                    onClick={handleBookClick}
+                    disabled={isLoading}
+                  >
                     Book
                   </Button>
-                </div>
-              </motion.div>
-
-              {/* Floating rating badge */}
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-                className="absolute -top-4 -right-4 glass-card p-3 shadow-elevated-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-terracotta text-terracotta" />
-                    ))}
-                  </div>
-                  <span className="text-sm font-medium text-emerald-900">5.0</span>
                 </div>
               </motion.div>
             </motion.div>

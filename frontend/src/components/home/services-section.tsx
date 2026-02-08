@@ -23,7 +23,7 @@ export function ServicesSection() {
     queryFn: () => servicesApi.getAll({ featured: true }),
   });
 
-  const services = (data?.data?.results || []).slice(0, 4);
+  const services = (data?.data || []).slice(0, 4);
   return (
     <section className="py-24 bg-sand-100" aria-labelledby="services-heading">
       <div className="container-fluid">
@@ -75,7 +75,7 @@ export function ServicesSection() {
                   <CardHeader className="pb-4">
                     <CardTitle className="text-xl">{service.title}</CardTitle>
                     <CardDescription className="text-emerald-700/70">
-                      {service.short_description}
+                      {service.short_description || service.title}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1">
@@ -88,7 +88,7 @@ export function ServicesSection() {
                       )}
                       {service.price && (
                         <p className="text-lg font-semibold text-emerald-700">
-                          ${service.price}
+                          PKR {service.price?.toLocaleString('en-US')}
                           {service.price_note && <span className="text-xs font-normal text-gray-500 ml-1">({service.price_note})</span>}
                         </p>
                       )}

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type PatientType = "new" | "returning" | "discovery";
+export type PatientType = "new" | "returning";
 export type Modality = "virtual" | "in_person" | "phone";
 
 export interface PatientDetails {
@@ -340,7 +340,7 @@ export const useBookingStore = create<BookingState>()(
 // Auth store
 interface AuthState {
   user: {
-    id: number;
+    id: string; // Supabase user IDs are UUID strings, not numbers
     email: string;
     full_name: string;
     role: string;
@@ -350,7 +350,7 @@ interface AuthState {
   isAuthenticated: boolean;
   setAuth: (access: string, refresh: string) => void;
   setUser: (user: AuthState["user"]) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   syncFromStorage: () => void;
 }
 
@@ -399,10 +399,44 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user) => set({ user }),
 
-      logout: () => {
-        // Clear localStorage
-        safeRemoveStorage("accessToken");
-        safeRemoveStorage("refreshToken");
+      logout: async () => {
+        // Clear Supabase session if in browser
+        if (typeof window !== "undefined") {
+          try {
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            // Use 'local' scope to clear session from this device only
+            await supabase.auth.signOut({ scope: 'local' });
+          } catch (error) {
+            console.error("Error signing out from Supabase:", error);
+          }
+          
+          // Clear ALL localStorage items (including Zustand persisted state)
+          try {
+            localStorage.removeItem("tf-wellfare-auth");
+            localStorage.removeItem("tf-wellfare-booking");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            
+            // Clear any Supabase-related storage
+            Object.keys(localStorage).forEach(key => {
+              if (key.includes('supabase') || key.includes('sb-')) {
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (error) {
+            console.error("Error clearing localStorage:", error);
+          }
+          
+          // Clear sessionStorage as well
+          try {
+            sessionStorage.clear();
+          } catch (error) {
+            console.error("Error clearing sessionStorage:", error);
+          }
+        }
+        
+        // Reset Zustand state
         set({
           user: null,
           accessToken: null,

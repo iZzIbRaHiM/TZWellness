@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, parseISO } from "date-fns";
+import { format, addDays, parseISO, startOfDay, isSameDay } from "date-fns";
 import { useBookingStore } from "@/lib/store";
 import { appointmentsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -15,6 +14,8 @@ import {
   RefreshCw,
   Calendar as CalendarIcon,
   AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +42,23 @@ export function StepCalendar() {
     queryKey: ["availableDates"],
     queryFn: async () => {
       const response = await appointmentsApi.getAvailableDates(60);
-      return response.data?.dates || [];
+      
+      // Transform response - handle both string[] and object[] formats
+      const rawDates = response.data?.dates || [];
+      const dateStrings = rawDates.map((item: any) => {
+        // If it's already a string, use it
+        if (typeof item === 'string') return item;
+        // If it's an object with date/available_date property
+        if (item.date) return item.date;
+        if (item.available_date) return item.available_date;
+        // Try to extract any date-like property
+        const dateValue = Object.values(item).find((val: any) => 
+          typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)
+        );
+        return dateValue as string;
+      }).filter(Boolean);
+      
+      return dateStrings;
     },
     staleTime: 60 * 1000,
   });
@@ -52,41 +69,81 @@ export function StepCalendar() {
     isLoading: slotsLoading,
     refetch: refetchSlots,
     isRefetching,
+    error: slotsError,
   } = useQuery({
     queryKey: ["availableSlots", selectedDate, modality],
     queryFn: async () => {
       if (!selectedDate) return null;
+      
       const response = await appointmentsApi.getAvailableSlots({
         start_date: selectedDate,
         end_date: selectedDate,
         modality: modality === "phone" ? "virtual" : modality || undefined,
       });
-      return response.data?.slots?.[selectedDate] || [];
+      
+      if (!response.success) {
+        console.error("❌ Slots API error:", response.error);
+        throw new Error(response.error?.message || "Failed to fetch slots");
+      }
+      
+      const slotsForDate = response.data?.slots?.[selectedDate] || [];
+      
+      return slotsForDate;
     },
     enabled: !!selectedDate,
     staleTime: 30 * 1000,
+    retry: 2,
   });
 
   const availableDates = availableDatesData || [];
   const slots = slotsData || [];
 
+  // Generate fallback time slots if API fails (temporary development aid)
+  const generateFallbackSlots = useCallback((date: string) => {
+    console.warn("⚠️ Using fallback slots - API unavailable");
+    const times = [];
+    for (let hour = 9; hour <= 17; hour++) {
+      times.push({
+        start_time: `${hour.toString().padStart(2, '0')}:00`,
+        end_time: `${hour.toString().padStart(2, '0')}:30`,
+        available: true,
+      });
+      if (hour < 17) {
+        times.push({
+          start_time: `${hour.toString().padStart(2, '0')}:30`,
+          end_time: `${(hour + 1).toString().padStart(2, '0')}:00`,
+          available: true,
+        });
+      }
+    }
+    return times;
+  }, []);
+
+  // Use fallback slots if API error and date is selected
+  const displaySlots = useMemo(() => {
+    if (slotsError && selectedDate) {
+      return generateFallbackSlots(selectedDate);
+    }
+    return slots;
+  }, [slots, slotsError, selectedDate, generateFallbackSlots]);
+
   // Check if a date has available slots
   const isDateAvailable = useCallback(
-    (date: Date) => {
-      const dateStr = format(date, "yyyy-MM-dd");
+    (dateStr: string) => {
       return availableDates.includes(dateStr);
     },
     [availableDates]
   );
 
   // Handle date selection - updates store directly
-  const handleDateSelect = useCallback((date: Date | undefined) => {
-    if (!date) return;
-    
-    // Format date and update store - this is the single source of truth
-    const dateStr = format(date, "yyyy-MM-dd");
+  const handleDateSelect = useCallback((dateStr: string) => {
     setDateTime(dateStr, ""); // Clear time when date changes
-  }, [setDateTime]);
+    
+    toast({
+      title: "Date selected",
+      description: `You selected ${dateStr}`,
+    });
+  }, [setDateTime, availableDates, toast]);
 
   // Handle time selection
   const handleTimeSelect = useCallback((time: string) => {
@@ -106,6 +163,44 @@ export function StepCalendar() {
       });
     }
   }, [refetchSlots]);
+
+  // Navigate months
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  // Generate calendar days
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days: Array<{ date: Date | null; dateStr: string | null; isCurrentMonth: boolean }> = [];
+
+    // Empty cells before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push({ date: null, dateStr: null, isCurrentMonth: false });
+    }
+
+    // Days in current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = format(date, "yyyy-MM-dd");
+      days.push({ date, dateStr, isCurrentMonth: true });
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays();
+  const today = startOfDay(new Date());
 
   // Determine if we have a valid selected date
   const hasSelectedDate = !!selectedDate && !!internalSelectedDate;
@@ -128,13 +223,31 @@ export function StepCalendar() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Calendar */}
+        {/* Custom Calendar */}
         <div className="border rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-gray-900">Select Date</h3>
-            <span className="text-sm text-gray-500">
-              {format(currentMonth, "MMMM yyyy")}
-            </span>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handlePrevMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-gray-700 font-medium min-w-[140px] text-center">
+                {format(currentMonth, "MMMM yyyy")}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleNextMonth}
+                className="h-8 w-8 p-0"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {datesLoading ? (
@@ -142,32 +255,68 @@ export function StepCalendar() {
               <Skeleton className="h-64 w-full" />
             </div>
           ) : (
-            <Calendar
-              mode="single"
-              selected={internalSelectedDate}
-              onSelect={handleDateSelect}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              disabled={(date) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return date < today || !isDateAvailable(date);
-              }}
-              modifiers={{
-                available: (date) => isDateAvailable(date),
-              }}
-              modifiersClassNames={{
-                available: "bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100 cursor-pointer",
-              }}
-              className="rounded-md"
-              fromDate={new Date()}
-              toDate={addDays(new Date(), 90)}
-            />
+            <div className="space-y-2">
+              {/* Weekday headers */}
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                  <div
+                    key={day}
+                    className="text-center text-xs font-medium text-gray-500 py-2"
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+
+              {/* Calendar grid */}
+              <div className="grid grid-cols-7 gap-1">
+                {calendarDays.map((day, index) => {
+                  if (!day.date || !day.dateStr) {
+                    return <div key={`empty-${index}`} className="aspect-square" />;
+                  }
+
+                  const isPast = day.date < today;
+                  const isAvailable = isDateAvailable(day.dateStr);
+                  const isSelected = selectedDate === day.dateStr;
+                  const isToday = isSameDay(day.date, new Date());
+                  const isDisabled = isPast || !isAvailable;
+
+                  return (
+                    <button
+                      key={day.dateStr}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!isDisabled) {
+                          handleDateSelect(day.dateStr!);
+                        }
+                      }}
+                      disabled={isDisabled}
+                      className={cn(
+                        "aspect-square rounded-lg text-sm font-medium transition-all relative",
+                        "flex items-center justify-center min-h-[40px]",
+                        isDisabled && "cursor-not-allowed opacity-40",
+                        !isDisabled && "cursor-pointer hover:bg-emerald-200 hover:scale-105 active:scale-95",
+                        isSelected && "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md",
+                        !isSelected && isAvailable && !isPast && "bg-emerald-100 text-emerald-800 border-2 border-emerald-300 font-semibold hover:border-emerald-500",
+                        !isAvailable && !isPast && "bg-gray-50 text-gray-400 border border-gray-200",
+                        isPast && "bg-gray-100 text-gray-300",
+                        isToday && !isSelected && "ring-2 ring-offset-1 ring-emerald-500"
+                      )}
+                      title={isAvailable ? `Select ${day.dateStr}` : "Not available"}
+                    >
+                      {day.date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-emerald-50 border border-emerald-200" />
+              <div className="w-4 h-4 rounded bg-emerald-100 border-2 border-emerald-300" />
               <span>Available</span>
             </div>
             <div className="flex items-center gap-2">
@@ -175,6 +324,16 @@ export function StepCalendar() {
               <span>Unavailable</span>
             </div>
           </div>
+          
+          {/* Debug info */}
+          {!datesLoading && (
+            <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-800">
+              <strong>Debug:</strong> {availableDates.length} available dates loaded
+              {availableDates.length > 0 && (
+                <div className="mt-1">Next 3: {availableDates.slice(0, 3).join(", ")}</div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Time slots */}
@@ -210,15 +369,38 @@ export function StepCalendar() {
                 <Skeleton key={i} className="h-12" />
               ))}
             </div>
-          ) : slots.length === 0 ? (
+          ) : slotsError ? (
+            <div className="h-64 flex flex-col items-center justify-center text-gray-500 space-y-3">
+              <AlertCircle className="h-12 w-12 text-amber-400 mb-2" />
+              <p className="text-amber-600 font-medium">Time Slots API Unavailable</p>
+              <p className="text-sm text-center max-w-xs">
+                Using demo time slots. API error: {(slotsError as Error).message}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetchSlots()}>
+                  Retry API
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  onClick={() => {
+                    // Show fallback slots
+                    generateFallbackSlots(selectedDate!);
+                  }}
+                >
+                  Use Demo Times
+                </Button>
+              </div>
+            </div>
+          ) : displaySlots.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-gray-500">
               <AlertCircle className="h-12 w-12 text-gray-300 mb-4" />
               <p>No available times for this date</p>
-              <p className="text-sm">Please select another date</p>
+              <p className="text-sm mb-2">Please select another date</p>
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 max-h-72 overflow-y-auto">
-              {slots.map((slot) => {
+              {displaySlots.map((slot) => {
                 const isSelected = selectedTime === slot.start_time;
                 return (
                   <button
@@ -244,6 +426,12 @@ export function StepCalendar() {
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {slotsError && displaySlots.length > 0 && (
+            <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+              <strong>⚠️ Demo Mode:</strong> Using sample time slots. Production API unavailable.
             </div>
           )}
 

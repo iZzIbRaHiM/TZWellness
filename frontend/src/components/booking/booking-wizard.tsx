@@ -9,10 +9,12 @@ import { ChevronLeft, X, Check } from "lucide-react";
 import { StepService } from "./steps/step-service";
 import { StepIdentity } from "./steps/step-identity";
 import { StepModality } from "./steps/step-modality";
-import { StepCalendar } from "./steps/step-calendar";
+import { StepCalendarV2 } from "./steps/step-calendar-v2";
 import { StepDetails } from "./steps/step-details";
 import { StepSuccess } from "./steps/step-success";
 import Link from "next/link";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { getWhatsAppLink } from "@/lib/whatsapp";
 
 const steps = [
   { id: 1, title: "Service", description: "What brings you in?" },
@@ -40,14 +42,10 @@ const slideVariants = {
 };
 
 export function BookingWizard() {
+  const { settings } = useSiteSettings();
   const { step, reset, prevStep, canProceed, referenceId, setStep } = useBookingStore();
   const [direction, setDirection] = React.useState(1);
   const prevStepRef = React.useRef(step);
-
-  // Reset booking state when component mounts
-  useEffect(() => {
-    reset();
-  }, []);
 
   // Track direction for animations
   useEffect(() => {
@@ -164,7 +162,7 @@ export function BookingWizard() {
               {step === 1 && <StepService />}
               {step === 2 && <StepIdentity />}
               {step === 3 && <StepModality />}
-              {step === 4 && <StepCalendar />}
+              {step === 4 && <StepCalendarV2 />}
               {step === 5 && <StepDetails />}
               {step === 6 && <StepSuccess />}
             </motion.div>
@@ -194,12 +192,14 @@ export function BookingWizard() {
             transition={{ delay: 0.3 }}
             className="text-center text-sm text-emerald-600/70 mt-8"
           >
-            Need assistance? Call us at{" "}
+            Need assistance?{" "}
             <a
-              href="tel:+1234567890"
+              href={getWhatsAppLink(settings.clinic_phone_href, "Hi! I need help with booking an appointment.")}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-terracotta hover:underline font-medium"
             >
-              (123) 456-7890
+              WhatsApp us
             </a>
           </motion.p>
         )}

@@ -14,7 +14,7 @@ import {
   subWeeks,
 } from "date-fns";
 import { cn } from "@/lib/utils";
-import { API_BASE_URL } from "@/lib/env";
+import { appointmentsApi, type Appointment } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -50,42 +50,13 @@ import {
   User,
   LayoutList,
   CalendarDays,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type ViewMode = "list" | "calendar";
-type StatusFilter = "all" | "pending" | "confirmed" | "cancelled";
-
-const API_URL = API_BASE_URL;
-
-// SSR-safe localStorage access
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem("accessToken");
-  } catch {
-    return null;
-  }
-}
-
-interface Appointment {
-  id: number;
-  reference_id: string;
-  patient_name: string;
-  patient_email: string;
-  patient_phone: string;
-  service: string;
-  service_id: number | null;
-  scheduled_date: string;
-  scheduled_time: string;
-  modality: string;
-  modality_display: string;
-  patient_type: string;
-  patient_type_display: string;
-  status: string;
-  reason: string;
-  created_at: string;
-}
+type StatusFilter = "all" | "pending" | "approved" | "rejected" | "cancelled";
 
 export function AdminAppointments() {
   const { toast } = useToast();
@@ -97,50 +68,29 @@ export function AdminAppointments() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
-  // Fetch pending appointments from API
-  const { data, isLoading, error } = useQuery({
+  // Fetch all appointments from Supabase
+  const { data: appointmentsData, isLoading, error } = useQuery({
     queryKey: ["admin-appointments"],
-    queryFn: async () => {
-      const token = getToken();
-      const res = await fetch(`${API_URL}/api/v1/dashboard/pending/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!res.ok) throw new Error("Failed to fetch appointments");
-      const result = await res.json();
-      return result.data.appointments as Appointment[];
-    },
+    queryFn: () => appointmentsApi.getAll(),
   });
 
-  const appointmentsList = data || [];
+  const appointmentsList = appointmentsData?.data || [];
 
   // Approve mutation
   const approveMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const token = getToken();
-      const res = await fetch(`${API_URL}/api/v1/dashboard/approve/${id}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ meeting_link: "" }),
-      });
-      if (!res.ok) throw new Error("Failed to approve appointment");
-      return res.json();
-    },
+    mutationFn: (id: string) => appointmentsApi.approve(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
       toast({
-        title: "Appointment Confirmed",
-        description: "The patient will be notified via email.",
+        title: "Appointment Approved",
+        description: "The patient will be notified via WhatsApp.",
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error('Approval error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to approve appointment. Please try again.",
+        description: error?.message || "Failed to approve appointment. Please try again.",
         variant: "destructive",
       });
     },
@@ -151,31 +101,21 @@ export function AdminAppointments() {
 
   // Reject mutation
   const rejectMutation = useMutation({
-    mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
-      const token = getToken();
-      const res = await fetch(`${API_URL}/api/v1/dashboard/reject/${id}/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ reason }),
-      });
-      if (!res.ok) throw new Error("Failed to reject appointment");
-      return res.json();
-    },
+    mutationFn: ({ id, reason }: { id: string; reason: string }) => 
+      appointmentsApi.reject(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
       toast({
-        title: "Appointment Cancelled",
-        description: "The patient will be notified via email.",
+        title: "Appointment Rejected",
+        description: "The patient will be notified via WhatsApp.",
         variant: "destructive",
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      console.error('Reject appointment error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to reject appointment. Please try again.",
+        description: error?.message || "Failed to reject appointment. Please try again.",
         variant: "destructive",
       });
     },
@@ -185,11 +125,34 @@ export function AdminAppointments() {
     },
   });
 
-  const handleApprove = (id: number) => {
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => appointmentsApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
+      toast({
+        title: "Appointment Deleted",
+        description: "The appointment has been permanently removed.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Delete appointment error:', error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to delete appointment. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setSelectedAppointment(null);
+    },
+  });
+
+  const handleApprove = (id: string) => {
     approveMutation.mutate(id);
   };
 
-  const handleReject = (id: number) => {
+  const handleReject = (id: string) => {
     if (!rejectReason.trim()) {
       toast({
         title: "Reason Required",
@@ -199,6 +162,12 @@ export function AdminAppointments() {
       return;
     }
     rejectMutation.mutate({ id, reason: rejectReason });
+  };
+
+  const handleDelete = (appointment: Appointment) => {
+    if (window.confirm(`Are you sure you want to permanently delete this appointment?\n\nPatient: ${appointment.patient_name}\nReference: ${appointment.reference_id}\n\nThis action cannot be undone.`)) {
+      deleteMutation.mutate(appointment.id);
+    }
   };
 
   // Filter appointments
@@ -224,10 +193,13 @@ export function AdminAppointments() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case "approved":
       case "confirmed":
-        return <Badge variant="success">Confirmed</Badge>;
+        return <Badge className="bg-green-100 text-green-700 border-0">Approved</Badge>;
       case "pending":
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge className="bg-amber-100 text-amber-700 border-0">Pending</Badge>;
+      case "rejected":
+        return <Badge variant="destructive">Rejected</Badge>;
       case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
       default:
@@ -305,7 +277,8 @@ export function AdminAppointments() {
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+            <TabsTrigger value="approved">Approved</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected</TabsTrigger>
             <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
           </TabsList>
         </Tabs>
@@ -354,7 +327,9 @@ export function AdminAppointments() {
                           <p className="text-sm text-gray-500">{apt.patient_email}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-700">{apt.service}</td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {apt.service?.title || 'N/A'}
+                      </td>
                       <td className="px-6 py-4">
                         <div>
                           <p className="text-gray-900">
@@ -370,16 +345,18 @@ export function AdminAppointments() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge className="bg-amber-100 text-amber-700 border-0">Pending</Badge>
+                        {getStatusBadge(apt.status)}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex gap-2">
+                        {apt.status === 'pending' && (
+                          <div className="flex gap-2">
                             <Button
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleApprove(apt.id);
                               }}
+                              disabled={approveMutation.isPending}
                             >
                               <CheckCircle className="h-4 w-4" />
                             </Button>
@@ -388,12 +365,18 @@ export function AdminAppointments() {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleReject(apt.id);
+                                setSelectedAppointment(apt);
+                                setRejectReason("");
                               }}
+                              disabled={rejectMutation.isPending}
                             >
                               <XCircle className="h-4 w-4" />
                             </Button>
                           </div>
+                        )}
+                        {apt.status !== 'pending' && (
+                          <span className="text-sm text-gray-500">-</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -476,7 +459,7 @@ export function AdminAppointments() {
                         <div className="font-medium">{apt.scheduled_time}</div>
                         <div className="truncate">{apt.patient_name}</div>
                         <div className="truncate text-xs opacity-75">
-                          {apt.service}
+                          {apt.service?.title || 'N/A'}
                         </div>
                       </button>
                     ))}
@@ -528,12 +511,14 @@ export function AdminAppointments() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-gray-500">Service</Label>
-                    <p className="font-medium">{selectedAppointment.service}</p>
+                    <p className="font-medium">
+                      {selectedAppointment.service?.title || 'N/A'}
+                    </p>
                   </div>
                   <div>
                     <Label className="text-gray-500">Status</Label>
                     <div className="mt-1">
-                      <Badge className="bg-amber-100 text-amber-700 border-0">Pending</Badge>
+                      {getStatusBadge(selectedAppointment.status)}
                     </div>
                   </div>
                   <div>
@@ -565,24 +550,72 @@ export function AdminAppointments() {
                   </p>
                 </div>
 
-                {/* Actions - Always show for pending appointments */}
-                <div className="flex gap-3 pt-4">
+                {/* Actions - Show only for pending appointments */}
+                {selectedAppointment.status === 'pending' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="reject-reason">Rejection Reason (if rejecting)</Label>
+                      <Textarea
+                        id="reject-reason"
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder="Provide a reason for rejection..."
+                        rows={3}
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={() => handleApprove(selectedAppointment.id)}
+                        disabled={approveMutation.isPending}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        {approveMutation.isPending ? 'Approving...' : 'Approve'}
+                      </Button>
+                      <Button
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                        onClick={() => handleReject(selectedAppointment.id)}
+                        disabled={rejectMutation.isPending || !rejectReason.trim()}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        {rejectMutation.isPending ? 'Rejecting...' : 'Reject'}
+                      </Button>
+                    </div>
+                  </>
+                )}
+
+                {/* Show status message for non-pending appointments */}
+                {selectedAppointment.status !== 'pending' && (
+                  <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">
+                      This appointment has been {selectedAppointment.status}.
+                    </p>
+                  </div>
+                )}
+
+                {/* Delete button - available for all statuses */}
+                <div className="pt-2 border-t">
                   <Button
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={() => handleApprove(selectedAppointment.id)}
-                    disabled={approveMutation.isPending}
+                    variant="outline"
+                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    onClick={() => handleDelete(selectedAppointment)}
+                    disabled={deleteMutation.isPending}
                   >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve
+                    {deleteMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Appointment
+                      </>
+                    )}
                   </Button>
-                  <Button
-                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                    onClick={() => handleReject(selectedAppointment.id)}
-                    disabled={rejectMutation.isPending}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Reject
-                  </Button>
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    This action cannot be undone
+                  </p>
                 </div>
               </div>
             </>

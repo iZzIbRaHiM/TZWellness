@@ -15,6 +15,7 @@ export function formatDate(date: Date | string): string {
 }
 
 export function formatTime(time: string): string {
+  if (!time) return "12:00 AM";
   const [hours, minutes] = time.split(":");
   const h = parseInt(hours, 10);
   const ampm = h >= 12 ? "PM" : "AM";
@@ -23,10 +24,7 @@ export function formatTime(time: string): string {
 }
 
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
+  return `PKR ${price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 export function generateReferenceId(): string {

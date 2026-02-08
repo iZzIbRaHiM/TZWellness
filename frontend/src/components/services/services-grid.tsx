@@ -33,11 +33,8 @@ export function ServicesGrid() {
     queryFn: () => categoriesApi.getAll(),
   });
 
-  const services = servicesData?.data?.results || [];
-  // categoriesApi returns array directly, not paginated
-  const apiCategories: ServiceCategory[] = Array.isArray(categoriesData?.data) 
-    ? categoriesData.data 
-    : [];
+  const services = servicesData?.data || [];
+  const apiCategories: ServiceCategory[] = categoriesData?.data || [];
 
   // Build categories array with "all" option
   const categories = [
@@ -172,7 +169,7 @@ export function ServicesGrid() {
               </CardContent>
               <div className="p-6 pt-0 mt-auto flex gap-2">
                 <Button asChild variant="default" className="flex-1">
-                  <Link href="/book">Book Now</Link>
+                  <Link href="/appointments">Book Now</Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link href={`/services/${service.slug}`}>
